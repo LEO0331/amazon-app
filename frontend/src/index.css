@@ -104,4 +104,6 @@ img.medium {
   color: var(--secondary-color);
   margin: 0.1rem;
 }
-  
+.rating span:last-child {
+  color: var(--primary-color);
+}
