@@ -189,9 +189,9 @@ img.large {
 .alert {
   padding: 1rem;
   border: 0.1rem solid transparent;
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
 }
-.alert-info {
+.alert-info { /* default */
   color: var(--primary-color);
   background-color: var(--bg-color);
 }
