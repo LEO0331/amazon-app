@@ -4,6 +4,12 @@
   --primary-color: #192735;
   --secondary-color: #f17d08;
   --white-color: #ffffff;
+  --black-color: #18191a;
+  --gold-color: #fad608;
+  --success-color: #097509;
+  --alert-color: #b31818;
+  --bg-color: #e7e7e7;
+  --border-color: #b9b9b9;
 }
 html {
   font-size: 62.5%; /* 16px x 62.5 = 10px = 1rem */
@@ -56,6 +62,45 @@ a {
 a:hover {
   color: var(--secondary-color);
 }
+ul {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+li {
+  margin-top: 1rem; /* vertical space between items */
+}
+input,
+select,
+textarea,
+button {
+  padding: 1rem;
+  border-radius: 0.6rem;
+  border: 0.1rem var(--border-color) solid;
+  font-size: 1.6rem;
+  font-family: Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+button {
+  background-color: var(--bg-color);
+  cursor: pointer;
+}
+input:hover,
+select:hover,
+textarea:hover,
+button:hover {
+  border: 0.1rem var(--black-color) solid;
+}
+button.primary {
+  background-color: var(--gold-color);
+}
+button.block { /* full width */
+  width: 100%;
+}
+button.small {
+  font-size: 1.2rem;
+}
 /* Header */
 header a {
   color: var(--white-color);
@@ -75,6 +120,27 @@ a.brand {
 .row.center {
   justify-content: center;
 }
+.row.top {
+  align-items: flex-start;
+}
+.row.start {
+  justify-content: flex-start;
+}
+.col-1 { /* flex-grow | flex-shrink | flex-basis */
+  flex: 1 1 25rem;
+}
+.col-2 { /* https://developer.mozilla.org/en-US/docs/Web/CSS/flex */
+  flex: 2 1 50rem;
+}
+.col-3 {
+  flex: 32 1 75rem;
+}
+.min-30 {
+  min-width: 30rem;
+}
+.p-1 {
+  padding: 1rem;
+}
 /* Image */
 img {
   border-radius: 0.5rem;
@@ -83,10 +149,13 @@ img.medium {
   max-width: 28rem;
   width: 100%;
 }
+img.large {
+  width: 100%; /* for UX in smaller screen */
+}
 /* Card */
 .card {
-  border: 0.1rem #b9b9b9 solid;
-  background-color: #eeeeee;
+  border: 0.1rem var(--border-color) solid;
+  background-color: var(--bg-color);
   border-radius: 0.6rem;
   margin: 1rem;
 }
@@ -101,9 +170,36 @@ img.medium {
 }
 /* Rating */
 .rating span {
-  color: var(--secondary-color);
+  color: var(--gold-color);
   margin: 0.1rem;
 }
 .rating span:last-child {
+  color: var(--black-color);
+}
+/* Alert */
+.loading {
+  display: block !important;
+}
+.success {
+  color: var(--success-color);
+}
+.danger {
+  color: var(--alert-color);
+}
+.alert {
+  padding: 1rem;
+  border: 0.1rem solid transparent;
+  border-radius: 0.5rem;
+}
+.alert-info {
   color: var(--primary-color);
+  background-color: var(--bg-color);
+}
+.alert-danger {
+  color: var(--alert-color);
+  background-color: var(--bg-color);
+}
+.alert-success {
+  color: var(--success-color);
+  background-color: var(--bg-color);
 }
