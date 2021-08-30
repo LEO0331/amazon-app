@@ -1,0 +1,19 @@
+{
+  "name": "ecommerce",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Ecommerce website",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --watch backend --exec node --experimental-modules backend/server.js",
+    "build": "cd frontend && npm install && npm run build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
+}
