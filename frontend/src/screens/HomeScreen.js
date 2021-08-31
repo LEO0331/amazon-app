@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import Products from "../components/Products";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from '../components/MessageBox';
-import {useSelector, useDispatch} from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { listProducts } from '../actions/productActions';
 
 
@@ -11,7 +11,7 @@ function HomeScreen() {
   const productList = useSelector(state => state.productList); //from store to reflect on the view
   const {loading, products, error} = productList; //3 values from productList
   useEffect(() => { //similar to class component with connect(state, actions)(className);
-    dispatch(listProducts())
+    dispatch(listProducts({}));
   }, [dispatch]);
   //params => ({foo: "a"}); returning the object {foo: "a"}
   return (
@@ -22,16 +22,16 @@ function HomeScreen() {
         ) : error ? (
           <MessageBox variant="danger">{error}</MessageBox>
         ) : (
-          <div className="row center">
-          {
-            products.map(product => (
+          <>
+            {products.length === 0 && <MessageBox>No Product Found</MessageBox>}
+            <div className="row center">
+            {products.map(product => (
               <Products key={product._id} product={product} />
-            ))
-          }
-          </div>
+            ))}
+            </div>
+          </>
         )
       }
-
     </div>
   )
 }
