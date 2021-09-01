@@ -18,3 +18,7 @@ function Products(props){
 }
 
 export default Products;
+
+/*
+go to <Route path="/product/:id" component={ProductScreen} /> after clicking any product due to <a href={`/product/${product._id}`}><h2>{product.name}</h2></a>
+*/
