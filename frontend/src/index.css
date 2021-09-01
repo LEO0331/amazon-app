@@ -111,6 +111,14 @@ a.brand {
   font-size: 3rem;
   font-weight: bold;
 }
+.badge{
+  background-color: var(--alert-color);
+  color: var(--white-color);
+  border-radius: 50%; /* circle */
+  padding: 0.1rem 0.5rem;
+  font-size: 1.2rem;
+  margin-left: 0.3rem;
+}
 .row {
   display: flex;
   flex-wrap: wrap;

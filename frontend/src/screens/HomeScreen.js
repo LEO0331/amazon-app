@@ -10,7 +10,8 @@ function HomeScreen() {
   const dispatch = useDispatch()
   const productList = useSelector(state => state.productList); //from store to reflect on the view
   const {loading, products, error} = productList; //3 values from productList
-  useEffect(() => { //similar to class component with connect(state, actions)(className);
+  //similar to class component with connect(state, actions)(className/component); connect() connects a React component to a Redux store
+  useEffect(() => {
     dispatch(listProducts({}));
   }, [dispatch]);
   //params => ({foo: "a"}); returning the object {foo: "a"}

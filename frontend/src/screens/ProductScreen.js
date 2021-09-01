@@ -13,7 +13,7 @@ function ProductScreen(props) { //props: path="/product/:id" in <Route>
     const productDetails = useSelector(state => state.productDetails);
     const {loading, product, error} = productDetails;
     useEffect(() => { 
-        dispatch(detailsProduct(productId))
+        dispatch(detailsProduct(productId)) //from actions
     }, [dispatch, productId]);
     //https://reactrouter.com/web/api/history
     const addToCart = () => { //move from the current page to another one, change route

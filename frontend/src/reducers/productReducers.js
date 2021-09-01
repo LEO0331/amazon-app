@@ -22,7 +22,7 @@ export const productListReducer = (state = {products: [], loading: true}, action
             return state;
     }
 }
-//product: {} in state
+//product: {}, error: '' in state
 export const productDetailsReducer = (state = {product: {}, loading: true}, action) => {
     switch (action.type) {
         case PRODUCT_DETAILS_REQUEST:
