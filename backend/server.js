@@ -1,17 +1,20 @@
 import express from 'express'; //"type": "module"; --experimental-modules
-import data from './data.js';
+//import data from './data.js';
 import mongoose from 'mongoose';
 import userRouter from './routers/userRouter.js';
+import productRouter from './routers/productRouter.js';
 
 const app = express(); //route handler
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/amazona'); //Mongoose 6.0 behaves as if useNewUrlParser, useUnifiedTopology, and useCreateIndex are true
+mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/Ecommerce'); //Mongoose 6.0 behaves as if useNewUrlParser, useUnifiedTopology, and useCreateIndex are true
 //using routers in the server
 app.use('/api/users', userRouter); //userRouter(app)
-app.get('/api/products', (req, res) => { //express 3
+app.use('/api/products', productRouter);
+/* express 3, static data
+app.get('/api/products', (req, res) => { 
     res.send(data.products);
 });
 
@@ -23,7 +26,7 @@ app.get('/api/products/:id', (req, res) => {
 		res.status(404).send({message: "Product Not Found"});
 	}
 });
-
+*/
 app.get('/', (req, res) => {
    res.send('Server is ready');
 });
