@@ -19,7 +19,6 @@ function ProductScreen(props) { //props: path="/product/:id" in <Route>
     const addToCart = () => { //move from the current page to another one, change route
         props.history.push(`/cart/${productId}?qty=${qty}`); //Pushes a new entry onto the history stack
     };
-    //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/keys
     return (
         <div>
         {
@@ -71,7 +70,7 @@ function ProductScreen(props) { //props: path="/product/:id" in <Route>
                                                 <div>Qty</div>
                                                 <div>
                                                     <select value={qty} onChange={e => setQty(e.target.value)}>
-                                                        {
+                                                        { //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/keys
                                                             [...Array(product.countInStock).keys()].map(x => (
                                                                 <option key={x+1} value={x+1}>{x+1}</option>
                                                             ))
@@ -94,17 +93,25 @@ function ProductScreen(props) { //props: path="/product/:id" in <Route>
             )
         }
         </div>
-        
     )
 }
 
 export default ProductScreen;
 
-/* replace to redux store
+/* 
+1. Replace to redux store
 const product = data.products.find(item => item._id === props.match.params.id); 
 const isMatch = item => item._id === props.match.params.id
 const product = data.products[data.products.findIndex(isMatch)]
 if(!product){ 
     return <div> Product Not Found! Please Search for Another Product </div>
 }
+
+2. https://stackoverflow.com/questions/22876978/loop-inside-react-jsx
+[...Array(product.countInStock).keys()].forEach(x => <option key={x+1} value={x+1}>{x+1}</option>)
+let op = []
+for(let i=0; i<qty; i++){
+   op.push(<option key={x+1} value={x+1}>{x+1}</option>)
+}
+return <select>{op}</select>
 */

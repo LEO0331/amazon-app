@@ -153,6 +153,10 @@ a.brand {
 img {
   border-radius: 0.5rem;
 }
+img.small{
+  max-width: 5rem;
+  width: 100%;
+}
 img.medium {
   max-width: 28rem;
   width: 100%;
