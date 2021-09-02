@@ -1,12 +1,17 @@
 import express from 'express'; //"type": "module"; --experimental-modules
 import data from './data.js';
+import mongoose from 'mongoose';
+import userRouter from './routers/userRouter.js';
 
-const app = express();
+const app = express(); //route handler
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-app.get('/api/products', (req, res) => {
+mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/amazona'); //Mongoose 6.0 behaves as if useNewUrlParser, useUnifiedTopology, and useCreateIndex are true
+//using routers in the server
+app.use('/api/users', userRouter); //userRouter(app)
+app.get('/api/products', (req, res) => { //express 3
     res.send(data.products);
 });
 
@@ -23,6 +28,10 @@ app.get('/', (req, res) => {
    res.send('Server is ready');
 });
 
+app.use((err, req, res, next) => { //error catcher middleware
+	res.status(500).send({message: err.message}); //server error
+});
+  
 const PORT = process.env.PORT || 5000; //logical OR: when expr1 is falsy, return expr2
 app.listen(PORT); //`http://localhost:${PORT}`
 
