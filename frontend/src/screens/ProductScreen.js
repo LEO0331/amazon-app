@@ -1,14 +1,14 @@
-import React,{ useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from '../components/MessageBox';
 import Ratings from '../components/Ratings';
 import { detailsProduct } from '../actions/productActions';
-import {Link} from 'react-router-dom';
-import {useSelector, useDispatch} from "react-redux";
+import { Link } from 'react-router-dom';
+import { useSelector, useDispatch } from "react-redux";
 
 function ProductScreen(props) { //props: path="/product/:id" in <Route>
     const productId = props.match.params.id; //props.match.params.id: user entered in Route path="/product/:id"
-    const [qty, setQty] = useState(1);
+    const [qty, setQty] = useState(1); //onChange
     const dispatch = useDispatch();
     const productDetails = useSelector(state => state.productDetails);
     const {loading, product, error} = productDetails;
