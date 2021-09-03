@@ -190,7 +190,7 @@ img.large {
 }
 /* Alert */
 .loading {
-  display: block !important;
+  display: block !important; /* prevent spinner moving around for loading */
 }
 .success {
   color: var(--success-color);

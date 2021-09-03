@@ -4,8 +4,9 @@ import {BrowserRouter, Link, Route} from "react-router-dom"; //https://github.co
 import HomeScreen from './screens/HomeScreen';
 import ProductScreen from './screens/ProductScreen';
 import CartScreen from './screens/CartScreen';
-import { useDispatch, useSelector } from 'react-redux';
+import RegisterScreen from './screens/RegisterScreen';
 import SigninScreen from './screens/SigninScreen';
+import { useDispatch, useSelector } from 'react-redux';
 import { signout } from './actions/userActions';
 
 
@@ -57,6 +58,7 @@ function App() {
         <main>
           <Route exact path="/" component={HomeScreen} />
           <Route path="/product/:id" component={ProductScreen} />
+          <Route path="/register" component={RegisterScreen} />
           <Route path="/signin" component={SigninScreen} />
           <Route path="/cart/:id?" component={CartScreen} />
         </main>
