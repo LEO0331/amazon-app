@@ -23,7 +23,7 @@ function CartScreen(props) { //path="/cart/:id?"
         dispatch(removeFromCart(id)); // delete action
     }
     const checkoutHandler = () => {
-        props.history.push('/signin?redirect=shipping'); //redirect to signin/shipping screen
+        props.history.push('/signin?redirect=shipping'); //redirect to signin or shipping screen
     }
     return (
         <div className="row top">

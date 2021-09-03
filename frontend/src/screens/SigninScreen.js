@@ -8,11 +8,20 @@ import { Link } from 'react-router-dom';
 function SigninScreen(props) {
     const [email, setEmail] = useState(''); //Hook
     const [password, setPassword] = useState('');
+    const redirect = props.location.search ? props.location.search.split('=')[1] : '/';
+    const userSignin = useSelector(state => state.userSignin);
+    const { userInfo, loading, error } = userSignin;
     const dispatch = useDispatch();
     const submitHandler = (e) => { //run when clicking submit button
         e.preventDefault(); //form not refresh, use ajax to signin users instead of refresh to another page
-    
-    }
+        dispatch(signin(email, password)); //userinfo contains values after this action
+    };
+    useEffect(() => {
+        if (userInfo) { //success login
+          props.history.push(redirect); // /signin?redirect=shipping
+        }
+    }, [props.history, redirect, userInfo]); //dependencies
+
     return (
         <div>
             <form className="form" onSubmit={submitHandler}>

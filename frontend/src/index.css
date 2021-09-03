@@ -215,3 +215,36 @@ img.large {
   color: var(--success-color);
   background-color: var(--bg-color);
 }
+/* Form */
+.form {
+  max-width: 60rem; /* 600px */
+  margin: 0 auto; /* center */
+}
+.form > div {
+  display: flex;
+  flex-direction: column;
+  margin: 1rem;
+}
+.form label {
+  margin: 1rem 0;
+}
+/* Dropdown */
+.dropdown {
+  display: inline-block; /* name and icon next to each other */
+  position: relative;
+}
+.dropdown-content {
+  position: absolute;
+  display: none; /* not show by default */
+  right: 0; /* stick to the right of the screen */
+  min-width: 12rem;
+  padding: 0.8rem;
+  z-index: 1; /* top */
+  background-color: var(--primary-color);
+  margin: 0;
+  margin-top: 0.3rem;
+  border-radius: 0.6rem;
+}
+.dropdown:hover .dropdown-content {
+  display: block; /* show the menu */
+}
