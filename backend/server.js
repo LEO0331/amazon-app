@@ -3,9 +3,12 @@ import express from 'express'; //"type": "module"; --experimental-modules
 import mongoose from 'mongoose';
 import userRouter from './routers/userRouter.js';
 import productRouter from './routers/productRouter.js';
+import dotenv from 'dotenv'; //https://www.npmjs.com/package/dotenv
+
+dotenv.config();
 
 const app = express(); //route handler
-
+//middlewares: legacy body-parser
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
