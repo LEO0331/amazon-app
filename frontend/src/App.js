@@ -8,6 +8,7 @@ import RegisterScreen from './screens/RegisterScreen';
 import SigninScreen from './screens/SigninScreen';
 import { useDispatch, useSelector } from 'react-redux';
 import { signout } from './actions/userActions';
+import ShippingAddressScreen from './screens/ShippingAddressScreen';
 
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
           <Route path="/register" component={RegisterScreen} />
           <Route path="/signin" component={SigninScreen} />
           <Route path="/cart/:id?" component={CartScreen} />
+          <Route path="/shipping" component={ShippingAddressScreen} />
         </main>
         <footer className="row center">
           <p className="lead">Copyright &copy; 2021 Amazona</p>

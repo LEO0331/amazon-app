@@ -11,7 +11,7 @@ import {
 export const listProducts = () => async (dispatch) => {
     dispatch({type: PRODUCT_LIST_REQUEST});
     try {
-        const {data} = await axios.get('/api/products');
+        const {data} = await axios.get('/api/products'); //get products from backend
         dispatch({type: PRODUCT_LIST_SUCCESS, payload: data}) //dispatch actions: change the state of redux and update homescreen showing products
     } catch (error) {
         dispatch({type: PRODUCT_LIST_FAIL, payload: error.message});
