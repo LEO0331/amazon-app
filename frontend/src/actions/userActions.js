@@ -44,10 +44,10 @@ export const signin = (email, password) => async (dispatch) => {
     }
 }
 
-export const signout = () => (dispatch) => {
+export const signout = () => (dispatch) => { //remove localstorage in store.js
     localStorage.removeItem('userInfo');
     localStorage.removeItem('cartItems');
-    //localStorage.removeItem('shippingAddress');
+    localStorage.removeItem('shippingAddress');
     dispatch({type: USER_SIGNOUT});
     //document.location.href = '/signin';
 };
