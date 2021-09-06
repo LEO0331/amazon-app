@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from '../components/MessageBox';
 import Ratings from '../components/Ratings';

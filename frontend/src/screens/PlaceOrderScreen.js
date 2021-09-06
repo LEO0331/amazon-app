@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import CheckoutSteps from '../components/CheckoutSteps';
+import { createOrder } from '../actions/orderActions';
+import { ORDER_CREATE_RESET } from '../constants/orderConstants';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 
@@ -10,6 +12,8 @@ function PlaceOrderScreen(props) {
     if (!cart.paymentMethod) {
         props.history.push('/payment'); //redirect to payment screen
     }
+    const orderCreate = useSelector(state => state.orderCreate);
+    const {loading, success, error, order} = orderCreate;
     const toPrice = num => Number(num.toFixed(2));
     cart.itemsPrice = toPrice(cart.cartItems.reduce((a, c) => a + c.qty * c.price, 0));
     cart.shippingPrice = cart.itemsPrice > 100 ? toPrice(0) : toPrice(10);
@@ -17,8 +21,14 @@ function PlaceOrderScreen(props) {
     cart.totalPrice = cart.itemsPrice + cart.shippingPrice + cart.taxPrice;
     const dispatch = useDispatch();
     const placeOrderHandler = () => {
-        //dispatch(createOrder({ ...cart, orderItems: cart.cartItems }));
+        dispatch(createOrder({ ...cart, orderItems: cart.cartItems })); //rename cartItems to orderItems through concat cuz backend has orderItems not cartItems
     }
+    useEffect(() => {
+        if (success) {
+            props.history.push(`/order/${order._id}`); //order detailed screen
+            dispatch({ type: ORDER_CREATE_RESET }); //clear previous order -> cart is empty
+        }
+    }, [dispatch, order, props.history, success]);
     return (
         <div>
             <CheckoutSteps step1 step2 step3 step4 />

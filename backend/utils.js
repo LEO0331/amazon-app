@@ -21,6 +21,14 @@ export const isAuth = (req, res, next) => { //middleware to authenticate users
                 } 
                 req.user = decode;
                 next(); //to next middleware
+                /*
+                if (err) {
+                    res.status(401).send({ message: 'Invalid Token' });
+                } else{
+                    req.user = decode;
+                    next();
+                }
+                */
         });
     } else {
         res.status(401).send({ message: 'No Token' });
