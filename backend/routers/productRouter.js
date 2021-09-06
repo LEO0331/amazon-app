@@ -26,6 +26,12 @@ productRouter.get('/:id', expressAsyncHandler(async (req, res) => { //product de
     } else {
         res.status(404).send({message: 'Product Not Found'});
     }
+    /* https://stackoverflow.com/questions/43055600/app-get-is-there-any-difference-between-res-send-vs-return-res-send
+    if (product) {
+        return res.send(product);
+    }
+    res.status(404).send({message: 'Product Not Found'});
+    */
 }));
 
 export default productRouter;

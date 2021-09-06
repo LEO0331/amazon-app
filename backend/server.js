@@ -3,6 +3,7 @@ import express from 'express'; //"type": "module"; --experimental-modules
 import mongoose from 'mongoose';
 import userRouter from './routers/userRouter.js';
 import productRouter from './routers/productRouter.js';
+import orderRouter from './routers/orderRouter.js';
 import dotenv from 'dotenv'; //https://www.npmjs.com/package/dotenv
 
 dotenv.config();
@@ -16,6 +17,7 @@ mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/Ecommerce'); //
 //using routers in the server
 app.use('/api/users', userRouter); //userRouter(app)
 app.use('/api/products', productRouter);
+app.use('/api/orders', orderRouter);
 /* express 3, static data
 app.get('/api/products', (req, res) => { 
     res.send(data.products);

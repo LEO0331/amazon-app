@@ -15,7 +15,7 @@ userRouter.get('/seed', expressAsyncHandler(async (req, res) => {
 
 userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
     //https://mongoosejs.com/docs/api/model.html#model_Model.findOne
-    const user = await User.findOne({email: req.body.email}); //find only one record
+    const user = await User.findOne({email: req.body.email}); //find only one record; no need save() cuz no new user created
     if (user) {
         if (bcrypt.compareSync(req.body.password, user.password)) { //entered compared to hashed pw
             res.send({
@@ -38,7 +38,7 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => {
         password: bcrypt.hashSync(req.body.password, 8)
     });
     const createdUser = await user.save(); //save() new users when post
-    res.send({ //send back to frontend
+    res.send({ //send back to frontend as route '/api/orders/register'
         _id: createdUser._id,
         name: createdUser.name,
         email: createdUser.email,
