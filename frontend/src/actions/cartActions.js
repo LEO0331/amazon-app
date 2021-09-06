@@ -35,6 +35,6 @@ export const saveShippingAddress = (data) => (dispatch) => { //data from Shippin
     localStorage.setItem('shippingAddress', JSON.stringify(data));
 };
   
-export const savePaymentMethod = (data) => (dispatch) => { //select radio button
+export const savePaymentMethod = (data) => (dispatch) => { //select radio button, no need to localStorage
     dispatch({ type: CART_SAVE_PAYMENT_METHOD, payload: data });
 };

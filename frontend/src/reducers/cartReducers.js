@@ -20,7 +20,7 @@ export const cartReducer = (state = { cartItems: [] }, action) => { //error: ''
                     cartItems: state.cartItems.map(x => x.product === existItem.product ? item : x) //only replace changed item
                 };
             } else {
-                return { ...state, error: '', cartItems: [...state.cartItems, item] }; //concat; push items into arr of onjects
+                return { ...state, error: '', cartItems: [...state.cartItems, item] }; //concat; push items into arr of objects
             }
         case CART_REMOVE_ITEM:
             return { //not change other properties of the cart object

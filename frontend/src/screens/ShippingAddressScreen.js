@@ -19,13 +19,11 @@ function ShippingAddressScreen(props){
     const dispatch = useDispatch();
     const submitHandler = e => { //dispatch save shipping address action
         e.preventDefault();
-        dispatch(saveShippingAddress({fullName, address, city, postalCode, country}));
+        dispatch(saveShippingAddress({fullName, address, city, postalCode, country})); //connect
         props.history.push('/payment'); //to payment screen
     }
     const chooseOnMap = () => {
-        dispatch(saveShippingAddress({
-            fullName, address, city, postalCode, country,
-        }));
+        dispatch(saveShippingAddress({fullName, address, city, postalCode, country,}));
         props.history.push('/payment');
     }
     return(

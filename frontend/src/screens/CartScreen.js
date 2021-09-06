@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 function CartScreen(props) { //path="/cart/:id?"
     const productId = props.match.params.id;
     //https://reactrouter.com/web/api/location
-    const qty = props.location.search // /cart/${productId}?qty=${qty}
+    const qty = props.location.search // /cart/${productId}?qty=${qty} from product screen as starting point
         ? Number(props.location.search.split('=')[1])
         : 1;
     //https://reactjs.org/docs/hooks-faq.html#what-do-hooks-mean-for-popular-apis-like-redux-connect-and-react-router
@@ -15,7 +15,7 @@ function CartScreen(props) { //path="/cart/:id?"
     const cart = useSelector(state => state.cart);
     const { cartItems, error } = cart; //from reducers
     useEffect(() => { //combination of componentDidMount,componentDidUpdate, componentWillUnmount
-        if (productId) {
+        if (productId) { //update when onChange
             dispatch(addToCart(productId, qty)); //from actions, item.product is product id
         }
     }, [dispatch, productId, qty]);

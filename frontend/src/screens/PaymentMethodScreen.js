@@ -10,6 +10,7 @@ function PaymentMethodScreen(props){
         props.history.push('/shipping');
     }
     const [paymentMethod, setPaymentMethod] = useState('PayPal');
+    //class component with connect(state, actions)(className/component); connect() connects a React component to a Redux store
     const dispatch = useDispatch();
     const submitHandler = (e) => {
         e.preventDefault();
