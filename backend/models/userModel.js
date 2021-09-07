@@ -2,7 +2,7 @@ import mongoose from 'mongoose'; //const {Schema} = mongoose;
 const userSchema = new mongoose.Schema(
     {
         name: {type: String, required: true},
-        email: {type: String, required: true, unique: true},
+        email: {type: String, required: true, unique: true}, //show error when duplicate
         password: {type: String, required: true},
         isAdmin: {type: Boolean, default: false, required: true},
         /*

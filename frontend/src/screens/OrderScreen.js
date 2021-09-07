@@ -2,20 +2,20 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { detailsOrder } from '../actions/orderActions';
+import { detailsOrder, payOrder } from '../actions/orderActions';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import { PayPalButton } from "react-paypal-button-v2"; //https://www.npmjs.com/package/react-paypal-button-v2
+import { ORDER_PAY_RESET } from '../constants/orderConstants';
 
 function OrderScreen(props) {
     const [sdkReady, setSdkReady] = useState(false); //Software Development Kit
     const orderId = props.match.params.id;
     const orderDetails = useSelector(state => state.orderDetails);
-    const dispatch = useDispatch();
     const { order, loading, error } = orderDetails;
-    //const orderPay = useSelector(state => state.orderPay);
-    //const { loading: loadingPay, error: errorPay, success: successPay } = orderPay;
-
+    const orderPay = useSelector(state => state.orderPay);
+    const { loading: loadingPay, error: errorPay, success: successPay } = orderPay; //rename
+    const dispatch = useDispatch();
     useEffect(() => {
         //https://developer.paypal.com/docs/business/javascript-sdk/javascript-sdk-configuration/
         const addPayPalScript = async () => { //send to backend getting clientId
@@ -31,8 +31,9 @@ function OrderScreen(props) {
             <script>paypal.Buttons().render('body');</script>
             */
         }
-        if (!order) {
-            dispatch(detailsOrder(orderId)); //from url
+        if (!order || successPay || (order && order._id !== orderId)) {
+            dispatch({ type: ORDER_PAY_RESET }); //reset to avoid infinite loading
+            dispatch(detailsOrder(orderId)); //from url; refresh and update
         } else {
             if (!order.isPaid) {
                 if (!window.paypal) {
@@ -42,11 +43,10 @@ function OrderScreen(props) {
                 }
             }
         }
-    }, [dispatch, order, orderId, sdkReady]); //run useEffect() when order, orderId, sdkReady changed
-    const successPaymentHandler = () => {
-        //dispatch(payOrder(order, paymentResult));
+    }, [dispatch, order, orderId, sdkReady, successPay]); //run useEffect() when order, orderId, sdkReady changed
+    const successPaymentHandler = (paymentResult) => {
+        dispatch(payOrder(order, paymentResult));
     };
-    
     return loading ? (
         <LoadingBox />
     ) : error ? (
@@ -76,8 +76,8 @@ function OrderScreen(props) {
                             <div className="card card-body">
                                 <h2>Payment Information</h2>
                                 <p><strong>Method:</strong> {order.paymentMethod}</p>
-                                {order.isPaid ? (
-                                    <MessageBox variant="success">Paid at {order.PaidAt}</MessageBox>
+                                {order.isPaid ? ( //toLocaleDateString
+                                    <MessageBox variant="success">Paid at {new Date(order.paidAt).toLocaleString()}</MessageBox>
                                 ) : (
                                     <MessageBox variant="danger">Not Paid</MessageBox>
                                 )}
@@ -145,7 +145,8 @@ function OrderScreen(props) {
                                                 <LoadingBox />
                                             ) : (
                                                 <>
-                                                    
+                                                    {loadingPay && <LoadingBox />}
+                                                    {errorPay && (<MessageBox variant="danger">{errorPay}</MessageBox>)}
                                                     <PayPalButton amount={order.totalPrice} onSuccess={successPaymentHandler} />
                                                 </>
                                             )

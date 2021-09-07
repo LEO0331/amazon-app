@@ -13,7 +13,7 @@ userRouter.get('/seed', expressAsyncHandler(async (req, res) => {
     res.send({createdUsers});
 }));
 
-userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
+userRouter.post('/signin', expressAsyncHandler(async (req, res) => { //req.body from frontend
     //https://mongoosejs.com/docs/api/model.html#model_Model.findOne
     const user = await User.findOne({email: req.body.email}); //find only one record; no need save() cuz no new user created
     if (user) {
@@ -32,13 +32,13 @@ userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
 }));
 
 userRouter.post('/register', expressAsyncHandler(async (req, res) => { //use post() when data can be entered from frontend
-    const user = new User({
+    const user = new User({ //req.body was data entered in registerScreen
         name: req.body.name,
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 8)
     });
     const createdUser = await user.save(); //save() new users when post
-    res.send({ //send back to frontend as route '/api/orders/register'
+    res.send({ //send back to frontend as route '/api/users/register'
         _id: createdUser._id,
         name: createdUser.name,
         email: createdUser.email,
