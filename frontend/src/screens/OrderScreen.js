@@ -7,6 +7,8 @@ import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import { PayPalButton } from "react-paypal-button-v2"; //https://www.npmjs.com/package/react-paypal-button-v2
 import { ORDER_PAY_RESET } from '../constants/orderConstants';
+//import { loadStripe } from '@stripe/stripe-js';
+//import StripeCheckout from '../components/StripeCheckout';
 
 function OrderScreen(props) {
     const [sdkReady, setSdkReady] = useState(false); //Software Development Kit
@@ -16,6 +18,8 @@ function OrderScreen(props) {
     const orderPay = useSelector(state => state.orderPay);
     const { loading: loadingPay, error: errorPay, success: successPay } = orderPay; //rename
     const dispatch = useDispatch();
+    //const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
+    //const stripePromise = loadStripe('pk_test_51JMkpVE7UohW0K4TyMJyBshELOaGP880Vp0d7tH4xfYTOXC38hcYmxRfDcQIPSsXX1ia9evyjbC9UatISOFTuInc00rvFSIh4I');
     useEffect(() => {
         //https://developer.paypal.com/docs/business/javascript-sdk/javascript-sdk-configuration/
         const addPayPalScript = async () => { //send to backend getting clientId
@@ -31,6 +35,7 @@ function OrderScreen(props) {
             <script>paypal.Buttons().render('body');</script>
             */
         }
+        //https://www.esparkinfo.com/integrate-paypal-node-js-recurring-payments-api.html
         if (!order || successPay || (order && order._id !== orderId)) {
             dispatch({ type: ORDER_PAY_RESET }); //reset to avoid infinite loading
             dispatch(detailsOrder(orderId)); //from url; refresh and update
