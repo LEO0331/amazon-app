@@ -18,6 +18,9 @@ mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/Ecommerce'); //
 app.use('/api/users', userRouter); //userRouter(app)
 app.use('/api/products', productRouter);
 app.use('/api/orders', orderRouter);
+app.get('/api/config/paypal', (req, res) => { //can change to LIVE in paypal dashboard
+	res.send(process.env.PAYPAL_CLIENT_ID || 'sb');
+});
 /* express 3, static data
 app.get('/api/products', (req, res) => { 
     res.send(data.products);
