@@ -27,7 +27,7 @@ function ProductScreen(props) { //props: path="/product/:id" in <Route>
             ) : error ? (
             <MessageBox variant="danger">{error}</MessageBox>
             ) : (
-                <div>
+            <div>
                 <Link to="/">Back</Link>
                 <div className="row top">
                     <div className="col-2">

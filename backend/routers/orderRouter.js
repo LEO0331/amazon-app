@@ -12,6 +12,7 @@ import {
 } from '../utils.js';
 
 const orderRouter = express.Router();
+
 orderRouter.post('/', isAuth, expressAsyncHandler(async (req, res) => {
     if (req.body.orderItems.length === 0) {
         res.status(400).send({ message: 'Cart is empty' }); //client error
@@ -28,6 +29,15 @@ orderRouter.post('/', isAuth, expressAsyncHandler(async (req, res) => {
         })
         const createdOrder = await order.save(); //require save() in post to save new created model() in db
         res.status(201).send({ message: 'New Order Created', order: createdOrder }); //to frontend '/api/orders/'
+    }
+}));
+
+orderRouter.get('/:id', isAuth, expressAsyncHandler(async (req, res) => {
+    const order = await Order.findById(req.params.id); //similar to product details api
+    if (order) {
+        res.send(order);
+    } else {
+        res.status(404).send({message: 'Order Not Found'});
     }
 }));
 

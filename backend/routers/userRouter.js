@@ -9,7 +9,7 @@ const userRouter = express.Router(); //express 4
 //Simple middleware for handling exceptions inside of async express routes and passing them to your express error handlers
 userRouter.get('/seed', expressAsyncHandler(async (req, res) => {
     //await User.remove({}); //remove all users to prevent duplicate errors
-    const createdUsers = await User.insertMany(data.users); //insert object of array in User collection
+    const createdUsers = await User.insertMany(data.users); //insert object of array in User collection from backend
     res.send({createdUsers});
 }));
 
@@ -31,7 +31,7 @@ userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
     res.status(401).send({message: 'Invalid email or password'}); //Unauthorized client error status response code
 }));
 
-userRouter.post('/register', expressAsyncHandler(async (req, res) => {
+userRouter.post('/register', expressAsyncHandler(async (req, res) => { //use post() when data can be entered from frontend
     const user = new User({
         name: req.body.name,
         email: req.body.email,

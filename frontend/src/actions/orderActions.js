@@ -4,7 +4,9 @@ import {
     ORDER_CREATE_REQUEST,
     ORDER_CREATE_SUCCESS,
     ORDER_CREATE_FAIL,
-    ORDER_CREATE_RESET,
+    ORDER_DETAILS_REQUEST,
+    ORDER_DETAILS_SUCCESS,
+    ORDER_DETAILS_FAIL,
 } from '../constants/orderConstants';
 
 export const createOrder = (order) => async (dispatch, getState) => {
@@ -12,13 +14,11 @@ export const createOrder = (order) => async (dispatch, getState) => {
     try {
         const {userSignin: { userInfo }} = getState();
         const { data } = await axios.post('/api/orders', order, {
-            headers: {
-                Authorization: `Bearer ${userInfo.token}`, //backend
-            },
+            headers: { Authorization: `Bearer ${userInfo.token}` } //backend
         });
         dispatch({ type: ORDER_CREATE_SUCCESS, payload: data.order }); //orderRouter.js: { message: 'New Order Created', order: createdOrder } sent to frontend
         dispatch({ type: CART_EMPTY }); //remove all items from cart
-        localStorage.removeItem('cartItems');
+        localStorage.removeItem('cartItems'); //<Link to={`/product/${item.product}`}>{item.name}</Link> in orderScreen will remove previous items from cart
     } catch (error) {
         dispatch({
             type: ORDER_CREATE_FAIL,
@@ -28,3 +28,21 @@ export const createOrder = (order) => async (dispatch, getState) => {
         });
     }
 }
+
+export const detailsOrder = (orderId) => async (dispatch, getState) => {
+    dispatch({ type: ORDER_DETAILS_REQUEST, payload: orderId });
+    const {userSignin: { userInfo }} = getState();
+    try {
+        const { data } = await axios.get(`/api/orders/${orderId}`, { //from backend
+            headers: { Authorization: `Bearer ${userInfo.token}` }
+        });
+        dispatch({ type: ORDER_DETAILS_SUCCESS, payload: data });
+    } catch (error) {
+        dispatch({
+            type: ORDER_DETAILS_FAIL,
+            payload: error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message,
+        });
+    }
+};

@@ -1,5 +1,4 @@
-import mongoose from 'mongoose';
-//const {Schema} = mongoose;
+import mongoose from 'mongoose'; //const {Schema} = mongoose;
 const userSchema = new mongoose.Schema(
     {
         name: {type: String, required: true},
