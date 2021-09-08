@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'; //https://www.npmjs.com/package/jsonwebtoken
 
-export const generateToken = user => {
+export const generateToken = user => { //https://github.com/auth0/express-jwt
     return jwt.sign( //jwt.sign(payload, secretOrPrivateKey, [options, callback])
         {
             _id: user._id,

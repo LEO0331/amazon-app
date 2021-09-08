@@ -23,7 +23,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-#root{
+#root {
   height: 100%;
 }
 /* Layout */
@@ -111,7 +111,7 @@ a.brand {
   font-size: 3rem;
   font-weight: bold;
 }
-.badge{
+.badge {
   background-color: var(--alert-color);
   color: var(--white-color);
   border-radius: 50%; /* circle */
@@ -256,8 +256,25 @@ img.large {
   padding: 0.8rem;
   font-weight: bold;
 }
-
-.checkout-steps > div.active{
+.checkout-steps > div.active {
   border-top-color: var(--secondary-color);
   color: var(--secondary-color);
 }
+/* Table */
+.table{
+  width: 100%;
+  border-collapse: collapse;
+}
+.table tbody tr:nth-of-type(odd) {
+  background-color: var(--bg-color);
+}
+.table td, 
+.table th {
+  text-align: left;
+  border: 0.1rem solid var(--border-color);
+  padding: 0.5rem;
+}
+.table button {
+  margin: 0 0.15rem;
+}
+

@@ -35,6 +35,11 @@ orderRouter.post('/', isAuth, expressAsyncHandler(async (req, res) => {
     }
 }));
 
+orderRouter.get('/mine', isAuth, expressAsyncHandler(async (req, res) => { //above /:id due to the concept of precedence for routers
+    const orders = await Order.find({ user: req.user._id }); //decoded JWT payload is available on the request via the user property
+    res.send(orders);
+}));
+
 orderRouter.get('/:id', isAuth, expressAsyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id); //similar to product details api
     if (order) {
