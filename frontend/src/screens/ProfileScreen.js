@@ -12,15 +12,28 @@ function ProfileScreen() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const userSignin = useSelector(state => state.userSignin);
     const userDetails = useSelector(state => state.userDetails);
+    const userUpdateProfile = useSelector(state => state.userUpdateProfile);
     const { userInfo } = userSignin;
     const { loading, error, user } = userDetails;
+    const { success: successUpdate, error: errorUpdate, loading: loadingUpdate } = userUpdateProfile; //rename
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(detailsUser(userInfo._id));
-    }, [dispatch, userInfo._id]);
+        if(!user){
+            dispatch(detailsUser(userInfo._id));
+        } else { //from backend
+            setName(user.name);
+            setEmail(user.email);
+        }
+    }, [dispatch, userInfo._id, user]);
     const submitHandler = (e) => { //update pw
         e.preventDefault();
-
+        if (password !== confirmPassword){
+            alert('Password not match');
+        } else {
+            dispatch(updateUserProfile({
+                userId: user._id, name, email, password,
+            }))
+        }
     }
     return (
         <div>
@@ -32,6 +45,9 @@ function ProfileScreen() {
                 ) : error ? ( <MessageBox variant="danger">{error}</MessageBox>
                 ) : (
                     <>
+                        {loadingUpdate && <LoadingBox />}
+                        {errorUpdate && (<MessageBox variant="danger">{errorUpdate}</MessageBox>)}
+                        {successUpdate && (<MessageBox variant="success">Successfully Updated Profile</MessageBox>)}
                         <div>
                             <label htmlFor="name">Name</label>
                             <input type="text" id="name" placeholder="Enter name" value={name} onChange={e => setName(e.target.value)} />
