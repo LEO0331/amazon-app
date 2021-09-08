@@ -7,8 +7,6 @@ import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import { PayPalButton } from "react-paypal-button-v2"; //https://www.npmjs.com/package/react-paypal-button-v2
 import { ORDER_PAY_RESET } from '../constants/orderConstants';
-//import { loadStripe } from '@stripe/stripe-js';
-//import StripeCheckout from '../components/StripeCheckout';
 
 function OrderScreen(props) {
     const [sdkReady, setSdkReady] = useState(false); //Software Development Kit
