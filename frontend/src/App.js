@@ -13,6 +13,7 @@ import PaymentMethodScreen from './screens/PaymentMethodScreen';
 import PlaceOrderScreen from './screens/PlaceOrderScreen';
 import OrderScreen from './screens/OrderScreen';
 import OrderHistoryScreen from './screens/OrderHistoryScreen';
+import ProfileScreen from './screens/ProfileScreen';
 
 function App() {
   const cart = useSelector(state => state.cart);
@@ -70,6 +71,7 @@ function App() {
           <Route path="/placeorder" component={PlaceOrderScreen} />
           <Route path="/order/:id" component={OrderScreen} />
           <Route path="/orderhistory" component={OrderHistoryScreen} />
+          <Route path="/profile" component={ProfileScreen} />
         </main>
         <footer className="row center">
           <p className="lead">Copyright &copy; 2021 Amazona</p>
