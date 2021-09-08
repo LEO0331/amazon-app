@@ -12,6 +12,8 @@ import {
 } from '../utils.js';
 
 const orderRouter = express.Router();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+//const stripePromise = loadStripe('pk_test_51JMkpVE7UohW0K4TyMJyBshELOaGP880Vp0d7tH4xfYTOXC38hcYmxRfDcQIPSsXX1ia9evyjbC9UatISOFTuInc00rvFSIh4I');
 
 orderRouter.post('/', isAuth, expressAsyncHandler(async (req, res) => {
     if (req.body.orderItems.length === 0) {
@@ -54,6 +56,28 @@ orderRouter.put('/:id/pay', isAuth, expressAsyncHandler(async (req, res) => { //
         };
         const updatedOrder = await order.save();
         res.send({ message: 'Order Paid', order: updatedOrder });
+    } else {
+        res.status(404).send({ message: 'Order Not Found' });
+    }
+}));
+//https://stripe.com/docs/payments/integration-builder?client=react
+orderRouter.post('/secret/:id', isAuth, expressAsyncHandler(async (req, res) => {
+    const order = await Order.findById(req.params.id);
+    if (order) {
+        order.isPaid = true;
+        order.paidAt = Date.now();
+        order.paymentResult = {
+            id: req.body.id,
+            status: req.body.status,
+        };
+        const { totalPrices } = req.body.totalPrice
+        // Create a PaymentIntent with the order amount and currency
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: totalPrices,
+            currency: "usd"
+        });
+        const updatedOrder = await order.save();
+        res.send({ message: 'Order Paid', order: updatedOrder, clientSecret: paymentIntent.client_secret });
     } else {
         res.status(404).send({ message: 'Order Not Found' });
     }
