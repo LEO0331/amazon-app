@@ -3,6 +3,8 @@ import expressAsyncHandler from 'express-async-handler';
 import Order from '../models/orderModel.js';
 import User from '../models/userModel.js';
 import Product from '../models/productModel.js';
+import Stripe from 'stripe'; //https://www.npmjs.com/package/stripe
+
 import {
     //isAdmin,
     isAuth,
@@ -12,8 +14,7 @@ import {
 } from '../utils.js';
 
 const orderRouter = express.Router();
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-//const stripePromise = loadStripe('pk_test_51JMkpVE7UohW0K4TyMJyBshELOaGP880Vp0d7tH4xfYTOXC38hcYmxRfDcQIPSsXX1ia9evyjbC9UatISOFTuInc00rvFSIh4I');
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 orderRouter.post('/', isAuth, expressAsyncHandler(async (req, res) => {
     if (req.body.orderItems.length === 0) {
