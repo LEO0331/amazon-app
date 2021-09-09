@@ -17,7 +17,7 @@ export const isAuth = (req, res, next) => { //middleware to authenticate users
         const token = authorization.slice(7, authorization.length); // format: Bearer XXXXXX; JWTs can be used as OAuth 2.0 Bearer Tokens to encode all relevant parts of an access token into the access token itself instead of having to store them in a database
         jwt.verify(token, process.env.JWT_SECRET || 'secret', (err, decode) => { //decrypt; callback 
             if (err) {
-                res.status(401).send({ message: 'Invalid Token' });
+                res.status(401).send({ message: 'Invalid User Token' });
             } else {
                 req.user = decode;
                 next();
@@ -32,5 +32,13 @@ export const isAuth = (req, res, next) => { //middleware to authenticate users
         });
     } else {
         res.status(401).send({ message: 'No Token' });
+    }
+}
+
+export const isAdmin = (req, res, next) => {
+    if(req.user && req.user.isAdmin){
+        next();
+    } else {
+        res.status(401).send({ message: 'Invalid Admin Token' });
     }
 }
