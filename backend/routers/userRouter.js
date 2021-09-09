@@ -3,13 +3,13 @@ import data from '../data.js';
 import User from '../models/userModel.js';
 import expressAsyncHandler from 'express-async-handler'; //https://www.npmjs.com/package/express-async-handler
 import bcrypt from 'bcryptjs';
-import { generateToken} from '../utils.js';
+import { generateToken, isAuth } from '../utils.js';
 
 const userRouter = express.Router(); //express 4
 //Simple middleware for handling exceptions inside of async express routes and passing them to your express error handlers
 userRouter.get('/seed', expressAsyncHandler(async (req, res) => {
     //await User.remove({}); //remove all users to prevent duplicate errors
-    const createdUsers = await User.insertMany(data.users); //insert object of array in User collection from backend
+    const createdUsers = await User.insertMany(data.users); //insert object of array in User collection from testing backend
     res.send({createdUsers});
 }));
 
@@ -47,7 +47,26 @@ userRouter.post('/register', expressAsyncHandler(async (req, res) => { //use pos
     })
 }));
 
-userRouter.get('/:id', expressAsyncHandler(async (req, res) => {
+userRouter.put('/profile', isAuth, expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id); //req.user._id is available from isAuth
+    if (user) {
+        user.name = req.body.name || user.name;
+        user.email = req.body.email || user.email;
+        if (req.body.password) { //user new enter pw to replace the old one
+            user.password = bcrypt.hashSync(req.body.password, 8);
+        }
+        const updatedUser = await user.save();
+        res.send({
+            _id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            isAdmin: updatedUser.isAdmin,
+            token: generateToken(updatedUser),
+        });
+    }
+}));
+//https://stackoverflow.com/questions/34095126/express-router-id
+userRouter.get('/:id', expressAsyncHandler(async (req, res) => { //id is the unique instance field (_id) that is given to each Mongoose model instance by default
     const user = await User.findById(req.params.id);
     if (user) {
         res.send(user);

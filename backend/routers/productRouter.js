@@ -18,7 +18,7 @@ productRouter.get('/seed', expressAsyncHandler(async (req, res) => {
     const createdProducts = await Product.insertMany(data.products); //insertMany() function is used to insert multiple documents into a collection. It accepts an array of documents to insert into the collection.
     res.send({createdProducts}); //{[{p1},{p2}]}
 }));
-//put at the end to avoid get '/seed' as id
+//put at the end to avoid get '/seed' as id; https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes
 productRouter.get('/:id', expressAsyncHandler(async (req, res) => { //product details api
     const product = await Product.findById(req.params.id);
     if (product) {

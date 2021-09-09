@@ -19,6 +19,7 @@ function ProfileScreen() {
     const dispatch = useDispatch();
     useEffect(() => {
         if(!user){
+            dispatch({ type: USER_UPDATE_PROFILE_RESET });
             dispatch(detailsUser(userInfo._id));
         } else { //from backend
             setName(user.name);

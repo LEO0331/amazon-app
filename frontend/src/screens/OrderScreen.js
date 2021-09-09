@@ -8,7 +8,7 @@ import MessageBox from '../components/MessageBox';
 import { PayPalButton } from "react-paypal-button-v2"; //https://www.npmjs.com/package/react-paypal-button-v2
 import { ORDER_PAY_RESET } from '../constants/orderConstants';
 
-function OrderScreen(props) {
+function OrderScreen(props) { // /order/${order._id} screen
     const [sdkReady, setSdkReady] = useState(false); //Software Development Kit
     const orderId = props.match.params.id;
     const orderDetails = useSelector(state => state.orderDetails);
