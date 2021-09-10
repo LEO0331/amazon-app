@@ -25,7 +25,7 @@ function ProductListScreen(props) {
             dispatch({ type: PRODUCT_DELETE_RESET });
         }
         dispatch(listProducts());
-    }, [createdProduct._id, dispatch, props.history, successCreate, successDelete]);
+    }, [createdProduct, dispatch, props.history, successCreate, successDelete]);
     const createHandler = () => {
         dispatch(createProduct());
     };
@@ -71,8 +71,6 @@ function ProductListScreen(props) {
                                     <td>{product.brand}</td>
                                     <td>
                                         <button type="button" className="small" onClick={() => {props.history.push(`/product/${product._id}/edit`)}}>Edit</button>
-                                    </td>
-                                    <td>
                                         <button type="button" className="small" onClick={() => deleteHandler(product)}>Delete</button>
                                     </td>
                                 </tr>

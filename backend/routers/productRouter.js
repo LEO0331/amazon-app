@@ -49,7 +49,7 @@ productRouter.post('/',  isAuth, isAdmin, expressAsyncHandler(async (req, res) =
         description: 'sample description',
     });
     const createdProduct = await product.save();
-    res.send({ message: 'Product Created', product: createdProduct }); //product: a prop won't be further use just telling info to frontend already save the product in the db
+    res.send({ message: 'Product Created', product: createdProduct }); //product: use in createProduct action; not related to get('/') cuz its product is directly from db
 }));
 
 productRouter.put('/:id', isAuth, isAdmin, expressAsyncHandler(async (req, res) => {
@@ -67,6 +67,18 @@ productRouter.put('/:id', isAuth, isAdmin, expressAsyncHandler(async (req, res) 
     } else {
         res.status(404).send({ message: 'Product Not Found' });
     }
-}))
+}));
+
+productRouter.delete('/:id', isAuth, isAdmin, expressAsyncHandler(async (req, res) => {
+    const product = await Product.findById(req.params.id);
+    if (product) {
+        const deleteProduct = await product.remove();
+        res.send({ message: 'Product Deleted', product: deleteProduct });
+    } else {
+        res.status(404).send({ message: 'Product Not Found' });
+    }
+}));
+
+
 
 export default productRouter;

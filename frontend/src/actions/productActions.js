@@ -11,7 +11,10 @@ import {
     PRODUCT_CREATE_FAIL,
     PRODUCT_UPDATE_REQUEST,
     PRODUCT_UPDATE_SUCCESS,
-    PRODUCT_UPDATE_FAIL
+    PRODUCT_UPDATE_FAIL,
+    PRODUCT_DELETE_REQUEST,
+    PRODUCT_DELETE_SUCCESS,
+    PRODUCT_DELETE_FAIL
 } from '../constants/productConstants';
 
 export const listProducts = () => async (dispatch) => {
@@ -46,7 +49,7 @@ export const createProduct = () => async (dispatch, getState) => {
         const {data} = await axios.post('/api/products', {}, { //empty obj cuz no data as second param payload, auto create sample data in backend
             headers: { Authorization: `Bearer ${userInfo.token}` }
         }); 
-        dispatch({type: PRODUCT_CREATE_SUCCESS, payload: data});
+        dispatch({type: PRODUCT_CREATE_SUCCESS, payload: data.product}); //new createdProduct
     } catch (error) {
         dispatch({
             type: PRODUCT_CREATE_FAIL,
@@ -68,6 +71,24 @@ export const updateProduct = (product) => async (dispatch, getState) => {
     } catch (error) {
         dispatch({
             type: PRODUCT_UPDATE_FAIL,
+            payload: error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message,
+        });
+    }
+}
+
+export const deleteProduct = (productId) => async (dispatch, getState) => {
+    dispatch({type: PRODUCT_DELETE_REQUEST, payload: productId});
+    const {userSignin: { userInfo }} = getState();
+    try {
+        const {data} = await axios.delete(`/api/products/${productId}`, { 
+            headers: { Authorization: `Bearer ${userInfo.token}` }
+        }); 
+        dispatch({type: PRODUCT_DELETE_SUCCESS});
+    } catch (error) {
+        dispatch({
+            type: PRODUCT_DELETE_FAIL,
             payload: error.response && error.response.data.message
                 ? error.response.data.message
                 : error.message,
