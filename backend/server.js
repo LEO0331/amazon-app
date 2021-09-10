@@ -4,7 +4,9 @@ import mongoose from 'mongoose';
 import userRouter from './routers/userRouter.js';
 import productRouter from './routers/productRouter.js';
 import orderRouter from './routers/orderRouter.js';
+import uploadRouter from './routers/uploadRouter.js';
 import dotenv from 'dotenv'; //https://www.npmjs.com/package/dotenv
+import path from 'path';
 
 dotenv.config();
 
@@ -18,9 +20,12 @@ mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/Ecommerce'); //
 app.use('/api/users', userRouter); //userRouter(app)
 app.use('/api/products', productRouter);
 app.use('/api/orders', orderRouter);
+app.use('/api/uploads', uploadRouter);
 app.get('/api/config/paypal', (req, res) => { //can change to LIVE in paypal dashboard
 	res.send(process.env.PAYPAL_CLIENT_ID || 'sb');
 });
+const __dirname = path.resolve(); //resolve a sequence of path-segments to an absolute path
+app.use('/uploads', express.static(path.join(__dirname, '/uploads'))); //concat to /uploads folder; https://nodejs.org/api/path.html#path_path_join_paths
 /* express 3, static data
 app.get('/api/products', (req, res) => { 
     res.send(data.products);

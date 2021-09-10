@@ -14,11 +14,15 @@ function ProductEditScreen(props) {
     const [countInStock, setCountInStock] = useState('');
     const [brand, setBrand] = useState('');
     const [description, setDescription] = useState('');
+    const [loadingUpload, setLoadingUpload] = useState(false);
+    const [errorUpload, setErrorUpload] = useState('');
     const productId = props.match.params.id;
     const productDetails = useSelector(state => state.productDetails);
     const { loading, error, product } = productDetails;
     const productUpdate = useSelector(state => state.productUpdate);
     const { loading: loadingUpdate, error: errorUpdate, success: successUpdate } = productUpdate;
+    const userSignin = useSelector(state => state.userSignin);
+    const { userInfo } = userSignin;
     const dispatch = useDispatch();
     useEffect(() => {
         if (successUpdate) {
@@ -40,6 +44,25 @@ function ProductEditScreen(props) {
     const submitHandler = (e) => {
         e.preventDefault(); //dispatch update product
         dispatch(updateProduct({_id: productId, name, price, image, category, brand, countInStock, description}));
+    }
+    const uploadFileHandler = async (e) => {
+        const file = e.target.files[0]; //upload only the first selected file
+        const formData = new FormData(); //https://developer.mozilla.org/en-US/docs/Web/API/FormData/Using_FormData_Objects
+        formData.append('image', file); //expect a single file named image at backend
+        setLoadingUpload(true);
+        try {
+            const { data } = await axios.post('/api/uploads', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`,
+                },
+            });
+            setImage(data);
+            setLoadingUpload(false);
+        } catch (error) {
+            setErrorUpload(error.message);
+            setLoadingUpload(false);
+        }
     }
     return (
         <div>
@@ -66,6 +89,12 @@ function ProductEditScreen(props) {
                         <div>
                             <label htmlFor="image">Image</label>
                             <input type="text" id="image" placeholder="Enter image" value={image} onChange={e => setImage(e.target.value)} />
+                        </div>
+                        <div>
+                            <label htmlFor="imageFile">Image File</label>
+                            <input type="file" id="imageFile" label="Choose Image" onChange={uploadFileHandler} />
+                            {loadingUpload && <LoadingBox />}
+                            {errorUpload && (<MessageBox variant="danger">{errorUpload}</MessageBox>)}
                         </div>
                         <div>
                             <label htmlFor="category">Category</label>
