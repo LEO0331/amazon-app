@@ -24,8 +24,8 @@ function ProductEditScreen(props) {
         if (successUpdate) {
             props.history.push('/productlist');
         }
-        if (!product || product._id !== productId || successUpdate) { //product._id !== productId avoid previous product info loaded
-            dispatch({ type: PRODUCT_UPDATE_RESET });
+        if (!product || product._id !== productId || successUpdate) { //product._id !== productId/successUpdate avoid previous product info loaded
+            dispatch({ type: PRODUCT_UPDATE_RESET }); 
             dispatch(detailsProduct(productId)); //load from backend; sample product
         } else {
             setName(product.name);
@@ -39,6 +39,7 @@ function ProductEditScreen(props) {
     }, [product, dispatch, productId, successUpdate, props.history]);
     const submitHandler = (e) => {
         e.preventDefault(); //dispatch update product
+        dispatch(updateProduct({_id: productId, name, price, image, category, brand, countInStock, description}));
     }
     return (
         <div>

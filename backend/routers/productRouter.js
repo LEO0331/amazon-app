@@ -9,7 +9,7 @@ const productRouter = express.Router();
 
 productRouter.get('/', expressAsyncHandler(async (req, res) => { // add to the end: /api/products/ -> exact api frontend send to
     //https://www.geeksforgeeks.org/mongoose-find-function/
-    const products = await Product.find({}); //{}: all products; get from/same as '/seed'
+    const products = await Product.find({}); //{}: all products; get from '/seed' and post('/')
     res.send(products);
 }));
 
@@ -17,7 +17,7 @@ productRouter.get('/seed', expressAsyncHandler(async (req, res) => { //products 
     //await Product.remove({});
     //https://www.geeksforgeeks.org/mongoose-insertmany-function/
     const createdProducts = await Product.insertMany(data.products); //insertMany() function is used to insert multiple documents into a collection. It accepts an array of documents to insert into the collection.
-    res.send({ createdProducts }); //{[{p1},{p2}]}
+    res.send({ createdProducts }); //{[{p1},{p2}]}; can be reach from get('/')
 }));
 //put at the end to avoid get '/seed' as id; https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes
 productRouter.get('/:id', expressAsyncHandler(async (req, res) => { //product details api
@@ -49,7 +49,24 @@ productRouter.post('/',  isAuth, isAdmin, expressAsyncHandler(async (req, res) =
         description: 'sample description',
     });
     const createdProduct = await product.save();
-    res.send({ message: 'Product Created', product: createdProduct });
+    res.send({ message: 'Product Created', product: createdProduct }); //product: a prop won't be further use just telling info to frontend already save the product in the db
 }));
+
+productRouter.put('/:id', isAuth, isAdmin, expressAsyncHandler(async (req, res) => {
+    const product = await Product.findById(req.params.id);
+    if (product) {
+        product.name = req.body.name;
+        product.price = req.body.price;
+        product.image = req.body.image;
+        product.category = req.body.category;
+        product.brand = req.body.brand;
+        product.countInStock = req.body.countInStock;
+        product.description = req.body.description;
+        const updatedProduct = await product.save();
+        res.send({ message: 'Product Updated', product: updatedProduct });
+    } else {
+        res.status(404).send({ message: 'Product Not Found' });
+    }
+}))
 
 export default productRouter;
