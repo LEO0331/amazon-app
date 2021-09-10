@@ -2,7 +2,7 @@ import { createStore, compose, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'redux-thunk'; //send ajax request in redux actions
 import { cartReducer } from './reducers/cartReducers';
 import { orderCreateReducer, orderDetailsReducer, orderMineListReducer, orderPayReducer } from './reducers/orderReducers';
-import { productDetailsReducer, productListReducer } from './reducers/productReducers';
+import { productCreateReducer, productDetailsReducer, productListReducer } from './reducers/productReducers';
 import { userDetailsReducer, userRegisterReducer, userSigninReducer, userUpdateProfileReducer } from './reducers/userReducers';
 
 const initialState = {
@@ -26,7 +26,8 @@ const reducer = combineReducers({
   orderPay: orderPayReducer,
   orderMineList: orderMineListReducer,
   userDetails: userDetailsReducer,
-  userUpdateProfile: userUpdateProfileReducer
+  userUpdateProfile: userUpdateProfileReducer,
+  productCreate: productCreateReducer
 })
 
 const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

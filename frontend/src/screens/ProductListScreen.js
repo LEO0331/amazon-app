@@ -2,16 +2,33 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { createProduct, deleteProduct, listProducts } from '../actions/productActions';
+import { PRODUCT_CREATE_RESET, PRODUCT_DELETE_RESET } from '../constants/productConstants';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 
 function ProductListScreen(props) {
+    const userSignin = useSelector(state => state.userSignin);
+    const { userInfo } = userSignin;
     const productList = useSelector(state => state.productList);
     const { loading, error, products } = productList;
+    const productCreate = useSelector(state => state.productCreate);
+    const { loading: loadingCreate, error: errorCreate, success: successCreate, product: createdProduct } = productCreate;
+    const productDelete = useSelector(state => state.productDelete);
+    const { loading: loadingDelete, error: errorDelete, success: successDelete } = productDelete;
     const dispatch = useDispatch()
     useEffect(() => {
+        if (successCreate) {
+            dispatch({ type: PRODUCT_CREATE_RESET });
+            props.history.push(`/product/${createdProduct._id}/edit`); //redirect to edit screen
+        }
+        if (successDelete) {
+            dispatch({ type: PRODUCT_DELETE_RESET });
+        }
         dispatch(listProducts())
-    }, [dispatch])
+    }, [createdProduct._id, dispatch, props.history, successCreate, successDelete]);
+    const createHandler = () => {
+        dispatch(createProduct());
+    };
     const deleteHandler = (product) => {
         if (window.confirm('Are you sure to delete?')) { //confirm window alert
             dispatch(deleteProduct(product._id));
@@ -21,7 +38,12 @@ function ProductListScreen(props) {
         <div>
             <div className="row">
                 <h1>Products</h1>
+                <button type="button" className="primary" onClick={createHandler}>Create Product</button>
             </div>
+            {loadingCreate && <LoadingBox />}
+            {errorCreate && <MessageBox variant="danger">{errorCreate}</MessageBox>}
+            {loadingDelete && <LoadingBox />}
+            {errorDelete && <MessageBox variant="danger">{errorDelete}</MessageBox>}
             {loading ? ( 
                 <LoadingBox />
                 ) : error ? (

@@ -3,6 +3,7 @@ import expressAsyncHandler from 'express-async-handler'; //try-catch
 import data from '../data.js';
 import Product from '../models/productModel.js';
 //import User from '../models/userModel.js';
+import { isAdmin, isAuth } from '../utils.js';
 
 const productRouter = express.Router();
 
@@ -16,7 +17,7 @@ productRouter.get('/seed', expressAsyncHandler(async (req, res) => {
     //await Product.remove({});
     //https://www.geeksforgeeks.org/mongoose-insertmany-function/
     const createdProducts = await Product.insertMany(data.products); //insertMany() function is used to insert multiple documents into a collection. It accepts an array of documents to insert into the collection.
-    res.send({createdProducts}); //{[{p1},{p2}]}
+    res.send({ createdProducts }); //{[{p1},{p2}]}
 }));
 //put at the end to avoid get '/seed' as id; https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes
 productRouter.get('/:id', expressAsyncHandler(async (req, res) => { //product details api
@@ -24,7 +25,7 @@ productRouter.get('/:id', expressAsyncHandler(async (req, res) => { //product de
     if (product) {
         res.send(product);
     } else {
-        res.status(404).send({message: 'Product Not Found'});
+        res.status(404).send({ message: 'Product Not Found' });
     }
     /* https://stackoverflow.com/questions/43055600/app-get-is-there-any-difference-between-res-send-vs-return-res-send
     if (product) {
@@ -32,6 +33,23 @@ productRouter.get('/:id', expressAsyncHandler(async (req, res) => { //product de
     }
     res.status(404).send({message: 'Product Not Found'});
     */
+}));
+
+productRouter.post('/',  isAuth, isAdmin, expressAsyncHandler(async (req, res) => {
+    const product = new Product({ //sample data; timestamp to unique data avoid duplicate error
+        name: 'sample name ' + Date.now(),
+        //seller: req.user._id,
+        image: '/images/p1.jpg',
+        price: 0,
+        category: 'sample category',
+        brand: 'sample brand',
+        countInStock: 0,
+        rating: 0,
+        numReviews: 0,
+        description: 'sample description',
+    });
+    const createdProduct = await product.save();
+    res.send({ message: 'Product Created', product: createdProduct });
 }));
 
 export default productRouter;
