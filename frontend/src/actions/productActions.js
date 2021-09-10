@@ -40,7 +40,7 @@ export const createProduct = () => async (dispatch, getState) => {
     dispatch({type: PRODUCT_CREATE_REQUEST});
     const {userSignin: { userInfo }} = getState(); //userInfo token
     try {
-        const {data} = await axios.post('/api/products', {}, { //empty obj cuz no data as payload
+        const {data} = await axios.post('/api/products', {}, { //empty obj cuz no data as payload, auto create sample data in backend
             headers: { Authorization: `Bearer ${userInfo.token}` }
         }); 
         dispatch({type: PRODUCT_CREATE_SUCCESS, payload: data});

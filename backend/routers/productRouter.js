@@ -9,11 +9,11 @@ const productRouter = express.Router();
 
 productRouter.get('/', expressAsyncHandler(async (req, res) => { // add to the end: /api/products/ -> exact api frontend send to
     //https://www.geeksforgeeks.org/mongoose-find-function/
-    const products = await Product.find({}); //{}: all products
+    const products = await Product.find({}); //{}: all products; get from/same as '/seed'
     res.send(products);
 }));
 
-productRouter.get('/seed', expressAsyncHandler(async (req, res) => {
+productRouter.get('/seed', expressAsyncHandler(async (req, res) => { //products showing on the homeScreen
     //await Product.remove({});
     //https://www.geeksforgeeks.org/mongoose-insertmany-function/
     const createdProducts = await Product.insertMany(data.products); //insertMany() function is used to insert multiple documents into a collection. It accepts an array of documents to insert into the collection.
