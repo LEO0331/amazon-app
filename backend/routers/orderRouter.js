@@ -3,18 +3,19 @@ import expressAsyncHandler from 'express-async-handler';
 import Order from '../models/orderModel.js';
 import User from '../models/userModel.js';
 import Product from '../models/productModel.js';
-import Stripe from 'stripe'; //https://www.npmjs.com/package/stripe
-
-import {
-    //isAdmin,
-    isAuth,
+import { isAdmin, isAuth,
     //isSellerOrAdmin,
     //mailgun,
     //payOrderEmailTemplate,
 } from '../utils.js';
+import Stripe from 'stripe'; //https://www.npmjs.com/package/stripe
 
 const orderRouter = express.Router();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+orderRouter.get('/', isAuth, isAdmin, expressAsyncHandler(async (req, res) => { //join() in SQL
+    const orders = await Order.find({}).populate('user', 'name'); //https://mongoosejs.com/docs/populate.html#population
+    res.send(orders);
+}));
 
 orderRouter.post('/', isAuth, expressAsyncHandler(async (req, res) => {
     if (req.body.orderItems.length === 0) {
@@ -67,6 +68,7 @@ orderRouter.put('/:id/pay', isAuth, expressAsyncHandler(async (req, res) => { //
     }
 }));
 //https://stripe.com/docs/payments/integration-builder?client=react
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 orderRouter.post('/secret/:id', isAuth, expressAsyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (order) {
