@@ -26,6 +26,10 @@ app.get('/api/config/paypal', (req, res) => { //can change to LIVE in paypal das
 });
 const __dirname = path.resolve(); //resolve a sequence of path-segments to an absolute path
 app.use('/uploads', express.static(path.join(__dirname, '/uploads'))); //concat to /uploads folder; https://nodejs.org/api/path.html#path_path_join_paths
+app.use(express.static(path.join(__dirname, '/frontend/build'))); //set files inside git folder
+app.get('*', (req, res) =>
+	res.sendFile(path.join(__dirname, '/frontend/build/index.html')) //serve all addresses by index.html
+);
 /* express 3, static data
 app.get('/api/products', (req, res) => { 
     res.send(data.products);
@@ -39,11 +43,11 @@ app.get('/api/products/:id', (req, res) => {
 		res.status(404).send({message: "Product Not Found"});
 	}
 });
-*/
+
 app.get('/', (req, res) => {
    res.send('Server is ready');
 });
-
+*/
 app.use((err, req, res, next) => { //error catcher middleware
 	res.status(500).send({message: err.message}); //server error
 });
