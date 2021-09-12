@@ -25,6 +25,8 @@ function OrderListScreen(props) {
     return (
         <div>
             <h1>Orders</h1>
+            {loadingDelete && <LoadingBox />}
+            {errorDelete && <MessageBox variant="danger">{errorDelete}</MessageBox>}
             {loading ? ( <LoadingBox />
             ) : error ? ( <MessageBox variant="danger">{error}</MessageBox>
             ) : (
@@ -33,6 +35,7 @@ function OrderListScreen(props) {
                         <tr>
                             <th>ID</th>
                             <th>USER</th>
+                            <th>DATE</th>
                             <th>TOTAL</th>
                             <th>PAID</th>
                             <th>DELIVERED</th>

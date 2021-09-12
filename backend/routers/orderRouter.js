@@ -67,6 +67,17 @@ orderRouter.put('/:id/pay', isAuth, expressAsyncHandler(async (req, res) => { //
         res.status(404).send({ message: 'Order Not Found' });
     }
 }));
+
+orderRouter.delete('/:id', isAuth, isAdmin, expressAsyncHandler(async (req, res) => {
+    const order = await Order.findById(req.params.id);
+    if (order) {
+        const deleteOrder = await order.remove();
+        res.send({ message: 'Order Deleted', product: deleteOrder });
+    } else {
+        res.status(404).send({ message: 'Order Not Found' });
+    }
+}))
+
 //https://stripe.com/docs/payments/integration-builder?client=react
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 orderRouter.post('/secret/:id', isAuth, expressAsyncHandler(async (req, res) => {
