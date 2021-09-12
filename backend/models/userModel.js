@@ -5,8 +5,8 @@ const userSchema = new mongoose.Schema(
         email: {type: String, required: true, unique: true}, //show error when duplicate
         password: {type: String, required: true},
         isAdmin: {type: Boolean, default: false, required: true},
-        /*
         isSeller: {type: Boolean, default: false, required: true},
+        /*
         seller: {
             name: String,
             logo: String,
