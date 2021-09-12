@@ -96,7 +96,7 @@ export const updateUserProfile = (user) => async (dispatch, getState) => {
 }
 
 export const updateUser = (user) => async (dispatch, getState) => {
-    dispatch({ type: USER_UPDATE_REQUEST, payload: user });
+    dispatch({ type: USER_UPDATE_REQUEST, payload: user }); //USER_UPDATE_PROFILE_REQUEST
     try {
         const {userSignin: { userInfo }} = getState();
         const { data } = await axios.put(`/api/users/${user._id}`, user, { 

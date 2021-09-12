@@ -13,7 +13,7 @@ function UserListScreen(props){ //similar to productListScreen
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(listUsers());
-        dispatch({type: USER_DETAILS_RESET});
+        dispatch({type: USER_DETAILS_RESET}); //detail of other users
     }, [dispatch, successDelete]);
     const deleteHandler = (user) => {
         if (window.confirm('Are you sure to delete?')) {
