@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { detailsOrder, payOrder } from '../actions/orderActions';
+import { deliverOrder, detailsOrder, payOrder } from '../actions/orderActions';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import { PayPalButton } from "react-paypal-button-v2"; //https://www.npmjs.com/package/react-paypal-button-v2
-import { ORDER_PAY_RESET } from '../constants/orderConstants';
+import { ORDER_DELIVER_RESET, ORDER_PAY_RESET } from '../constants/orderConstants';
 
 function OrderScreen(props) { // /order/${order._id} screen
     const [sdkReady, setSdkReady] = useState(false); //Software Development Kit
@@ -15,6 +15,10 @@ function OrderScreen(props) { // /order/${order._id} screen
     const { order, loading, error } = orderDetails;
     const orderPay = useSelector(state => state.orderPay);
     const { loading: loadingPay, error: errorPay, success: successPay } = orderPay; //rename
+    const userSignin = useSelector(state => state.userSignin);
+    const { userInfo } = userSignin;
+    const orderDeliver = useSelector(state => state.orderDeliver);
+    const { loading: loadingDeliver, error: errorDeliver, success: successDeliver } = orderDeliver;
     const dispatch = useDispatch();
     useEffect(() => {
         //https://developer.paypal.com/docs/business/javascript-sdk/javascript-sdk-configuration/
@@ -32,8 +36,9 @@ function OrderScreen(props) { // /order/${order._id} screen
             */
         }
         //https://www.esparkinfo.com/integrate-paypal-node-js-recurring-payments-api.html
-        if (!order || successPay || (order && order._id !== orderId)) {
+        if (!order || successPay || (order && order._id !== orderId) || successDeliver) {
             dispatch({ type: ORDER_PAY_RESET }); //reset to avoid infinite loading
+            dispatch({ type: ORDER_DELIVER_RESET });
             dispatch(detailsOrder(orderId)); //from url; refresh and update
         } else {
             if (!order.isPaid) {
@@ -44,9 +49,12 @@ function OrderScreen(props) { // /order/${order._id} screen
                 }
             }
         }
-    }, [dispatch, order, orderId, sdkReady, successPay]); //run useEffect() when order, orderId, sdkReady changed
+    }, [dispatch, order, orderId, sdkReady, successPay, successDeliver]); //run useEffect() when order, orderId, sdkReady changed
     const successPaymentHandler = (paymentResult) => {
         dispatch(payOrder(order, paymentResult));
+    };
+    const deliverHandler = () => {
+        dispatch(deliverOrder(order._id));
     };
     return loading ? (
         <LoadingBox />
@@ -77,7 +85,7 @@ function OrderScreen(props) { // /order/${order._id} screen
                             <div className="card card-body">
                                 <h2>Payment Information</h2>
                                 <p><strong>Method:</strong> {order.paymentMethod}</p>
-                                {order.isPaid ? ( //toLocaleDateString
+                                {order.isPaid ? ( //toLocaleDateString; order.paidAt
                                     <MessageBox variant="success">Paid at {new Date(order.paidAt).toLocaleString()}</MessageBox>
                                 ) : (
                                     <MessageBox variant="danger">Not Paid</MessageBox>
@@ -155,6 +163,13 @@ function OrderScreen(props) { // /order/${order._id} screen
                                     </li>
                                 )
                             }
+                            {userInfo.isAdmin && order.isPaid && !order.isDelivered && (
+                                <li>
+                                    {loadingDeliver && <LoadingBox />}
+                                    {errorDeliver && (<MessageBox variant="danger">{errorDeliver}</MessageBox>)}
+                                    <button type="button" className="primary block" onClick={deliverHandler}>Deliver Order</button>
+                                </li>
+                            )}
                         </ul>
                     </div>
                 </div>
