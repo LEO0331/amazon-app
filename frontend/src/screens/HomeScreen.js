@@ -11,7 +11,7 @@ function HomeScreen() {
   const productList = useSelector(state => state.productList); //from store to reflect on the view
   const {loading, products, error} = productList; //3 values from productList
   useEffect(() => {
-    dispatch(listProducts({}));
+    dispatch(listProducts({})); //return all products without filtering
   }, [dispatch]);
   //params => ({foo: "a"}); returning the object {foo: "a"}
   return (

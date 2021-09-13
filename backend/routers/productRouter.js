@@ -3,13 +3,14 @@ import expressAsyncHandler from 'express-async-handler'; //try-catch
 import data from '../data.js';
 import Product from '../models/productModel.js';
 //import User from '../models/userModel.js';
-import { isAdmin, isAuth } from '../utils.js';
+import { isAdmin, isAdminOrSeller, isAuth } from '../utils.js';
 
 const productRouter = express.Router();
-
-productRouter.get('/', expressAsyncHandler(async (req, res) => { // add to the end: /api/products/ -> exact api frontend send to
-    //https://www.geeksforgeeks.org/mongoose-find-function/
-    const products = await Product.find({}); //{}: all products; get from '/seed' and post('/')
+//https://www.geeksforgeeks.org/mongoose-find-function/
+productRouter.get('/', expressAsyncHandler(async (req, res) => { //add to the end: /api/products/ -> exact api frontend send to
+    const seller = req.query.seller || '';
+    const sellerFilter = seller ? { seller } : {}; //{}: all products; get from '/seed' and post('/')
+    const products = await Product.find({...sellerFilter}); //only obj fields
     res.send(products);
 }));
 
@@ -35,10 +36,10 @@ productRouter.get('/:id', expressAsyncHandler(async (req, res) => { //product de
     */
 }));
 
-productRouter.post('/',  isAuth, isAdmin, expressAsyncHandler(async (req, res) => {
+productRouter.post('/',  isAuth, isAdminOrSeller, expressAsyncHandler(async (req, res) => {
     const product = new Product({ //sample data; timestamp to unique data avoid duplicate error
         name: 'sample name ' + Date.now(),
-        //seller: req.user._id,
+        seller: req.user._id, //current user see their products
         image: '/images/p1.jpg',
         price: 0,
         category: 'sample category',
@@ -52,7 +53,7 @@ productRouter.post('/',  isAuth, isAdmin, expressAsyncHandler(async (req, res) =
     res.send({ message: 'Product Created', product: createdProduct }); //product: use in createProduct action; not related to get('/') cuz its product is directly from db
 }));
 
-productRouter.put('/:id', isAuth, isAdmin, expressAsyncHandler(async (req, res) => {
+productRouter.put('/:id', isAuth, isAdminOrSeller, expressAsyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (product) {
         product.name = req.body.name;

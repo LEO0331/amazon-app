@@ -7,6 +7,7 @@ export const generateToken = user => { //https://github.com/auth0/express-jwt
             name: user.name,
             email: user.email,
             isAdmin: user.isAdmin,
+            isSeller: user.isSeller,
         }, process.env.JWT_SECRET || 'secret', {expiresIn: '90d',}
     );
 };
@@ -33,7 +34,7 @@ export const isAuth = (req, res, next) => { //middleware to authenticate users
     } else {
         res.status(401).send({ message: 'No Token' });
     }
-}
+};
 
 export const isAdmin = (req, res, next) => {
     if(req.user && req.user.isAdmin){
@@ -41,4 +42,20 @@ export const isAdmin = (req, res, next) => {
     } else {
         res.status(401).send({ message: 'Invalid Admin Token' });
     }
-}
+};
+
+export const isSeller = (req, res, next) => {
+    if(req.user && req.user.isSeller){
+        next();
+    } else {
+        res.status(401).send({ message: 'Invalid Seller Token' });
+    }
+};
+
+export const isAdminOrSeller = (req, res, next) => {
+    if(req.user && (req.user.isAdmin || req.user.isSeller)){
+        next();
+    } else {
+        res.status(401).send({ message: 'Invalid Admin/Seller Token' });
+    }
+};

@@ -36,7 +36,7 @@ const orderSchema = new mongoose.Schema(
       taxPrice: { type: Number, required: true },
       totalPrice: { type: Number, required: true },
       user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-      //seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, //https://stackoverflow.com/questions/28997636/should-i-use-schema-types-objectid-or-schema-objectid-when-defining-a-mongoose-s
+      seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, //https://stackoverflow.com/questions/28997636/should-i-use-schema-types-objectid-or-schema-objectid-when-defining-a-mongoose-s
       isPaid: { type: Boolean, default: false },
       paidAt: { type: Date },
       isDelivered: { type: Boolean, default: false },

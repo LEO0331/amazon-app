@@ -17,10 +17,10 @@ import {
     PRODUCT_DELETE_FAIL
 } from '../constants/productConstants';
 
-export const listProducts = () => async (dispatch) => {
+export const listProducts = ({seller = ''}) => async (dispatch) => {
     dispatch({type: PRODUCT_LIST_REQUEST});
     try {
-        const {data} = await axios.get('/api/products'); //get products from backend through db
+        const {data} = await axios.get(`/api/products?seller=${seller}`); //get products from backend through db
         dispatch({type: PRODUCT_LIST_SUCCESS, payload: data}) //dispatch actions: change the state of redux and update homescreen showing products
     } catch (error) {
         dispatch({type: PRODUCT_LIST_FAIL, payload: error.message});
