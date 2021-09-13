@@ -10,7 +10,7 @@ const productRouter = express.Router();
 productRouter.get('/', expressAsyncHandler(async (req, res) => { //add to the end: /api/products/ -> exact api frontend send to
     const seller = req.query.seller || '';
     const sellerFilter = seller ? { seller } : {}; //{}: all products; get from '/seed' and post('/')
-    const products = await Product.find({...sellerFilter}); //only obj fields
+    const products = await Product.find({...sellerFilter}).populate('seller', 'seller.name seller.logo'); //only obj fields
     res.send(products);
 }));
 
@@ -22,7 +22,7 @@ productRouter.get('/seed', expressAsyncHandler(async (req, res) => { //products 
 }));
 //put at the end to avoid get '/seed' as id; https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes
 productRouter.get('/:id', expressAsyncHandler(async (req, res) => { //product details api
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate('seller', 'seller.name seller.logo seller.rating seller.numReviews');
     if (product) {
         res.send(product);
     } else {

@@ -45,6 +45,13 @@ function ProductScreen(props) { //props: path="/product/:id" in <Route>
                         <div className="card card-body">
                             <ul>
                                 <li>
+                                    Seller{' '}
+                                    <h2>
+                                        <Link to={`/seller/${product.seller._id}`}>{product.seller.seller.name}</Link>
+                                    </h2>
+                                    <Ratings rating={product.seller.seller.rating} numReviews={product.seller.seller.numReviews} />
+                                </li>
+                                <li>
                                     <div className="row">
                                         <div>Price</div>
                                         <div className="price">${product.price}</div>
