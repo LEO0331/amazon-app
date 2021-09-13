@@ -14,6 +14,7 @@
 html {
   font-size: 62.5%; /* 16px x 62.5 = 10px = 1rem */
   box-sizing: border-box;
+  /* width: 100% */
 }
 body {
   margin: 0;
@@ -22,6 +23,7 @@ body {
   font-family: 'Open Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* width: 100% */
 }
 #root {
   height: 100%;
@@ -281,4 +283,50 @@ img.large {
 .carousel .slide img {
   max-width: 25rem;
 }
+/*
+.carousel .slide {
+  background: var(--black-color) !important;
+}
+*/
+/* Search */
+.search button {
+  border-radius: 0 0.6rem 0.6rem 0;
+  border-right: none; /* no duplicate border */
+  margin-right: 0.4rem;
+}
+.search input {
+  width: 25rem;
+  border-radius: 0.6rem 0 0 0.6rem;
+  border-right: none;
+  margin-left: 0.4rem;
+}
+/* Break Points */
+@media (max-width: 768px){
+  .grid-container{
+    grid-template-rows: 10rem 1fr 5rem;
+  }
+  header.row {
+    justify-content: flex-start; 
+  }
+  .dropdown-content{
+    left: 0;
+  }
+}
 
+/* 
+@media (max-width: 576px){
+  .grid-container{
+    width:576px; 
+  }
+  header {
+    min-width:576px; 
+  }
+}
+.carousel .slide { //in the carousel.min.css
+  min-width: 100%;
+  margin: 0;
+  position: relative;
+  text-align: center;
+  background: #000;
+}
+*/

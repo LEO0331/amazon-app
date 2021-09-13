@@ -11,12 +11,11 @@ export const cartReducer = (state = { cartItems: [] }, action) => { //error: ''
     switch (action.type){
         case CART_ADD_ITEM:
             const item = action.payload; //product: data._id; new item
-            //item already in the cart
-            const existItem = state.cartItems.find(x => x.product === item.product); //action.payload.product -> id
+            const existItem = state.cartItems.find(x => x.product === item.product); //item already in the cart; action.payload.product -> id
             if(existItem){
                 return { //only update changed item, others remain
                     ...state, //current items
-                    error: '',
+                    error: '', //order items from one seller; prevent buying same products from different sellers
                     cartItems: state.cartItems.map(x => x.product === existItem.product ? item : x) //only replace changed item
                 };
             } else {
@@ -25,7 +24,7 @@ export const cartReducer = (state = { cartItems: [] }, action) => { //error: ''
         case CART_REMOVE_ITEM:
             return { //not change other properties of the cart object
                 ...state,
-                error: '',
+                error: '', //order items from one seller; prevent buying same products from different sellers
                 cartItems: state.cartItems.filter(x => x.product !== action.payload)
             };
             case CART_SAVE_SHIPPING_ADDRESS:
@@ -35,7 +34,7 @@ export const cartReducer = (state = { cartItems: [] }, action) => { //error: ''
             case CART_ADD_ITEM_FAIL:
                 return { ...state, error: action.payload };
             case CART_EMPTY:
-                return { ...state, error: '', cartItems: [] };
+                return { ...state, error: '', cartItems: [] }; //order items from one seller; prevent buying same products from different seller
         default:
             return state;
     }
