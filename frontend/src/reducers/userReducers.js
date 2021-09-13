@@ -25,6 +25,9 @@ import {
     USER_DELETE_SUCCESS,
     USER_DELETE_FAIL,
     USER_DELETE_RESET,
+    USER_TOPSELLERS_LIST_REQUEST,
+    USER_TOPSELLERS_LIST_SUCCESS,
+    USER_TOPSELLERS_LIST_FAIL,
 } from '../constants/userConstants';
 
 export const userRegisterReducer = (state = {}, action) => {
@@ -128,3 +131,15 @@ export const userDeleteReducer = (state = {}, action) => {
     }
 };
 
+export const userTopSellerListReducer = (state = { loading: true }, action) => {
+    switch (action.type) {
+        case USER_TOPSELLERS_LIST_REQUEST:
+            return { loading: true };
+        case USER_TOPSELLERS_LIST_SUCCESS:
+            return { loading: false, users: action.payload };
+        case USER_TOPSELLERS_LIST_FAIL:
+            return { loading: false, error: action.payload };
+        default:
+            return state;
+    }
+};

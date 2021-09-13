@@ -6,6 +6,11 @@ import bcrypt from 'bcryptjs';
 import { generateToken, isAdmin, isAuth } from '../utils.js';
 
 const userRouter = express.Router(); //express 4
+userRouter.get('/top-sellers', expressAsyncHandler(async (req, res) => { //https://stackoverflow.com/questions/5825520/in-mongoose-how-do-i-sort-by-date-node-js/15081087#15081087
+    const topSellers = await User.find({ isSeller: true }).sort({ 'seller.rating': -1 }).limit(3); //descending
+    res.send(topSellers);
+}));
+  
 //Simple middleware for handling exceptions inside of async express routes and passing them to your express error handlers
 userRouter.get('/seed', expressAsyncHandler(async (req, res) => {
     //await User.remove({}); //remove all users to prevent duplicate errors
