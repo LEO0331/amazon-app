@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 function Ratings(props) {
     const {rating, numReviews, caption} = props;

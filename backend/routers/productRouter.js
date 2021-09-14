@@ -11,14 +11,29 @@ productRouter.get('/', expressAsyncHandler(async (req, res) => { //add to the en
     const seller = req.query.seller || '';
     const name = req.query.name || '';
     const category = req.query.category || '';
+    const min = req.query.min && Number(req.query.min) !== 0 ? Number(req.query.min) : 0;
+    const max = req.query.max && Number(req.query.max) !== 0 ? Number(req.query.max) : 0; //max can be 0 as Any product in util.js
+    const order = req.query.order || '';
+    const rating = req.query.rating && Number(req.query.rating) !== 0 ? Number(req.query.rating) : 0;
     const sellerFilter = seller ? { seller } : {}; //{}: all products; get from '/seed' and post('/')
     const nameFilter = name ? { name: { $regex: name, $options: 'i' } } : {}; //contained check: https://docs.mongodb.com/manual/reference/operator/query/regex/
     const categoryFilter = category ? { category } : {};
+    const priceFilter = min && max ? { price: { $gte: min, $lte: max } } : {}; //>=, <=
+    const ratingFilter = rating ? { rating: { $gte: rating } } : {};
+    const sortOrder = order === 'lowest'
+        ? { price: 1 }
+        : order === 'highest'
+        ? { price: -1 }
+        : order === 'toprated'
+        ? { rating: -1 }
+        : { _id: -1 }; //newest
     const products = await Product.find({
         ...sellerFilter,
         ...nameFilter,
         ...categoryFilter,
-    }).populate('seller', 'seller.name seller.logo'); //only obj fields
+        ...priceFilter,
+        ...ratingFilter
+    }).populate('seller', 'seller.name seller.logo').sort(sortOrder); //only obj fields
     res.send(products);
 }));
 

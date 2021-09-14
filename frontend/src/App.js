@@ -157,6 +157,7 @@ function App() {
           <Route exact path="/search/name/:name?" component={SearchScreen} />
           <Route exact path="/search/category/:category" component={SearchScreen} />
           <Route exact path="/search/category/:category/name/:name" component={SearchScreen} />
+          <Route exact path="/search/category/:category/name/:name/min/:min/max/:max/rating/:rating/order/:order" component={SearchScreen} />
           <PrivateRoute path="/profile" component={ProfileScreen} />
           <AdminRoute exact path="/productlist" component={ProductListScreen} />
           <AdminRoute exact path="/orderlist" component={OrderListScreen} />

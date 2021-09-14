@@ -303,6 +303,16 @@ img.large {
   border-right: none;
   margin-left: 0.4rem;
 }
+.active {
+  font-weight: bold;
+  color: var(--alert-color);
+}
+.s-box{
+  margin-top: 5px;
+  width: 18rem;
+  font-size: 14px;
+  padding: 3px;
+}
 /* Aside */
 aside {
   position: fixed;
@@ -355,6 +365,16 @@ button.close-sidebar {
 @media (min-width: 992px) {
   .search input {
     width: 45rem;
+  }
+}
+@media (max-width: 1050px) {
+  .c-2 {
+    flex: 2 1 50rem;
+  }
+}
+@media (max-width: 800px) {
+  .c-1 {
+    flex: 1 1 25rem;
   }
 }
 /* 
