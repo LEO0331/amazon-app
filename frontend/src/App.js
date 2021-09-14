@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 //https://stackoverflow.com/questions/50807929/how-does-react-router-works-and-what-is-the-difference-between-link-androute/50808647
 import {BrowserRouter, Link, Route} from "react-router-dom"; //https://github.com/reactjs/react-router-tutorial/tree/master/lessons
 import HomeScreen from './screens/HomeScreen';
@@ -25,22 +25,32 @@ import SellerRoute from './components/SellerRoute';
 import SellerScreen from './screens/SellerScreen';
 import SearchBox from './components/SearchBox';
 import SearchScreen from './screens/SearchScreen';
+import { listProductCategories } from './actions/productActions';
+import LoadingBox from './components/LoadingBox';
+import MessageBox from './components/MessageBox';
 
 function App() {
   const cart = useSelector(state => state.cart);
   const { cartItems } = cart;
   const userSignin = useSelector(state => state.userSignin);
   const { userInfo } = userSignin;
+  const productCategoryList = useSelector(state => state.productCategoryList);
+  const { loading: loadingCategories, error: errorCategories, categories } = productCategoryList;
+  const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
   const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(listProductCategories());
+  }, [dispatch]);
   const signoutHandler = () => {
     dispatch(signout());
   };
-
-  return (
+  //history is the prop of react-router-dom obj: https://reactrouter.com/web/api/history
+  return ( //https://reactrouter.com/web/api/Route/render-func
     <BrowserRouter>
       <div className="grid-container">
         <header className="row">
           <div>
+            <button type="button" className="open-sidebar" onClick={() => setSidebarIsOpen(true)}><i className="fa fa-bars"></i></button>
             <Link className="brand" to="/">amazona</Link>
           </div>
           <div>
@@ -106,6 +116,31 @@ function App() {
             )}
           </div>
         </header>
+        <aside className={sidebarIsOpen ? 'open' : ''}>
+          <ul className="categories">
+            <li>
+              <strong>Categories</strong>
+              <button
+                onClick={() => setSidebarIsOpen(false)}
+                className="close-sidebar"
+                type="button"
+              >
+                <i className="fa fa-close"></i>
+              </button>
+            </li>
+            {loadingCategories ? (
+              <LoadingBox />
+            ) : errorCategories ? (
+              <MessageBox variant="danger">{errorCategories}</MessageBox>
+            ) : (
+              categories.map(c => (
+                <li key={c}>
+                  <Link to={`/search/category/${c}`} onClick={() => setSidebarIsOpen(false)}>{c}</Link>
+                </li>
+              ))
+            )}
+          </ul>
+        </aside>
         <main>
           <Route exact path="/" component={HomeScreen} />
           <Route exact path="/product/:id" component={ProductScreen} />
@@ -120,6 +155,8 @@ function App() {
           <Route path="/orderhistory" component={OrderHistoryScreen} />
           <Route path="/seller/:id" component={SellerScreen} />
           <Route exact path="/search/name/:name?" component={SearchScreen} />
+          <Route exact path="/search/category/:category" component={SearchScreen} />
+          <Route exact path="/search/category/:category/name/:name" component={SearchScreen} />
           <PrivateRoute path="/profile" component={ProfileScreen} />
           <AdminRoute exact path="/productlist" component={ProductListScreen} />
           <AdminRoute exact path="/orderlist" component={OrderListScreen} />

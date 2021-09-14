@@ -9,9 +9,22 @@ const productRouter = express.Router();
 //https://www.geeksforgeeks.org/mongoose-find-function/
 productRouter.get('/', expressAsyncHandler(async (req, res) => { //add to the end: /api/products/ -> exact api frontend send to
     const seller = req.query.seller || '';
+    const name = req.query.name || '';
+    const category = req.query.category || '';
     const sellerFilter = seller ? { seller } : {}; //{}: all products; get from '/seed' and post('/')
-    const products = await Product.find({...sellerFilter}).populate('seller', 'seller.name seller.logo'); //only obj fields
+    const nameFilter = name ? { name: { $regex: name, $options: 'i' } } : {}; //contained check: https://docs.mongodb.com/manual/reference/operator/query/regex/
+    const categoryFilter = category ? { category } : {};
+    const products = await Product.find({
+        ...sellerFilter,
+        ...nameFilter,
+        ...categoryFilter,
+    }).populate('seller', 'seller.name seller.logo'); //only obj fields
     res.send(products);
+}));
+
+productRouter.get('/categories', expressAsyncHandler(async (req, res) => {
+    const categories = await Product.find().distinct('category'); //Return Distinct Values for a Field
+    res.send(categories);
 }));
 
 productRouter.get('/seed', expressAsyncHandler(async (req, res) => { //products showing on the homeScreen

@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
-
 :root {
   --primary-color: #192735;
   --secondary-color: #f17d08;
@@ -20,7 +18,7 @@ body {
   margin: 0;
   height: 100vh;
   font-size: 1.6rem;
-  font-family: 'Open Sans', sans-serif;
+  font-family: Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* width: 100% */
@@ -53,10 +51,15 @@ footer {
 h1 {
   font-size: 1.8rem; /* 18px */
   padding: 1rem 0;
+  font-weight: bold;
 }
 h2 {
   font-size: 1.6rem; /* 16px */
   padding: 1rem 0;
+  font-weight: bolder;
+}
+h3{
+  font-weight: 900;
 }
 a {
   text-decoration: none;
@@ -295,11 +298,48 @@ img.large {
   margin-right: 0.4rem;
 }
 .search input {
-  width: 25rem;
+  width: 20rem;
   border-radius: 0.6rem 0 0 0.6rem;
   border-right: none;
   margin-left: 0.4rem;
 }
+/* Aside */
+aside {
+  position: fixed;
+  width: 20rem;
+  height: 100%;
+  background-color: var(--bg-color);
+  z-index: 10;
+  transform: translateX(-20rem);
+  transition: all 0.3s;
+}
+aside.open {
+  transform: translateX(0);
+}
+button.open-sidebar {
+  font-size: 2.8rem;
+  padding: 0.2rem 0.5rem;
+  margin: 0 0.5rem;
+  background: none;
+  color: var(--white-color);
+  cursor: pointer;
+}
+button.open-sidebar:hover {
+  border-color: var(--white-color);
+}
+aside ul {
+  padding: 0;
+  list-style: none;
+}
+aside li {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+}
+button.close-sidebar {
+  padding: 0.3rem 0.8rem;
+}
+
 /* Break Points */
 @media (max-width: 768px){
   .grid-container{
@@ -312,7 +352,11 @@ img.large {
     left: 0;
   }
 }
-
+@media (min-width: 992px) {
+  .search input {
+    width: 45rem;
+  }
+}
 /* 
 @media (max-width: 576px){
   .grid-container{
