@@ -106,6 +106,19 @@ button.block { /* full width */
 button.small {
   font-size: 1.2rem;
 }
+button.modal{
+  background-color: transparent;
+  border: transparent;
+  text-decoration: underline;
+}
+.modal-style{
+  display: flex;
+  margin: 0 auto;
+  margin-top: 5%;
+  width: 450px; 
+  background-color: var(--white-color);
+  border: 0.1rem var(--black-color) solid;
+}
 /* Header */
 header a {
   color: var(--white-color);
@@ -154,6 +167,9 @@ a.brand {
 .p-1 {
   padding: 0.9rem;
 }
+.f-12{
+  font-size: 12px;
+}
 /* Image */
 img {
   border-radius: 0.5rem;
@@ -184,6 +200,12 @@ img.large {
 }
 .price {
   font-size: 2rem;
+}
+.review{
+  border: 0.1rem var(--border-color) solid;
+  border-radius: 0.4rem;
+  margin: 1rem;
+  padding: 0.5rem;
 }
 /* Rating */
 .rating span {
@@ -349,7 +371,10 @@ aside li {
 button.close-sidebar {
   padding: 0.3rem 0.8rem;
 }
-
+.close-btn{
+  padding: 0.3rem 0.8rem;
+  background-color: transparent;
+}
 /* Break Points */
 @media (max-width: 768px){
   .grid-container{

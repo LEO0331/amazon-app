@@ -2,7 +2,7 @@ import express from 'express';
 import expressAsyncHandler from 'express-async-handler'; //try-catch
 import data from '../data.js';
 import Product from '../models/productModel.js';
-//import User from '../models/userModel.js';
+import User from '../models/userModel.js';
 import { isAdmin, isAdminOrSeller, isAuth } from '../utils.js';
 
 const productRouter = express.Router();
@@ -108,6 +108,29 @@ productRouter.delete('/:id', isAuth, isAdmin, expressAsyncHandler(async (req, re
     }
 }));
 
-
+productRouter.post('/:id/reviews', isAuth, expressAsyncHandler(async (req, res) => {
+    const productId = req.params.id;
+    const product = await Product.findById(productId);
+    if (product) {
+        if (product.reviews.find(n => n.name === req.user.name)){
+            return res.status(404).send({ message: 'You have already submitted a review' });
+        }
+        const review = {
+            name: req.user.name,
+            rating: Number(req.body.rating),
+            comment: req.body.comment,
+        };
+        product.reviews.push(review); //array end
+        product.numReviews = product.reviews.length;
+        product.rating = product.reviews.reduce((a, c) => c.rating + a, 0) / product.reviews.length;
+        const updatedProduct = await product.save();
+        res.status(201).send({
+            message: 'Review Created',
+            review: updatedProduct.reviews[updatedProduct.reviews.length - 1] //array end
+        });
+    } else {
+        res.status(404).send({ message: 'Product Not Found' });
+    }
+}));
 
 export default productRouter;

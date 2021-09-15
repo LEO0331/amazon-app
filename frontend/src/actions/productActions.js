@@ -17,7 +17,10 @@ import {
     PRODUCT_DELETE_FAIL,
     PRODUCT_CATEGORY_LIST_REQUEST,
     PRODUCT_CATEGORY_LIST_SUCCESS,
-    PRODUCT_CATEGORY_LIST_FAIL
+    PRODUCT_CATEGORY_LIST_FAIL,
+    PRODUCT_REVIEW_CREATE_REQUEST,
+    PRODUCT_REVIEW_CREATE_SUCCESS,
+    PRODUCT_REVIEW_CREATE_FAIL
 } from '../constants/productConstants';
 
 export const listProducts = ({seller = '', name = '', category = '', order = '', min = 0, max = 0, rating = 0}) => async (dispatch) => {
@@ -71,7 +74,7 @@ export const createProduct = () => async (dispatch, getState) => {
                 : error.message,
         });
     }
-}
+};
 
 export const updateProduct = (product) => async (dispatch, getState) => {
     dispatch({type: PRODUCT_UPDATE_REQUEST, payload: product});
@@ -89,7 +92,7 @@ export const updateProduct = (product) => async (dispatch, getState) => {
                 : error.message,
         });
     }
-}
+};
 
 export const deleteProduct = (productId) => async (dispatch, getState) => {
     dispatch({type: PRODUCT_DELETE_REQUEST, payload: productId});
@@ -107,5 +110,22 @@ export const deleteProduct = (productId) => async (dispatch, getState) => {
                 : error.message,
         });
     }
-}
+};
 
+export const createReview = (productId, review) => async (dispatch, getState) => {
+    dispatch({type: PRODUCT_REVIEW_CREATE_REQUEST});
+    const {userSignin: { userInfo }} = getState(); //userInfo token
+    try {
+        const {data} = await axios.post(`/api/products/${productId}/reviews`, review, { //empty obj cuz no data as second param payload, auto create sample data in backend
+            headers: { Authorization: `Bearer ${userInfo.token}` }
+        }); 
+        dispatch({type: PRODUCT_REVIEW_CREATE_SUCCESS, payload: data.product}); //new createdProduct
+    } catch (error) {
+        dispatch({
+            type: PRODUCT_REVIEW_CREATE_FAIL,
+            payload: error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message,
+        });
+    }
+};

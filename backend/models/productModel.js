@@ -2,6 +2,17 @@
 //https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/
 import mongoose from 'mongoose';
 
+const reviewSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    comment: { type: String, required: true },
+    rating: { type: Number, required: true },
+  },
+  {
+    timestamps: true,
+  }
+);
+
 const productSchema = new mongoose.Schema(
   {
     name: {type: String, required: true, unique: true}, //no duplicate
@@ -14,7 +25,7 @@ const productSchema = new mongoose.Schema(
     countInStock: {type: Number, required: true},
     rating: {type: Number, required: true},
     numReviews: {type: Number, required: true},
-    //reviews: [reviewSchema]
+    reviews: [reviewSchema]
   },
   {
     timestamps: true,
