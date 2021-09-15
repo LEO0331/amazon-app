@@ -45,8 +45,14 @@ productRouter.get('/categories', expressAsyncHandler(async (req, res) => {
 productRouter.get('/seed', expressAsyncHandler(async (req, res) => { //products showing on the homeScreen
     //await Product.remove({});
     //https://www.geeksforgeeks.org/mongoose-insertmany-function/
-    const createdProducts = await Product.insertMany(data.products); //insertMany() function is used to insert multiple documents into a collection. It accepts an array of documents to insert into the collection.
-    res.send({ createdProducts }); //{[{p1},{p2}]}; can be reach from get('/')
+    const seller = await User.findOne({ isSeller: true });
+    if (seller) { //all products have sellers
+        const products = data.products.map(product => ({...product, seller: seller._id,}));
+        const createdProducts = await Product.insertMany(products); //insertMany() function is used to insert multiple documents into a collection. It accepts an array of documents to insert into the collection.
+        res.send({ createdProducts }); //{[{p1},{p2}]}; can be reach from get('/')
+    } else {
+        res.status(500).send({ message: 'No seller found. Please first run /api/users/seed' });
+    }
 }));
 //put at the end to avoid get '/seed' as id; https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes
 productRouter.get('/:id', expressAsyncHandler(async (req, res) => { //product details api

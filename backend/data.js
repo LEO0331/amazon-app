@@ -7,7 +7,14 @@ const data = {
       email: 'admin@gmail.com',
       password: bcrypt.hashSync('1234', 8), //Auto-gen a salt and hash: const hash = bcrypt.hashSync(myPlaintextPassword, saltRounds);
       isAdmin: true,
-      
+      isSeller: true,
+      seller: {
+        name: 'Puma',
+        logo: '/images/logo1.png',
+        description: 'best seller',
+        rating: 4.5,
+        numReviews: 120,
+      },
     },
     {
       name: 'David',
