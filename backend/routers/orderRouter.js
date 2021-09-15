@@ -1,12 +1,9 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import Order from '../models/orderModel.js';
-import User from '../models/userModel.js';
-import Product from '../models/productModel.js';
-import { isAdmin, isAuth, isAdminOrSeller,
-    //mailgun,
-    //payOrderEmailTemplate,
-} from '../utils.js';
+//import User from '../models/userModel.js';
+//import Product from '../models/productModel.js';
+import { isAdmin, isAuth, isAdminOrSeller, mailgun, payOrderEmailTemplate} from '../utils.js';
 import Stripe from 'stripe'; //https://www.npmjs.com/package/stripe
 
 const orderRouter = express.Router();
@@ -53,7 +50,7 @@ orderRouter.get('/:id', isAuth, expressAsyncHandler(async (req, res) => {
 }));
 
 orderRouter.put('/:id/pay', isAuth, expressAsyncHandler(async (req, res) => { //update status of order
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id).populate('user', 'email name');
     if (order){
         order.isPaid = true;
         order.paidAt = Date.now();
@@ -64,6 +61,18 @@ orderRouter.put('/:id/pay', isAuth, expressAsyncHandler(async (req, res) => { //
             email_address: req.body.email_address
         };
         const updatedOrder = await order.save();
+        mailgun().messages().send({ //https://help.mailgun.com/hc/en-us/articles/203637190-How-Do-I-Add-or-Delete-a-Domain-
+            from: 'Amazona <amazona@mg.yourdomain.com>',
+            to: `${order.user.name} <${order.user.email}>`,
+            subject: `New order ${order._id}`,
+            html: payOrderEmailTemplate(order) //content in email body
+        }, (error, body) => {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log(body);
+            }
+        });
         res.send({ message: 'Order Paid', order: updatedOrder });
     } else {
         res.status(404).send({ message: 'Order Not Found' });
