@@ -11,8 +11,7 @@ import path from 'path';
 dotenv.config();
 
 const app = express(); //route handler
-//middlewares: legacy body-parser
-app.use(express.json());
+app.use(express.json()); //middlewares: legacy body-parser
 app.use(express.urlencoded({extended: true}));
 
 mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/Ecommerce'); //Mongoose 6.0 behaves as if useNewUrlParser, useUnifiedTopology, and useCreateIndex are true
