@@ -8,10 +8,11 @@ import MessageBox from '../components/MessageBox';
 
 function ProductListScreen(props) {
     const sellerMode = props.match.path.indexOf('/seller') >= 0; // path=/productlist/seller -- T/F
+    const { pageNumber = 1 } = useParams();
     const userSignin = useSelector(state => state.userSignin);
     const { userInfo } = userSignin;
     const productList = useSelector(state => state.productList);
-    const { loading, error, products } = productList;
+    const { loading, error, products, page, pages } = productList;
     const productCreate = useSelector(state => state.productCreate);
     const { loading: loadingCreate, error: errorCreate, success: successCreate, product: createdProduct } = productCreate;
     const productDelete = useSelector(state => state.productDelete);
@@ -25,8 +26,8 @@ function ProductListScreen(props) {
         if (successDelete) {
             dispatch({ type: PRODUCT_DELETE_RESET });
         }
-        dispatch(listProducts({seller: sellerMode ? userInfo._id : ''})); //add new smaple products to generate sellerID and add it to existing products
-    }, [createdProduct, dispatch, props.history, successCreate, successDelete, sellerMode, userInfo._id]);
+        dispatch(listProducts({seller: sellerMode ? userInfo._id : '', pageNumber})); //add new smaple products to generate sellerID and add it to existing products
+    }, [createdProduct, dispatch, props.history, successCreate, successDelete, sellerMode, userInfo._id, pageNumber]);
     const createHandler = () => {
         dispatch(createProduct());
     };
@@ -78,6 +79,13 @@ function ProductListScreen(props) {
                             ))}
                         </tbody>
                     </table>
+                    <div className="row center pagination">
+                        {[...Array(pages).keys()].map(x => ( //convert pages to link; similar format as Qty in productScreen
+                            <Link className={x + 1 === page ? 'active' : ''} key={x + 1} to={`/productlist/pageNumber/${x + 1}`}>
+                                {x + 1}
+                            </Link>
+                        ))}
+                    </div>
                 </>
             )}
         </div>

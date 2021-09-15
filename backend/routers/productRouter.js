@@ -8,6 +8,8 @@ import { isAdmin, isAdminOrSeller, isAuth } from '../utils.js';
 const productRouter = express.Router();
 //https://www.geeksforgeeks.org/mongoose-find-function/
 productRouter.get('/', expressAsyncHandler(async (req, res) => { //add to the end: /api/products/ -> exact api frontend send to
+    const pageSize = 3;
+    const page = Number(req.query.pageNumber) || 1;
     const seller = req.query.seller || '';
     const name = req.query.name || '';
     const category = req.query.category || '';
@@ -27,14 +29,21 @@ productRouter.get('/', expressAsyncHandler(async (req, res) => { //add to the en
         : order === 'toprated'
         ? { rating: -1 }
         : { _id: -1 }; //newest
+    const count = await Product.count({
+        ...sellerFilter,
+        ...nameFilter,
+        ...categoryFilter,
+        ...priceFilter,
+        ...ratingFilter,
+    });
     const products = await Product.find({
         ...sellerFilter,
         ...nameFilter,
         ...categoryFilter,
         ...priceFilter,
         ...ratingFilter
-    }).populate('seller', 'seller.name seller.logo').sort(sortOrder); //only obj fields
-    res.send(products);
+    }).populate('seller', 'seller.name seller.logo').sort(sortOrder).skip(pageSize * (page - 1)).limit(pageSize); //only obj fields
+    res.send({products, page, pages: Math.ceil(count / pageSize)}); //https://stackoverflow.com/questions/5539955/how-to-paginate-with-mongoose-in-node-js
 }));
 
 productRouter.get('/categories', expressAsyncHandler(async (req, res) => {

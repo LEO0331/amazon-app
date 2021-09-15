@@ -23,10 +23,10 @@ import {
     PRODUCT_REVIEW_CREATE_FAIL
 } from '../constants/productConstants';
 
-export const listProducts = ({seller = '', name = '', category = '', order = '', min = 0, max = 0, rating = 0}) => async (dispatch) => {
+export const listProducts = ({pageNumber = '', seller = '', name = '', category = '', order = '', min = 0, max = 0, rating = 0}) => async (dispatch) => {
     dispatch({type: PRODUCT_LIST_REQUEST});
     try {
-        const {data} = await axios.get(`/api/products?seller=${seller}&name=${name}&category=${category}&min=${min}&max=${max}&rating=${rating}&order=${order}`); //get products from backend through db
+        const {data} = await axios.get(`/api/products?pageNumber=${pageNumber}&seller=${seller}&name=${name}&category=${category}&min=${min}&max=${max}&rating=${rating}&order=${order}`); //get products from backend through db
         dispatch({type: PRODUCT_LIST_SUCCESS, payload: data}) //dispatch actions: change the state of redux and update homescreen showing products
     } catch (error) {
         dispatch({type: PRODUCT_LIST_FAIL, payload: error.message});

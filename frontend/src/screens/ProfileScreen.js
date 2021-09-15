@@ -34,7 +34,7 @@ function ProfileScreen() {
             }
         }
     }, [dispatch, userInfo._id, user]);
-    const submitHandler = (e) => { //update pw
+    const submitHandler = e => { //update pw
         e.preventDefault();
         if (password !== confirmPassword){
             alert('Password not match');
