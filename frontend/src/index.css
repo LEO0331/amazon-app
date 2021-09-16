@@ -440,6 +440,77 @@ button.close-sidebar {
 .summary-title.color3 {
   background-color: var(--title3-color);
 }
+/* Chatbox */
+.chatbox {
+  color: var(--black-color);
+  position: fixed;
+  right: 0.9rem;
+  bottom: 0.9rem;
+}
+.chatbox ul {
+  overflow: scroll;
+  max-height: 20rem;
+}
+.chatbox li {
+  margin-bottom: 1rem;
+}
+.chatbox input {
+  width: calc(100% - 9rem);
+}
+.support-users {
+  background: var(--bg-color);
+  height: 100%;
+}
+.support-users li {
+  background-color: var(--bg-color);
+}
+.support-users button {
+  background-color: transparent;
+  border: none;
+  text-align: left;
+}
+.support-users li {
+  margin: 0;
+  background-color: var(--bg-color);
+  border-bottom: 0.1rem var(--border-color) solid;
+}
+.support-users li:hover {
+  background-color: var(--border-color);
+}
+.support-users li.selected {
+  background-color: var(--border-color);
+}
+.support-messages {
+  padding: 1rem;
+}
+.support-messages input {
+  width: calc(100% - 9rem);
+}
+.support-messages ul {
+  height: calc(100vh - 18rem);
+  max-height: calc(100vh - 18rem);
+  overflow: scroll;
+}
+.support-messages li {
+  margin-bottom: 1rem;
+}
+.support-users span {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  position: absolute;
+  margin-left: -25px;
+  margin-top: 10px;
+}
+.support-users .offline {
+  background-color: var(--border-color);
+}
+.support-users .online {
+  background-color: var(--success-color);
+}
+.support-users .unread {
+  background-color: var(--alert-color);
+}
 /* Break Points */
 @media (max-width: 768px){
   .grid-container{

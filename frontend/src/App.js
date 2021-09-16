@@ -30,6 +30,8 @@ import LoadingBox from './components/LoadingBox';
 import MessageBox from './components/MessageBox';
 import MapScreen from './screens/MapScreen';
 import DashboardScreen from './screens/DashboardScreen';
+import SupportScreen from './screens/SupportScreen';
+import ChatBox from './components/ChatBox';
 
 function App() {
   const cart = useSelector(state => state.cart);
@@ -113,6 +115,9 @@ function App() {
                   <li>
                     <Link to="/userlist">Users</Link>
                   </li>
+                  <li>
+                    <Link to="/support">Support</Link>
+                  </li>
                 </ul>
               </div>
             )}
@@ -168,11 +173,13 @@ function App() {
           <AdminRoute path="/user/:id/edit" component={UserEditScreen} />
           <AdminRoute exact path="/productlist/pageNumber/:pageNumber" component={ProductListScreen} />
           <AdminRoute path="/dashboard" component={DashboardScreen} />
+          <AdminRoute path="/support" component={SupportScreen} />
           <SellerRoute path="/productlist/seller" component={ProductListScreen} />
           <SellerRoute path="/orderlist/seller" component={OrderListScreen} />
         </main>
         <footer className="row center">
-          <p className="lead">Copyright &copy; 2021 Amazona</p>
+          {userInfo && !userInfo.isAdmin && <ChatBox userInfo={userInfo} />}
+          <p className="lead">All right reserved. Copyright &copy; 2021 Amazona</p>
         </footer>
       </div>
     </BrowserRouter>
