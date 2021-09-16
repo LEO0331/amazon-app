@@ -52,7 +52,7 @@ productRouter.get('/categories', expressAsyncHandler(async (req, res) => {
 }));
 
 productRouter.get('/seed', expressAsyncHandler(async (req, res) => { //products showing on the homeScreen
-    //await Product.remove({});
+    await Product.remove({});
     //https://www.geeksforgeeks.org/mongoose-insertmany-function/
     const seller = await User.findOne({ isSeller: true });
     if (seller) { //all products have sellers
