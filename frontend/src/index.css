@@ -538,6 +538,11 @@ button.close-sidebar {
     flex: 1 1 25rem;
   }
 }
+@media (max-width: 376px){ /* SE */
+  .grid-container{
+    grid-template-rows: 13rem 1fr 5rem;
+  }
+}
 /* 
 @media (max-width: 576px){
   .grid-container{

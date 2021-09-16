@@ -55,7 +55,7 @@ function App() {
         <header className="row">
           <div>
             <button type="button" className="open-sidebar" onClick={() => setSidebarIsOpen(true)}><i className="fa fa-bars"></i></button>
-            <Link className="brand" to="/">amazona</Link>
+            <Link className="brand" to="/">EShop</Link>
           </div>
           <div>
             <Route render={({ history }) => (<SearchBox history={history} />)}/>
@@ -179,7 +179,7 @@ function App() {
         </main>
         <footer className="row center">
           {userInfo && !userInfo.isAdmin && <ChatBox userInfo={userInfo} />}
-          <p className="lead">All right reserved. Copyright &copy; 2021 Amazona</p>
+          <p className="lead">All right reserved. Copyright &copy; 2021 EShop</p>
         </footer>
       </div>
     </BrowserRouter>

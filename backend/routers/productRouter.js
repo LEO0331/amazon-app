@@ -8,7 +8,7 @@ import { isAdmin, isAdminOrSeller, isAuth } from '../utils.js';
 const productRouter = express.Router();
 //https://www.geeksforgeeks.org/mongoose-find-function/
 productRouter.get('/', expressAsyncHandler(async (req, res) => { //add to the end: /api/products/ -> exact api frontend send to
-    const pageSize = 3;
+    const pageSize = 8; //contain ? products in a page
     const page = Number(req.query.pageNumber) || 1;
     const seller = req.query.seller || '';
     const name = req.query.name || '';

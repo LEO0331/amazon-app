@@ -18,9 +18,23 @@ const data = {
     },
     {
       name: 'David',
-      email: 'user@gmail.com',
-      password: bcrypt.hashSync('4321', 8),
+      email: 'user1@gmail.com',
+      password: bcrypt.hashSync('1234', 8),
       isAdmin: false,
+    },
+    {
+      name: 'Steve',
+      email: 'user2@gmail.com',
+      password: bcrypt.hashSync('1234', 8),
+      isAdmin: false,
+      isSeller: true,
+      seller: {
+        name: 'Lee',
+        logo: '/images/logo2.png',
+        description: 'great seller',
+        rating: 4.5,
+        numReviews: 100,
+      },
     },
   ],
   //id should be auto assigned 

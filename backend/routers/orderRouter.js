@@ -4,7 +4,6 @@ import Order from '../models/orderModel.js';
 import User from '../models/userModel.js';
 import Product from '../models/productModel.js';
 import { isAdmin, isAuth, isAdminOrSeller, mailgun, payOrderEmailTemplate} from '../utils.js';
-import Stripe from 'stripe'; //https://www.npmjs.com/package/stripe
 
 const orderRouter = express.Router();
 
@@ -140,7 +139,9 @@ orderRouter.put('/:id/deliver', isAuth, isAdmin, expressAsyncHandler(async (req,
     }
 }));
 
-//https://stripe.com/docs/payments/integration-builder?client=react
+/*
+https://stripe.com/docs/payments/integration-builder?client=react
+import Stripe from 'stripe'; //https://www.npmjs.com/package/stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 orderRouter.post('/secret/:id', isAuth, expressAsyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id);
@@ -163,5 +164,5 @@ orderRouter.post('/secret/:id', isAuth, expressAsyncHandler(async (req, res) => 
         res.status(404).send({ message: 'Order Not Found' });
     }
 }));
-
+*/
 export default orderRouter;
