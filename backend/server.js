@@ -7,6 +7,8 @@ import orderRouter from './routers/orderRouter.js';
 import uploadRouter from './routers/uploadRouter.js';
 import dotenv from 'dotenv'; //https://www.npmjs.com/package/dotenv
 import path from 'path';
+import http from 'http'; //inbuilt node
+import { Server } from 'socket.io'; //https://socket.io/
 
 dotenv.config();
 
@@ -37,8 +39,76 @@ app.use((err, req, res, next) => { //error catcher middleware
 });
   
 const PORT = process.env.PORT || 5000; //logical OR: when expr1 is falsy, return expr2
-app.listen(PORT); //`http://localhost:${PORT}`
-
+const httpServer = http.Server(app); //https://www.npmjs.com/package/socket.io
+const io = new Server(httpServer, { cors: { origin: '*' } });
+const users = [];
+io.on('connection', (socket) => {
+	console.log('connection', socket.id);
+	socket.on('disconnect', () => { //close the browser
+		const user = users.find(x => x.socketId === socket.id);
+		if (user) {
+			user.online = false;
+			console.log('Offline', user.name);
+			const admin = users.find(x => x.isAdmin && x.online);
+			if (admin) {
+				io.to(admin.socketId).emit('updateUser', user); //pass userInfo to admin
+			}
+		}
+	});
+	socket.on('onLogin', (user) => { //new user
+		const updatedUser = {
+			...user,
+			online: true,
+			socketId: socket.id,
+			messages: [],
+		};
+		const existUser = users.find(x => x._id === updatedUser._id);
+		if (existUser) {
+			existUser.socketId = socket.id;
+			existUser.online = true;
+		} else {
+			users.push(updatedUser); //new user
+		}
+		console.log('Online', user.name);
+		const admin = users.find(x => x.isAdmin && x.online);
+		if (admin) {
+			io.to(admin.socketId).emit('updateUser', updatedUser);
+		}
+		if (updatedUser.isAdmin) {
+			io.to(updatedUser.socketId).emit('listUsers', users);
+		}
+	});
+	socket.on('onUserSelected', (user) => {
+		const admin = users.find(x => x.isAdmin && x.online);
+		if (admin) {
+			const existUser = users.find(x => x._id === user._id);
+			io.to(admin.socketId).emit('selectUser', existUser);
+		}
+	});
+	socket.on('onMessage', (message) => { //new message added
+		if (message.isAdmin) {
+			const user = users.find(x => x._id === message._id && x.online);
+			if (user) {
+				io.to(user.socketId).emit('message', message);
+				user.messages.push(message); //history
+			}
+		} else {
+			const admin = users.find(x => x.isAdmin && x.online);
+			if (admin) {
+				io.to(admin.socketId).emit('message', message);
+				const user = users.find(x => x._id === message._id && x.online);
+				user.messages.push(message);
+			} else {
+				io.to(socket.id).emit('message', {
+					name: 'Admin',
+					body: 'Sorry. I am not online right now. Please contact me later.',
+				});
+			}
+		}
+	});
+});
+httpServer.listen(PORT);
+//app.listen(PORT); //`http://localhost:${PORT}`
 /* express 3, static data
 app.get('/api/products', (req, res) => { 
     res.send(data.products);
