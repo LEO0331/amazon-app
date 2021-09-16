@@ -1,8 +1,8 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import Order from '../models/orderModel.js';
-//import User from '../models/userModel.js';
-//import Product from '../models/productModel.js';
+import User from '../models/userModel.js';
+import Product from '../models/productModel.js';
 import { isAdmin, isAuth, isAdminOrSeller, mailgun, payOrderEmailTemplate} from '../utils.js';
 import Stripe from 'stripe'; //https://www.npmjs.com/package/stripe
 
@@ -13,6 +13,45 @@ orderRouter.get('/', isAuth, isAdminOrSeller, expressAsyncHandler(async (req, re
     const sellerFilter = seller ? { seller } : {};
     const orders = await Order.find({...sellerFilter}).populate('user', 'name'); //https://mongoosejs.com/docs/populate.html#population
     res.send(orders);
+}));
+
+orderRouter.get('/summary', isAuth, isAdmin, expressAsyncHandler(async (req, res) => {
+    const orders = await Order.aggregate([ //https://mongoosejs.com/docs/api/aggregate.html#aggregate_Aggregate
+        {
+            $group: { //https://docs.mongodb.com/manual/reference/operator/aggregation/group/
+                _id: null, //null: accumulated values for all the input documents as a whole
+                numOrders: { $sum: 1 }, //https://docs.mongodb.com/manual/reference/operator/aggregation/sum/#mongodb-group-grp.-sum
+                totalSales: { $sum: '$totalPrice' } //all values in totalPrice
+            }
+        }
+    ]);
+    const users = await User.aggregate([ //summary.users[0].numUsers in dashboard screen
+        {
+            $group: {
+                _id: null,
+                numUsers: { $sum: 1 }
+            }
+        }
+    ]);
+    const dailyOrders = await Order.aggregate([
+        {
+            $group: { //https://docs.mongodb.com/manual/reference/operator/aggregation/dateToString/
+                _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+                orders: { $sum: 1 },
+                sales: { $sum: '$totalPrice' }
+            }
+        },
+        { $sort: { _id: 1 } }
+    ]);
+    const productCategories = await Product.aggregate([
+        {
+            $group: {
+                _id: '$category',
+                count: { $sum: 1 }
+            }
+        }
+    ]);
+    res.send({ users, orders, dailyOrders, productCategories });
 }));
 
 orderRouter.post('/', isAuth, expressAsyncHandler(async (req, res) => {

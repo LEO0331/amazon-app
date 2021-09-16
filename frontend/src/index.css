@@ -8,6 +8,9 @@
   --alert-color: #b31818;
   --bg-color: #e7e7e7;
   --border-color: #b9b9b9;
+  --title1-color: #f0e0e0;
+  --title2-color: #e0f0e0;
+  --title3-color: #e0e0f0;
 }
 html {
   font-size: 62.5%; /* 16px x 62.5 = 10px = 1rem */
@@ -411,6 +414,31 @@ button.close-sidebar {
 }
 .pagination a.active {
   font-weight: bold;
+}
+/* Dashboard */
+.summary > li {
+  border: 0.1rem var(--border-color) solid;
+  margin: 1.8rem;
+  border-radius: 0.4rem;
+  flex: 1 1 20rem;
+}
+.summary-title {
+  font-size: 2rem;
+  padding: 1rem;
+}
+.summary-body {
+  font-size: 4rem;
+  padding: 1rem;
+  text-align: center;
+}
+.summary-title.color1 {
+  background-color: var(--title1-color);
+}
+.summary-title.color2 {
+  background-color: var(--title2-color);
+}
+.summary-title.color3 {
+  background-color: var(--title3-color);
 }
 /* Break Points */
 @media (max-width: 768px){
