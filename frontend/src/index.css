@@ -444,25 +444,25 @@ button.close-sidebar {
 .chatbox {
   color: var(--black-color);
   position: fixed;
-  right: 0.9rem;
-  bottom: 0.9rem;
+  right: 1rem;
+  bottom: 0.5rem;
 }
 .chatbox ul {
   overflow: scroll;
   max-height: 20rem;
 }
 .chatbox li {
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
 }
 .chatbox input {
   width: calc(100% - 9rem);
 }
 .support-users {
-  background: var(--bg-color);
+  background: var(--border-color);
   height: 100%;
 }
 .support-users li {
-  background-color: var(--bg-color);
+  background-color: var(--border-color);
 }
 .support-users button {
   background-color: transparent;
@@ -471,7 +471,7 @@ button.close-sidebar {
 }
 .support-users li {
   margin: 0;
-  background-color: var(--bg-color);
+  background-color: var(--border-color);
   border-bottom: 0.1rem var(--border-color) solid;
 }
 .support-users li:hover {
