@@ -35,6 +35,4 @@ $ npm start
 - Returns admin/seller/customer email and password
 - Run on chrome: http://localhost:5000/api/products/seed
 - Creates 6 sample products
-```
-Remove **await Product.remove({})** at productRouter.js and **await User.remove({})** at userRouter.js after seeding
-```
+- Remove **await Product.remove({})** at productRouter.js and **await User.remove({})** at userRouter.js after seeding
