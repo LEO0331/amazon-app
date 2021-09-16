@@ -544,14 +544,6 @@ button.close-sidebar {
   }
 }
 /* 
-@media (max-width: 576px){
-  .grid-container{
-    width:576px; 
-  }
-  header {
-    min-width:576px; 
-  }
-}
 .carousel .slide { //in the carousel.min.css
   min-width: 100%;
   margin: 0;
