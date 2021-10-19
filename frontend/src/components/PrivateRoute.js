@@ -11,3 +11,20 @@ function PrivateRoute({ component: Component, ...rest }) { //unauthenticated use
 }
 
 export default PrivateRoute;
+/*
+https://stackoverflow.com/questions/43484302/what-does-rest-mean-in-react-jsx
+const PrivateRoute = ({ component: Component, ...rest }) => ( //XXscreen; rest: path
+  <Route {...rest} render={props => (
+    fakeAuth.isAuthenticated ? (
+      <Component {...props}/>
+    ) : (
+      <Redirect to={{
+        pathname: '/login',
+        state: { from: props.location }
+      }}/>
+    )
+  )}/>
+)
+Operation 1: Find the component property defined on props (Note: lowercase component) and assign it to a new location in state we call Component (Note: capital Component).
+Operation 2: Then, take all remaining properties defined on the props object and collect them inside an argument called rest.
+*/
