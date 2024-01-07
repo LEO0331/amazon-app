@@ -1,8 +1,6 @@
 # ECommerce Website
 ![Eshop](/template/ProfilePic.jpg)
 This is an e-commerce website similar to Amazon using MERN stack (MongoDB, ExpressJS, React and Node.JS).
-## Demo
-Heroku : [https://my-ecommence-app.herokuapp.com/](https://my-ecommence-app.herokuapp.com/)
 ## Run Locally
 ### 1. Clone repo
 ```
