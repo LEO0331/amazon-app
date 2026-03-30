@@ -16,7 +16,16 @@ const app = express(); //route handler
 app.use(express.json()); //middlewares: legacy body-parser
 app.use(express.urlencoded({extended: true}));
 
-mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/Ecommerce'); //Mongoose 6.0 behaves as if useNewUrlParser, useUnifiedTopology, and useCreateIndex are true
+const MONGODB_URL = process.env.MONGODB_URL || 'mongodb://localhost/Ecommerce';
+mongoose
+	.connect(MONGODB_URL)
+	.then(() => {
+		console.log(`MongoDB connected: ${MONGODB_URL}`);
+	})
+	.catch((err) => {
+		console.error('MongoDB connection failed. Start MongoDB or set MONGODB_URL in .env');
+		console.error(err.message);
+	}); //Mongoose 6.0 behaves as if useNewUrlParser, useUnifiedTopology, and useCreateIndex are true
 //using routers in the server
 app.use('/api/users', userRouter); //userRouter(app)
 app.use('/api/products', productRouter);
@@ -107,7 +116,9 @@ io.on('connection', (socket) => {
 		}
 	});
 });
-httpServer.listen(PORT);
+httpServer.listen(PORT, () => {
+	console.log(`Server listening on http://localhost:${PORT}`);
+});
 //app.listen(PORT); //`http://localhost:${PORT}`
 /* express 3, static data
 app.get('/api/products', (req, res) => { 
