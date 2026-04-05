@@ -7,6 +7,7 @@ import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import { PayPalButton } from "react-paypal-button-v2"; //https://www.npmjs.com/package/react-paypal-button-v2
 import { ORDER_DELIVER_RESET, ORDER_PAY_RESET } from '../constants/orderConstants';
+import { resolveAssetUrl } from '../utils';
 
 function OrderScreen(props) { // /order/${order._id} screen
     const [sdkReady, setSdkReady] = useState(false); //Software Development Kit
@@ -100,7 +101,7 @@ function OrderScreen(props) { // /order/${order._id} screen
                                         <li key={item.product}>
                                             <div className="row">
                                                 <div>
-                                                    <img src={item.image} alt={item.name} className="small" />
+                                                    <img src={resolveAssetUrl(item.image)} alt={item.name} className="small" />
                                                 </div>
                                                 <div className="min-30">
                                                     <Link to={`/product/${item.product}`}>{item.name}</Link>

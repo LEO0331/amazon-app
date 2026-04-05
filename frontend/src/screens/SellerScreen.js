@@ -6,6 +6,7 @@ import Products from '../components/Products';
 import Ratings from '../components/Ratings';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
+import { resolveAssetUrl } from '../utils';
 
 function SellerScreen(props){
     const sellerId = props.match.params.id;
@@ -31,7 +32,7 @@ function SellerScreen(props){
                             <li>
                                 <div className="row start">
                                     <div className="p-1">
-                                        <img className="small" src={user.seller.logo} alt={user.seller.name} />
+                                        <img className="small" src={resolveAssetUrl(user.seller.logo)} alt={user.seller.name} />
                                     </div>
                                     <div className="p-1">
                                         <h1>{user.seller.name}</h1>

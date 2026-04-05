@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { listProducts } from '../actions/productActions';
 import { listTopSellers } from '../actions/userActions';
 import { Link } from 'react-router-dom';
+import { resolveAssetUrl } from '../utils';
 
 function HomeScreen() {
   const dispatch = useDispatch();
@@ -33,7 +34,7 @@ function HomeScreen() {
             {sellers.map(seller => (
               <div key={seller._id}>
                 <Link to={`/seller/${seller._id}`}>
-                  <img src={seller.seller.logo} alt={seller.seller.name} />
+                  <img src={resolveAssetUrl(seller.seller.logo)} alt={seller.seller.name} />
                   <p className="legend">{seller.seller.name}</p>
                 </Link>
               </div>

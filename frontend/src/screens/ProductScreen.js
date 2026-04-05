@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from "react-redux";
 import { PRODUCT_REVIEW_CREATE_RESET } from '../constants/productConstants';
 import Modal from 'react-modal';
+import { resolveAssetUrl } from '../utils';
 
 function ProductScreen(props) { //props: path="/product/:id" in <Route>
     const productId = props.match.params.id; //props.match.params.id: user entered in Route path="/product/:id"
@@ -60,7 +61,7 @@ function ProductScreen(props) { //props: path="/product/:id" in <Route>
                 <Link to="/">Back</Link>
                 <div className="row top">
                     <div className="col-2">
-                        <img className="large" src={product.image} alt={product.name}/>
+                        <img className="large" src={resolveAssetUrl(product.image)} alt={product.name}/>
                     </div>
                     <div className="col-1">
                         <ul>

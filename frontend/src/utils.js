@@ -39,3 +39,21 @@ export const prices = [
       max: 1000
     }
 ];
+
+export const resolveAssetUrl = (assetPath) => {
+    if (!assetPath) {
+        return assetPath;
+    }
+
+    if (/^https?:\/\//i.test(assetPath)) {
+        return assetPath;
+    }
+
+    if (assetPath.startsWith('/images/')) {
+        const base = import.meta.env.BASE_URL || '/';
+        const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+        return `${normalizedBase}${assetPath.replace(/^\//, '')}`;
+    }
+
+    return assetPath;
+};

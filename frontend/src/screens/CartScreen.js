@@ -3,6 +3,7 @@ import { addToCart, removeFromCart } from '../actions/cartActions';
 import { useDispatch, useSelector } from 'react-redux';
 import MessageBox from '../components/MessageBox';
 import { Link } from 'react-router-dom';
+import { resolveAssetUrl } from '../utils';
 
 function CartScreen(props) { //path="/cart/:id?"
     const productId = props.match.params.id;
@@ -39,7 +40,7 @@ function CartScreen(props) { //path="/cart/:id?"
                                 <li key={item.product}>
                                     <div className="row">
                                         <div>
-                                            <img src={item.image} alt={item.name} className="small" />
+                                            <img src={resolveAssetUrl(item.image)} alt={item.name} className="small" />
                                         </div>
                                         <div className="min-30">
                                             <Link to={`/product/${item.product}`}>{item.name}</Link>

@@ -6,6 +6,7 @@ import { createOrder } from '../actions/orderActions';
 import { ORDER_CREATE_RESET } from '../constants/orderConstants';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
+import { resolveAssetUrl } from '../utils';
 
 function PlaceOrderScreen(props) {
     const cart = useSelector(state => state.cart);
@@ -59,7 +60,7 @@ function PlaceOrderScreen(props) {
                                         <li key={item.product}>
                                             <div className="row">
                                                 <div>
-                                                    <img src={item.image} alt={item.name} className="small" />
+                                                    <img src={resolveAssetUrl(item.image)} alt={item.name} className="small" />
                                                 </div>
                                                 <div className="min-30">
                                                     <Link to={`/product/${item.product}`}>{item.name}</Link>
