@@ -9,6 +9,8 @@ on:
 
 jobs:
   test-and-build:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,14 +35,17 @@ jobs:
         run: npm run build
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-          VITE_BASE_PATH: /
+          VITE_BASE_PATH: /amazon-app/
 
   deploy-frontend:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: test-and-build
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,13 +65,18 @@ jobs:
         run: npm run build
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-          VITE_BASE_PATH: /
+          VITE_BASE_PATH: /amazon-app/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./frontend/dist
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend/dist
+        uses: actions/deploy-pages@v4
 
   deploy-backend:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
