@@ -31,73 +31,72 @@ function SearchScreen(props) { // /search/name/${name}
         return `/search/category/${filterCategory}/name/${filterName}/min/${filterMin}/max/${filterMax}/rating/${filterRating}/order/${sortOrder}/pageNumber/${filterPage}`;
     };
     return (
-        <div>
-            <div className="row">
+        <div className="search-page">
+            <div className="search-toolbar">
                 {loading ? (
                     <LoadingBox />
                 ) : error ? (
                     <MessageBox variant="danger">{error}</MessageBox>
                 ) : (
-                    <div>
-                        <div>{products.length} Results</div>
-                        <div>
-                            <select className="s-box" value={order} onChange={e => {props.history.push(getFilterUrl({ order: e.target.value }))}}>
+                    <>
+                        <div className="search-results-count">{products.length} Results</div>
+                        <div className="search-sort">
+                            <label htmlFor="sortOrder">Sort By</label>
+                            <select id="sortOrder" className="s-box" value={order} onChange={e => {props.history.push(getFilterUrl({ order: e.target.value }))}}>
                                 <option value="newest">Newest Arrivals</option>
                                 <option value="toprated">Avg. Customer Reviews</option>
                                 <option value="lowest">Price: Low to High</option>
                                 <option value="highest">Price: High to Low</option>
                             </select>
                         </div>
-                    </div>
+                    </>
                 )}
             </div>
-            <div className="row top">
-                <div className="col-1">
-                    <h3>Department</h3>
-                    <div>
+            <div className="search-layout">
+                <div className="search-filters">
+                    <section className="filter-card">
+                        <h3>Department</h3>
                         {loadingCategories ? (
                             <LoadingBox />
                         ) : errorCategories ? (
-                            <MessageBox variant="danger">{error}</MessageBox>
+                            <MessageBox variant="danger">{errorCategories}</MessageBox>
                         ) : (
-                            <ul>
+                            <ul className="filter-list">
                                 <li>
-                                    <Link className={'all' === category ? 'active' : ''} to={getFilterUrl({ category: 'all' })}>Any</Link>
+                                    <Link className={`filter-link ${'all' === category ? 'active' : ''}`} to={getFilterUrl({ category: 'all' })}>Any</Link>
                                 </li>
-                                <li>
-                                    {categories.map(c => ( //side bar shows categories
-                                        <li key={c}>
-                                            <Link className={c === category ? 'active' : ''} to={getFilterUrl({ category: c })}>{c}</Link>
-                                        </li>
-                                    ))}
-                                </li>
+                                {categories.map(c => ( //side bar shows categories
+                                    <li key={c}>
+                                        <Link className={`filter-link ${c === category ? 'active' : ''}`} to={getFilterUrl({ category: c })}>{c}</Link>
+                                    </li>
+                                ))}
                             </ul>
                         )}
-                    </div>
-                    <div>
+                    </section>
+                    <section className="filter-card">
                         <h3>Price</h3>
-                        <ul>
+                        <ul className="filter-list">
                             {prices.map(p => ( //side bar shows prices
                                 <li key={p.name}>
-                                    <Link className={`${p.min}-${p.max}` === `${min}-${max}` ? 'active' : ''} to={getFilterUrl({ min: p.min, max: p.max })}>{p.name}</Link>
+                                    <Link className={`filter-link ${`${p.min}-${p.max}` === `${min}-${max}` ? 'active' : ''}`} to={getFilterUrl({ min: p.min, max: p.max })}>{p.name}</Link>
                                 </li>
                             ))}
                         </ul>
-                    </div>
-                    <div>
+                    </section>
+                    <section className="filter-card">
                         <h3>Avg. Customer Review</h3>
-                        <ul>
+                        <ul className="filter-list">
                             {ratings.map(r => ( //side bar shows reviews
                                 <li key={r.name}>
-                                    <Link className={`${r.rating}` === `${rating}` ? 'active' : ''} to={getFilterUrl({ rating: r.rating })}>
+                                    <Link className={`filter-link filter-rating-link ${`${r.rating}` === `${rating}` ? 'active' : ''}`} to={getFilterUrl({ rating: r.rating })}>
                                         <Ratings caption={' & up'} rating={r.rating} />
                                     </Link>
                                 </li>
                             ))}
                         </ul>
-                    </div>
+                    </section>
                 </div>
-                <div className="col-3 c-2 c-1">
+                <div className="search-results-pane">
                     {loading ? (
                         <LoadingBox />
                     ) : error ? (
