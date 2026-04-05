@@ -83,6 +83,14 @@ app.get('/api/config/google', (_req, res) => {
 const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
+app.get('/', (_req, res) => {
+  res.status(200).send({ status: 'ok', service: 'amazon-app-api' });
+});
+
+app.get('/health', (_req, res) => {
+  res.status(200).send({ status: 'ok' });
+});
+
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '/frontend/dist')));
   app.get('*', (_req, res) =>
