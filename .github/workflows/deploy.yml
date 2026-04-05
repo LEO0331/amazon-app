@@ -69,7 +69,7 @@ jobs:
           publish_dir: ./frontend/dist
 
   deploy-backend:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && secrets.VERCEL_TOKEN != ''
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: test-and-build
     runs-on: ubuntu-latest
     steps:
@@ -85,5 +85,16 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
+      - name: Check Vercel token
+        id: check_vercel_token
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "VERCEL_TOKEN is not set. Skipping backend deployment."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Deploy backend to Vercel
+        if: steps.check_vercel_token.outputs.enabled == 'true'
         run: vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
