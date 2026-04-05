@@ -50,7 +50,7 @@ export const resolveAssetUrl = (assetPath) => {
     }
 
     if (assetPath.startsWith('/images/')) {
-        const base = import.meta.env.BASE_URL || '/';
+        const base = import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || '/';
         const normalizedBase = base.endsWith('/') ? base : `${base}/`;
         return `${normalizedBase}${assetPath.replace(/^\//, '')}`;
     }

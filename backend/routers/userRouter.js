@@ -47,6 +47,7 @@ userRouter.get(
     const result = await execute(
       'SELECT * FROM users WHERE is_seller = 1 ORDER BY seller_rating DESC LIMIT 3'
     );
+    res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
     res.send(result.rows.map((row) => sanitizeUser(mapUser(row))));
   })
 );
@@ -54,6 +55,10 @@ userRouter.get(
 userRouter.get(
   '/seed',
   expressAsyncHandler(async (_req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+      res.status(403).send({ message: 'Disabled in production' });
+      return;
+    }
     await resetDatabase();
     const users = await seedUsers();
     await seedProducts({
@@ -86,7 +91,7 @@ userRouter.post(
     setAuthCookie(res, token);
     issueCsrfToken(res);
 
-    res.send({ ...authPayload(user), token });
+    res.send(authPayload(user));
   })
 );
 
@@ -114,7 +119,7 @@ userRouter.post(
     const token = generateToken(created);
     setAuthCookie(res, token);
     issueCsrfToken(res);
-    res.send({ ...authPayload(created), token });
+    res.send(authPayload(created));
   })
 );
 
@@ -166,7 +171,7 @@ userRouter.put(
     const token = generateToken(updated);
     setAuthCookie(res, token);
 
-    res.send({ ...authPayload(updated), token });
+    res.send(authPayload(updated));
   })
 );
 

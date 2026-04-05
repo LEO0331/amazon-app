@@ -32,11 +32,19 @@ const originList = (process.env.FRONTEND_ORIGINS || '')
 const defaultOrigins = ['http://localhost:3000', 'http://localhost:5173'];
 const allowedOrigins = new Set([...defaultOrigins, ...originList]);
 
+const authRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.AUTH_RATE_LIMIT_MAX || 20),
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 app.set('trust proxy', 1);
+app.disable('x-powered-by');
 app.use(helmet());
 app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '100kb', parameterLimit: 100 }));
 app.use(
   cors({
     origin(origin, callback) {
@@ -57,6 +65,8 @@ app.use(
     legacyHeaders: false,
   })
 );
+app.use('/api/users/signin', authRateLimit);
+app.use('/api/users/register', authRateLimit);
 
 app.get('/api/auth/csrf-token', (req, res) => {
   const token = issueCsrfToken(res);
@@ -74,10 +84,6 @@ app.use('/api/seed', seedRouter);
 
 app.get('/api/config/paypal', (_req, res) => {
   res.send(process.env.PAYPAL_CLIENT_ID || 'sb');
-});
-
-app.get('/api/config/google', (_req, res) => {
-  res.send(process.env.GOOGLE_API_KEY || '');
 });
 
 const __dirname = path.resolve();

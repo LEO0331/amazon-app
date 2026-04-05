@@ -1,38 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 //https://stackoverflow.com/questions/50807929/how-does-react-router-works-and-what-is-the-difference-between-link-androute/50808647
 import {HashRouter, Link, Route} from "react-router-dom"; //https://github.com/reactjs/react-router-tutorial/tree/master/lessons
-import HomeScreen from './screens/HomeScreen';
-import ProductScreen from './screens/ProductScreen';
-import CartScreen from './screens/CartScreen';
-import RegisterScreen from './screens/RegisterScreen';
-import SigninScreen from './screens/SigninScreen';
 import { useDispatch, useSelector } from 'react-redux';
 import { signout } from './actions/userActions';
-import ShippingAddressScreen from './screens/ShippingAddressScreen';
-import PaymentMethodScreen from './screens/PaymentMethodScreen';
-import PlaceOrderScreen from './screens/PlaceOrderScreen';
-import OrderScreen from './screens/OrderScreen';
-import OrderHistoryScreen from './screens/OrderHistoryScreen';
-import ProfileScreen from './screens/ProfileScreen';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
-import ProductListScreen from './screens/ProductListScreen';
-import ProductEditScreen from './screens/ProductEditScreen';
-import OrderListScreen from './screens/OrderListScreen';
-import UserListScreen from './screens/UserListScreen';
-import UserEditScreen from './screens/UserEditScreen';
 import SellerRoute from './components/SellerRoute';
-import SellerScreen from './screens/SellerScreen';
 import SearchBox from './components/SearchBox';
-import SearchScreen from './screens/SearchScreen';
 import { listProductCategories } from './actions/productActions';
 import LoadingBox from './components/LoadingBox';
 import MessageBox from './components/MessageBox';
-import MapScreen from './screens/MapScreen';
-import DashboardScreen from './screens/DashboardScreen';
-import SupportScreen from './screens/SupportScreen';
 import ChatBox from './components/ChatBox';
 import { initializeCsrfToken } from './apiClient';
+
+const HomeScreen = lazy(() => import('./screens/HomeScreen'));
+const ProductScreen = lazy(() => import('./screens/ProductScreen'));
+const CartScreen = lazy(() => import('./screens/CartScreen'));
+const RegisterScreen = lazy(() => import('./screens/RegisterScreen'));
+const SigninScreen = lazy(() => import('./screens/SigninScreen'));
+const ShippingAddressScreen = lazy(() => import('./screens/ShippingAddressScreen'));
+const PaymentMethodScreen = lazy(() => import('./screens/PaymentMethodScreen'));
+const PlaceOrderScreen = lazy(() => import('./screens/PlaceOrderScreen'));
+const OrderScreen = lazy(() => import('./screens/OrderScreen'));
+const OrderHistoryScreen = lazy(() => import('./screens/OrderHistoryScreen'));
+const ProfileScreen = lazy(() => import('./screens/ProfileScreen'));
+const ProductListScreen = lazy(() => import('./screens/ProductListScreen'));
+const ProductEditScreen = lazy(() => import('./screens/ProductEditScreen'));
+const OrderListScreen = lazy(() => import('./screens/OrderListScreen'));
+const UserListScreen = lazy(() => import('./screens/UserListScreen'));
+const UserEditScreen = lazy(() => import('./screens/UserEditScreen'));
+const SellerScreen = lazy(() => import('./screens/SellerScreen'));
+const SearchScreen = lazy(() => import('./screens/SearchScreen'));
+const DashboardScreen = lazy(() => import('./screens/DashboardScreen'));
+const SupportScreen = lazy(() => import('./screens/SupportScreen'));
 
 function App() {
   const cart = useSelector(state => state.cart);
@@ -151,33 +151,34 @@ function App() {
           </ul>
         </aside>
         <main>
-          <Route exact path="/" component={HomeScreen} />
-          <Route exact path="/product/:id" component={ProductScreen} />
-          <Route exact path="/product/:id/edit" component={ProductEditScreen} />
-          <Route path="/register" component={RegisterScreen} />
-          <Route path="/signin" component={SigninScreen} />
-          <Route path="/cart/:id?" component={CartScreen} />
-          <Route path="/shipping" component={ShippingAddressScreen} />
-          <Route path="/payment" component={PaymentMethodScreen} />
-          <Route path="/placeorder" component={PlaceOrderScreen} />
-          <Route path="/order/:id" component={OrderScreen} />
-          <Route path="/orderhistory" component={OrderHistoryScreen} />
-          <Route path="/seller/:id" component={SellerScreen} />
-          <Route exact path="/search/name/:name?" component={SearchScreen} />
-          <Route exact path="/search/category/:category" component={SearchScreen} />
-          <Route exact path="/search/category/:category/name/:name" component={SearchScreen} />
-          <Route exact path="/search/category/:category/name/:name/min/:min/max/:max/rating/:rating/order/:order/pageNumber/:pageNumber" component={SearchScreen} />
-          <PrivateRoute path="/profile" component={ProfileScreen} />
-          <PrivateRoute path="/map" component={MapScreen} />
-          <AdminRoute exact path="/productlist" component={ProductListScreen} />
-          <AdminRoute exact path="/orderlist" component={OrderListScreen} />
-          <AdminRoute path="/userlist" component={UserListScreen} />
-          <AdminRoute path="/user/:id/edit" component={UserEditScreen} />
-          <AdminRoute exact path="/productlist/pageNumber/:pageNumber" component={ProductListScreen} />
-          <AdminRoute path="/dashboard" component={DashboardScreen} />
-          <AdminRoute path="/support" component={SupportScreen} />
-          <SellerRoute path="/productlist/seller" component={ProductListScreen} />
-          <SellerRoute path="/orderlist/seller" component={OrderListScreen} />
+          <Suspense fallback={<LoadingBox />}>
+            <Route exact path="/" component={HomeScreen} />
+            <Route exact path="/product/:id" component={ProductScreen} />
+            <Route exact path="/product/:id/edit" component={ProductEditScreen} />
+            <Route path="/register" component={RegisterScreen} />
+            <Route path="/signin" component={SigninScreen} />
+            <Route path="/cart/:id?" component={CartScreen} />
+            <Route path="/shipping" component={ShippingAddressScreen} />
+            <Route path="/payment" component={PaymentMethodScreen} />
+            <Route path="/placeorder" component={PlaceOrderScreen} />
+            <Route path="/order/:id" component={OrderScreen} />
+            <Route path="/orderhistory" component={OrderHistoryScreen} />
+            <Route path="/seller/:id" component={SellerScreen} />
+            <Route exact path="/search/name/:name?" component={SearchScreen} />
+            <Route exact path="/search/category/:category" component={SearchScreen} />
+            <Route exact path="/search/category/:category/name/:name" component={SearchScreen} />
+            <Route exact path="/search/category/:category/name/:name/min/:min/max/:max/rating/:rating/order/:order/pageNumber/:pageNumber" component={SearchScreen} />
+            <PrivateRoute path="/profile" component={ProfileScreen} />
+            <AdminRoute exact path="/productlist" component={ProductListScreen} />
+            <AdminRoute exact path="/orderlist" component={OrderListScreen} />
+            <AdminRoute path="/userlist" component={UserListScreen} />
+            <AdminRoute path="/user/:id/edit" component={UserEditScreen} />
+            <AdminRoute exact path="/productlist/pageNumber/:pageNumber" component={ProductListScreen} />
+            <AdminRoute path="/dashboard" component={DashboardScreen} />
+            <AdminRoute path="/support" component={SupportScreen} />
+            <SellerRoute path="/productlist/seller" component={ProductListScreen} />
+            <SellerRoute path="/orderlist/seller" component={OrderListScreen} />
+          </Suspense>
         </main>
         <footer className="row center">
           {userInfo && !userInfo.isAdmin && <ChatBox userInfo={userInfo} />}

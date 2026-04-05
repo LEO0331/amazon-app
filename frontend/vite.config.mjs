@@ -18,6 +18,18 @@ export default defineConfig({
     },
   },
   base,
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-redux': ['redux', 'react-redux', 'redux-thunk'],
+          'vendor-charts': ['react-google-charts', 'react-responsive-carousel'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
   },

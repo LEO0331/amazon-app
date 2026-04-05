@@ -1,32 +1,30 @@
-# Amazon App (SQLite + Vite)
+# Amazon App (Vite + SQLite on Turso)
 
 [![CI and Deploy](https://github.com/LEO0331/amazon-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/LEO0331/amazon-app/actions/workflows/deploy.yml)
 [![Frontend](https://img.shields.io/badge/frontend-Vite-646CFF?logo=vite&logoColor=fff)](./frontend)
-[![Backend](https://img.shields.io/badge/backend-Express%20%2B%20SQLite-000000?logo=sqlite&logoColor=fff)](./backend)
+[![Backend](https://img.shields.io/badge/backend-Express%20%2B%20libSQL-0f172a?logo=sqlite&logoColor=fff)](./backend)
 
-Amazon-style ecommerce application with a modernized architecture:
-- Backend on Express + Turso/libSQL (SQLite protocol)
-- Frontend on React + Redux + Vite
-- Cookie-based auth with CSRF protection
-- Async support inbox API (replacing websocket chat)
-- Vercel-ready backend + GitHub Pages frontend flow
+A polished Amazon-style ecommerce experience with a Vite frontend, cookie-based security, and a Turso/libSQL backend optimized for serverless deployment.
 
-## What Changed
+## Short GitHub Description
 
-- Replaced Mongo/Mongoose runtime with SQLite-compatible data layer (`@libsql/client`)
-- Added SQL schema initialization and indexed query paths for products/orders/support
-- Added deterministic Faker seeding (500 products by default)
-- Migrated frontend from CRA to Vite
-- Added centralized API client with `withCredentials` + automatic CSRF header
-- Reworked support feature to async thread/message polling APIs
-- Added CI/CD workflow for test/build + GitHub Pages deploy + optional Vercel deploy
+Modern Amazon-style ecommerce app with Vite frontend, Express + Turso/libSQL backend, cookie auth + CSRF security, and CI/CD to GitHub Pages + Vercel.
 
-## Tech Stack
+## Architecture
 
-- Backend: Node.js, Express, libSQL client, bcryptjs, jsonwebtoken
-- Frontend: React 17, Redux, React Router v5, Axios, Vite
-- Data: Turso/libSQL (or local sqlite file URL)
-- Deploy: GitHub Pages (frontend), Vercel (backend)
+- Frontend: React 17, Redux, React Router v5, Vite
+- Backend: Express, `@libsql/client`, SQL schema initialization, indexed query paths
+- Security: HTTP-only auth cookies, CSRF token checks, strict CORS allowlist, Helmet, rate limiting
+- Support: Async support inbox (threads + polling), no websocket dependency
+- Deployment: GitHub Pages (frontend), Vercel (backend API)
+
+## Removed / Cleaned Up
+
+- Removed map/location flow and Google API key dependency
+- Removed unused Mailgun email helpers
+- Removed unused Stripe demo components
+- Hardened auth to cookie-session only (no bearer token fallback)
+- Restricted destructive dev seed route in production
 
 ## Environment Variables
 
@@ -38,52 +36,69 @@ Required:
 
 Recommended:
 - `DATABASE_AUTH_TOKEN`
-- `FRONTEND_ORIGINS`
+- `FRONTEND_ORIGINS` (example: `https://leo0331.github.io,http://localhost:5173`)
 
-Frontend build/runtime:
-- `VITE_API_BASE_URL` (set in GitHub Actions secrets for production)
-- `VITE_BASE_PATH` (usually `/`)
+Optional:
+- `RATE_LIMIT_MAX`
+- `AUTH_RATE_LIMIT_MAX`
+- `PAYPAL_CLIENT_ID` (use `sb` for PayPal sandbox demo)
+- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_S3_BUCKET` / `AWS_REGION` (only if enabling S3 upload)
+
+GitHub Actions secrets:
+- `VITE_API_BASE_URL` = your Vercel backend URL
+- `VERCEL_TOKEN` = optional, needed for backend deploy job
+
+## Payment Demo Setup
+
+Current checkout demo uses **PayPal JS SDK** via `/api/config/paypal`.
+
+For demo mode:
+- Set `PAYPAL_CLIENT_ID=sb`
+- Keep payment method as `PayPal` in checkout
+
+For production-like testing:
+- Create a PayPal developer app and replace `PAYPAL_CLIENT_ID`
 
 ## Local Development
-
-Install dependencies:
 
 ```bash
 npm install
 npm install --prefix frontend
-```
-
-Run backend:
-
-```bash
 npm run backend:start
-```
-
-Run frontend:
-
-```bash
 npm run frontend:dev
 ```
 
 ## Seed Demo Data
 
-Seed users + 500 products + baseline orders:
+Bootstrap users + products:
+- `GET /api/users/seed` (development only, disabled in production)
 
-- Legacy dev endpoint: `GET /api/users/seed`
-- Admin-protected endpoint: `POST /api/seed` (cookie auth required)
+Full admin-protected seed (default 500 products):
+- `POST /api/seed` with auth cookie + CSRF token (`count` must be `1..1000`)
 
-Default accounts after seed:
+Default seeded users:
 - `admin@gmail.com` / `1234`
 - `seller@gmail.com` / `1234`
 - `user@gmail.com` / `1234`
 
-## Tests and Build
+## Tests and Coverage
 
-Run tests:
+Run all tests (backend + frontend):
 
 ```bash
 npm test
 ```
+
+What is covered now:
+- Backend integration tests:
+  - `/api/users`, `/api/products`, `/api/orders`, `/api/support`
+  - auth-required route checks, CSRF enforcement, CORS allowlist behavior
+  - pagination/filter validation, seed count bounds, cache header checks
+- Frontend unit tests:
+  - asset URL resolution for GitHub Pages base path
+  - cart reducer behavior (add/update/remove/clear/address/payment)
+  - user reducer flows (signin/register/profile update)
+  - order reducer flows (create/details/summary)
 
 Build frontend:
 
@@ -91,34 +106,15 @@ Build frontend:
 npm run build
 ```
 
-## CI/CD (GitHub Actions)
+## CI/CD
 
-Workflow file: `.github/workflows/deploy.yml`
+Workflow: `.github/workflows/deploy.yml`
 
-On push/PR to `master`:
+On PR / push to `master`:
 1. Install dependencies
-2. Run backend tests
+2. Run tests
 3. Build frontend
 
 On push to `master`:
-1. Deploy `frontend/dist` to GitHub Pages
-2. Deploy backend to Vercel (if `VERCEL_TOKEN` is configured)
-
-### Required GitHub Secrets
-
-- `VITE_API_BASE_URL` (frontend API URL, e.g. your Vercel backend URL)
-- `VERCEL_TOKEN` (optional, needed only for backend deploy job)
-
-## API Coverage in Tests
-
-Integration tests currently validate:
-- `/api/users`: seed, signin, protected list
-- `/api/products`: listing, detail, categories
-- `/api/orders`: create, mine, pay, summary
-- `/api/support`: thread creation, messaging, admin thread listing
-- Security behavior: auth required + CSRF enforcement checks
-
-## Deployment Topology
-
-- Frontend: GitHub Pages static deployment from `frontend/dist`
-- Backend: Vercel serverless route via `vercel.json` (`/api/*` -> `api/index.js`)
+1. Deploy frontend to GitHub Pages
+2. Deploy backend to Vercel (if `VERCEL_TOKEN` exists)

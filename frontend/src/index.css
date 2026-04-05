@@ -1,23 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600;700&display=swap');
+
 :root {
   --color-bg: #ffffff;
   --color-surface: #ffffff;
-  --color-surface-alt: #f6f5f4;
+  --color-surface-alt: #f7f3ee;
   --color-text: rgba(0, 0, 0, 0.95);
-  --color-text-muted: #615d59;
-  --color-text-soft: #a39e98;
+  --color-text-muted: #5f5851;
+  --color-text-soft: #9b9389;
   --color-border: rgba(0, 0, 0, 0.1);
-  --color-primary: #0075de;
-  --color-primary-active: #005bab;
-  --color-focus: #097fe8;
+  --color-primary: #0b6cc8;
+  --color-primary-active: #074f93;
+  --color-focus: #0f7fe9;
   --color-success: #1aae39;
   --color-danger: #dd5b00;
   --radius-sm: 4px;
   --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
   --shadow-card: rgba(0, 0, 0, 0.04) 0px 4px 18px,
     rgba(0, 0, 0, 0.027) 0px 2.025px 7.84688px,
     rgba(0, 0, 0, 0.02) 0px 0.8px 2.925px,
     rgba(0, 0, 0, 0.01) 0px 0.175px 1.04062px;
+  --shadow-pop: rgba(0, 0, 0, 0.12) 0px 22px 40px -24px;
 }
 
 * {
@@ -32,10 +36,35 @@ body {
   margin: 0;
   min-height: 100vh;
   font-size: 1.6rem;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 60rem at 90% -5%, rgba(11, 108, 200, 0.14), transparent 60%),
+    radial-gradient(42rem 42rem at -5% 105%, rgba(221, 91, 0, 0.08), transparent 65%);
+  z-index: -2;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  z-index: -1;
+  opacity: 0.35;
 }
 
 #root {
@@ -53,8 +82,12 @@ body {
 header {
   grid-area: header;
   border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
+  background: color-mix(in oklab, var(--color-surface) 88%, #f5f2ef 12%);
   padding: 0.8rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: blur(12px);
 }
 
 main {
@@ -62,6 +95,7 @@ main {
   width: min(1200px, 100%);
   margin: 0 auto;
   padding: 2.4rem 1.6rem 4.8rem;
+  animation: main-enter 0.75s ease both;
 }
 
 footer {
@@ -84,6 +118,7 @@ h1 {
   font-size: 4rem;
   letter-spacing: -1.1px;
   line-height: 1.08;
+  font-family: 'Fraunces', Georgia, serif;
 }
 
 h2 {
@@ -91,6 +126,7 @@ h2 {
   letter-spacing: -0.6px;
   line-height: 1.23;
   margin-bottom: 1.2rem;
+  font-family: 'Fraunces', Georgia, serif;
 }
 
 h3 {
@@ -139,10 +175,12 @@ button {
   background: rgba(0, 0, 0, 0.05);
   color: var(--color-text);
   font-weight: 600;
+  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
 button:hover {
   border-color: rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
 }
 
 button:focus-visible,
@@ -239,10 +277,16 @@ img.large {
 
 .card {
   border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(255, 255, 255, 0.9));
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   margin: 1rem;
+  transition: transform 0.24s ease, box-shadow 0.24s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card), var(--shadow-pop);
 }
 
 .card-body {
@@ -336,7 +380,7 @@ img.large {
   z-index: 3;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
 }
 
@@ -469,7 +513,7 @@ button.close-sidebar,
 .summary > li {
   border: 1px solid var(--color-border);
   margin: 1rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   flex: 1 1 22rem;
   background: #fff;
 }
@@ -565,5 +609,16 @@ button.close-sidebar,
 @media (min-width: 992px) {
   .search input {
     width: 45rem;
+  }
+}
+
+@keyframes main-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

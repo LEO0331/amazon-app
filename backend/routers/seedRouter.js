@@ -5,13 +5,21 @@ import { isAdmin, isAuth } from '../utils.js';
 import { resetDatabase, seedOrders, seedProducts, seedUsers } from '../services/seedService.js';
 
 const seedRouter = express.Router();
+const DEFAULT_SEED_COUNT = 500;
+const MAX_SEED_COUNT = 1000;
 
 seedRouter.post(
   '/',
   isAuth,
   isAdmin,
   expressAsyncHandler(async (req, res) => {
-    const count = Number(req.body.count || 500);
+    const requestedCount = Number(req.body.count || DEFAULT_SEED_COUNT);
+    if (!Number.isInteger(requestedCount) || requestedCount < 1 || requestedCount > MAX_SEED_COUNT) {
+      res.status(400).send({ message: `count must be an integer between 1 and ${MAX_SEED_COUNT}` });
+      return;
+    }
+
+    const count = requestedCount;
     await resetDatabase();
     const users = await seedUsers();
     const sellerIds = users.filter((user) => user.isSeller).map((user) => user.id);

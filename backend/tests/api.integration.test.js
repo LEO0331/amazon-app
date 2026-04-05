@@ -106,6 +106,7 @@ test('users endpoints: seed + signin + list', async () => {
   assert.equal(signin.status, 200);
   const authBody = await signin.json();
   assert.equal(authBody.email, 'admin@gmail.com');
+  assert.equal(authBody.token, undefined);
 
   await admin.getCsrfToken();
 
@@ -114,6 +115,27 @@ test('users endpoints: seed + signin + list', async () => {
   const users = await listResponse.json();
   assert.ok(Array.isArray(users));
   assert.ok(users.length >= 3);
+});
+
+test('users endpoint: signin rejects invalid credentials and signout clears auth cookie', async () => {
+  await seed();
+
+  const invalid = await fetch(`${baseUrl}/api/users/signin`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email: 'admin@gmail.com', password: 'wrong-password' }),
+  });
+  assert.equal(invalid.status, 401);
+
+  const admin = new Session(baseUrl);
+  const signin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(signin.status, 200);
+  await admin.getCsrfToken();
+
+  const signout = await admin.post('/api/users/signout', {});
+  assert.equal(signout.status, 200);
+  const setCookie = signout.headers.getSetCookie ? signout.headers.getSetCookie().join(';') : '';
+  assert.ok(setCookie.includes('auth_token='));
 });
 
 test('products endpoints: list + details + categories', async () => {
@@ -134,9 +156,28 @@ test('products endpoints: list + details + categories', async () => {
 
   const categoriesResponse = await fetch(`${baseUrl}/api/products/categories`);
   assert.equal(categoriesResponse.status, 200);
+  assert.equal(categoriesResponse.headers.get('cache-control'), 'public, max-age=300, s-maxage=600');
   const categories = await categoriesResponse.json();
   assert.ok(Array.isArray(categories));
   assert.ok(categories.length > 0);
+});
+
+test('products validation: invalid pagination values are rejected', async () => {
+  await seed();
+
+  const response = await fetch(`${baseUrl}/api/products?pageNumber=abc&pageSize=0`);
+  assert.equal(response.status, 400);
+});
+
+test('products security: create product requires admin or seller authentication', async () => {
+  await seed();
+
+  const unauthorized = await fetch(`${baseUrl}/api/products`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+  assert.ok([401, 403].includes(unauthorized.status));
 });
 
 test('orders endpoints: create + mine + pay + summary', async () => {
@@ -240,6 +281,17 @@ test('security: protected route requires auth cookie', async () => {
   assert.equal(response.status, 401);
 });
 
+test('security: bearer auth header is rejected when cookie is missing', async () => {
+  await seed();
+
+  const response = await fetch(`${baseUrl}/api/orders/mine`, {
+    headers: {
+      authorization: 'Bearer fake-token',
+    },
+  });
+  assert.equal(response.status, 401);
+});
+
 test('security: csrf token required for protected mutation', async () => {
   await seed();
 
@@ -269,4 +321,29 @@ test('support security: non-admin cannot read another user thread', async () => 
 
   const forbidden = await seller.request(`/api/support/threads/${thread._id}/messages`);
   assert.equal(forbidden.status, 403);
+});
+
+test('cors: allowed frontend origin receives access-control-allow-origin', async () => {
+  await seed();
+
+  const response = await fetch(`${baseUrl}/api/products/categories`, {
+    headers: {
+      origin: 'http://localhost:5173',
+    },
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('access-control-allow-origin'), 'http://localhost:5173');
+});
+
+test('seed validation: rejects count beyond hard limit', async () => {
+  await seed();
+
+  const admin = new Session(baseUrl);
+  const adminSignin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(adminSignin.status, 200);
+  await admin.getCsrfToken();
+
+  const response = await admin.post('/api/seed', { count: 2000 });
+  assert.equal(response.status, 400);
 });

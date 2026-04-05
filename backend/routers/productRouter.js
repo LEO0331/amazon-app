@@ -10,10 +10,24 @@ const productRouter = express.Router();
 
 const PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 30;
+const ALLOWED_ORDERS = new Set(['lowest', 'highest', 'toprated', 'newest', '']);
 
 function toNumber(value, fallback = 0) {
   const next = Number(value);
   return Number.isFinite(next) ? next : fallback;
+}
+
+function parsePositiveInteger(value, fallback) {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    return null;
+  }
+
+  return parsed;
 }
 
 async function loadSellerMap(rows) {
@@ -30,8 +44,13 @@ async function loadSellerMap(rows) {
 productRouter.get(
   '/',
   expressAsyncHandler(async (req, res) => {
-    const page = Math.max(1, toNumber(req.query.pageNumber, 1));
-    const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, toNumber(req.query.pageSize, PAGE_SIZE)));
+    const page = parsePositiveInteger(req.query.pageNumber, 1);
+    const requestedPageSize = parsePositiveInteger(req.query.pageSize, PAGE_SIZE);
+    if (page === null || requestedPageSize === null) {
+      res.status(400).send({ message: 'Invalid pagination parameters' });
+      return;
+    }
+    const pageSize = Math.min(MAX_PAGE_SIZE, requestedPageSize);
     const seller = req.query.seller || '';
     const name = req.query.name || '';
     const category = req.query.category || '';
@@ -39,6 +58,11 @@ productRouter.get(
     const max = req.query.max ? toNumber(req.query.max, 0) : 0;
     const rating = req.query.rating ? toNumber(req.query.rating, 0) : 0;
     const order = req.query.order || '';
+
+    if (min < 0 || max < 0 || rating < 0 || rating > 5 || !ALLOWED_ORDERS.has(order)) {
+      res.status(400).send({ message: 'Invalid filter parameters' });
+      return;
+    }
 
     const where = [];
     const args = [];
@@ -104,6 +128,7 @@ productRouter.get(
   '/categories',
   expressAsyncHandler(async (_req, res) => {
     const categories = await execute('SELECT DISTINCT category FROM products ORDER BY category ASC');
+    res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
     res.send(categories.rows.map((row) => row.category));
   })
 );

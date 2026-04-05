@@ -78,10 +78,12 @@ const statements = [
   'CREATE INDEX IF NOT EXISTS idx_products_seller ON products(seller_id)',
   'CREATE INDEX IF NOT EXISTS idx_products_price ON products(price)',
   'CREATE INDEX IF NOT EXISTS idx_products_rating ON products(rating)',
+  'CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at)',
   'CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id)',
   'CREATE INDEX IF NOT EXISTS idx_orders_seller ON orders(seller_id)',
   'CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)',
   'CREATE INDEX IF NOT EXISTS idx_support_threads_user ON support_threads(user_id)',
+  'CREATE INDEX IF NOT EXISTS idx_support_threads_last_message_at ON support_threads(last_message_at)',
   'CREATE INDEX IF NOT EXISTS idx_support_messages_thread ON support_messages(thread_id)',
 ];
 
