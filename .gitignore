@@ -28,4 +28,5 @@ yarn-error.log*
 .env
 /dev.db
 /backend/dev.db
+/test-api.db
 /uploads/*.jpg
