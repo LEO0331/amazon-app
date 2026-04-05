@@ -8,6 +8,25 @@ function nowIso() {
 }
 
 const categories = ['Shirts', 'Pants', 'Shoes', 'Accessories', 'Bags', 'Electronics'];
+const sellerLogos = [
+  'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=600&q=80',
+];
+
+const productImages = [
+  'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1592878849122-5fcd55f62fce?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=800&q=80',
+];
 
 export async function resetDatabase() {
   await execute('DELETE FROM support_messages');
@@ -29,7 +48,7 @@ export async function seedUsers() {
       isAdmin: 1,
       isSeller: 1,
       sellerName: 'Notion Store',
-      sellerLogo: '/images/logo1.png',
+      sellerLogo: sellerLogos[0],
       sellerDescription: 'Primary seller account',
       sellerRating: 4.8,
       sellerNumReviews: 128,
@@ -42,7 +61,7 @@ export async function seedUsers() {
       isAdmin: 0,
       isSeller: 1,
       sellerName: 'Atlas Goods',
-      sellerLogo: '/images/logo2.png',
+      sellerLogo: sellerLogos[1],
       sellerDescription: 'Secondary seller account',
       sellerRating: 4.4,
       sellerNumReviews: 84,
@@ -109,7 +128,7 @@ export async function seedProducts({ count = 500, sellerIds = [] } = {}) {
         randomUUID(),
         faker.helpers.arrayElement(ids),
         `${faker.commerce.productName()} ${i + 1}`.slice(0, 120),
-        `/images/p${(i % 6) + 1}.jpg`,
+        productImages[i % productImages.length],
         brand,
         category,
         faker.commerce.productDescription().slice(0, 500),

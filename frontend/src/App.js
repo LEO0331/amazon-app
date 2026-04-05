@@ -55,14 +55,14 @@ function App() {
     <HashRouter>
       <div className="grid-container">
         <header className="row">
-          <div>
+          <div className="header-left">
             <button type="button" className="open-sidebar" onClick={() => setSidebarIsOpen(true)}><i className="fa fa-bars"></i></button>
             <Link className="brand" to="/">EShop</Link>
           </div>
-          <div>
+          <div className="header-center">
             <Route render={({ history }) => (<SearchBox history={history} />)}/>
           </div>
-          <div>
+          <div className="header-right">
             <Link to="/cart">Cart
               {cartItems.length > 0 && (
                 <span className="badge">{cartItems.length}</span>

@@ -10,7 +10,9 @@
     "frontend:dev": "npm --prefix frontend run dev",
     "frontend:build": "npm --prefix frontend run build",
     "build": "npm run frontend:build",
-    "test": "node backend/tests/seed.test.js && node backend/tests/api.integration.test.js && npm --prefix frontend run test"
+    "test": "node backend/tests/seed.test.js && node backend/tests/api.integration.test.js && npm --prefix frontend run test",
+    "test:backend:coverage": "node --test --experimental-test-coverage backend/tests/*.test.js",
+    "test:coverage": "npm run test:backend:coverage && npm --prefix frontend run test:coverage"
   },
   "author": "",
   "license": "ISC",

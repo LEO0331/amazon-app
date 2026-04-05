@@ -8,8 +8,8 @@ function SearchBox(props) {
     }; 
     return ( 
         <form className="search" onSubmit={submitHandler}>
-            <div>
-                <input type="text" name="qy" id="qy" onChange={e => setName(e.target.value)} />
+            <div className="search-wrap">
+                <input type="text" name="qy" id="qy" placeholder="Search products..." onChange={e => setName(e.target.value)} />
                 <button className="primary" type="submit"><i className="fa fa-search"></i></button>
             </div>
         </form>

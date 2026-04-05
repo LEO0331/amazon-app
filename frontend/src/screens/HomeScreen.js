@@ -10,6 +10,25 @@ import { listTopSellers } from '../actions/userActions';
 import { Link } from 'react-router-dom';
 import { resolveAssetUrl } from '../utils';
 
+const heroSlides = [
+  {
+    title: 'Summer Drop',
+    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1600&q=80',
+  },
+  {
+    title: 'Daily Essentials',
+    image: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=1600&q=80',
+  },
+  {
+    title: 'Street Edit',
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1600&q=80',
+  },
+  {
+    title: 'Premium Picks',
+    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80',
+  },
+];
+
 function HomeScreen() {
   const dispatch = useDispatch();
   const productList = useSelector(state => state.productList); //from store to reflect on the view
@@ -22,6 +41,16 @@ function HomeScreen() {
   }, [dispatch]);
   return (
     <div>
+      <section className="hero-gallery">
+        <Carousel showArrows autoPlay infiniteLoop interval={3200} showThumbs={false} showStatus={false}>
+          {heroSlides.map((slide) => (
+            <div key={slide.image}>
+              <img src={slide.image} alt={slide.title} />
+              <p className="legend">{slide.title}</p>
+            </div>
+          ))}
+        </Carousel>
+      </section>
       <h2>Top Sellers</h2>
       {loadingSellers ? (
         <LoadingBox />
