@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadStripe } from '@stripe/stripe-js';
 import StripeCheckout from '../components/StripeCheckout';
-import axios from 'axios';
+import apiClient from '../apiClient';
 import LoadingBox from '../components/LoadingBox';
 //https://stripe.com/docs/payments/integration-builder?client=react
 function StripeOrderScreen(props){
@@ -12,7 +12,7 @@ function StripeOrderScreen(props){
     const dispatch = useDispatch();
     useEffect(() => {
         const addStripeScript = async () => {
-            const { data: clientId } = await axios.get('/api/stripe/key');
+            const { data: clientId } = await apiClient.get('/api/stripe/key');
             const stripeObj = await loadStripe(clientId);
             setStripe(stripeObj);
         };    
@@ -33,3 +33,4 @@ function StripeOrderScreen(props){
 }
 
 export default StripeOrderScreen;
+

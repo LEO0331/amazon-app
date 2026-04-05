@@ -1,4 +1,4 @@
-import axios from 'axios';
+import apiClient from '../apiClient';
 import {
     CART_ADD_ITEM,
     CART_REMOVE_ITEM,
@@ -8,7 +8,7 @@ import {
 } from '../constants/cartConstants';
 //https://redux.js.org/api/store#getstate
 export const addToCart = (productId, qty) => async (dispatch, getState) => {
-    const { data } = await axios.get(`/api/products/${productId}`);
+    const { data } = await apiClient.get(`/api/products/${productId}`);
     const { cart: { cartItems } } = getState();
     if (cartItems.length > 0 && data.seller._id !== cartItems[0].seller._id) { //data.seller._id: product gonna add
         dispatch({ //order items from one seller; prevent buying same products from different sellers
@@ -45,3 +45,4 @@ export const saveShippingAddress = (data) => (dispatch) => { //data from Shippin
 export const savePaymentMethod = (data) => (dispatch) => { //select radio button, no need to localStorage
     dispatch({ type: CART_SAVE_PAYMENT_METHOD, payload: data });
 };
+

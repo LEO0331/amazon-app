@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'; //https://www.npmjs.com/package/@react-google-maps/api
 import { LoadScript, GoogleMap, StandaloneSearchBox, Marker } from '@react-google-maps/api';
 import LoadingBox from '../components/LoadingBox';
-import axios from 'axios';
+import apiClient from '../apiClient';
 import { USER_ADDRESS_MAP_CONFIRM } from '../constants/userConstants';
 import { useDispatch } from 'react-redux';
 
@@ -17,7 +17,7 @@ function MapScreen(props) {
     const markerRef = useRef(null);
     useEffect(() => {
         const fetch = async () => {
-            const { data } = await axios('/api/config/google');
+            const { data } = await apiClient('/api/config/google');
             setGoogleApiKey(data);
             getUserCurrentLocation();
         };
@@ -98,3 +98,5 @@ function MapScreen(props) {
 }
 
 export default MapScreen;
+
+

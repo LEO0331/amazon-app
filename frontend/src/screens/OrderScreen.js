@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import apiClient from '../apiClient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { deliverOrder, detailsOrder, payOrder } from '../actions/orderActions';
@@ -23,7 +23,7 @@ function OrderScreen(props) { // /order/${order._id} screen
     useEffect(() => {
         //https://developer.paypal.com/docs/business/javascript-sdk/javascript-sdk-configuration/
         const addPayPalScript = async () => { //send to backend getting clientId
-            const {data} = await axios.get('/api/config/paypal');
+            const {data} = await apiClient.get('/api/config/paypal');
             const script = document.createElement('script');
             script.type = 'text/javascript';
             script.src = `https://www.paypal.com/sdk/js?client-id=${data}&locale=en_AU`;
@@ -179,3 +179,4 @@ function OrderScreen(props) { // /order/${order._id} screen
 }
 
 export default OrderScreen;
+

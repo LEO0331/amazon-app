@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
+import apiClient from '../apiClient';
 import { detailsProduct, updateProduct } from '../actions/productActions';
 import { PRODUCT_UPDATE_RESET } from '../constants/productConstants';
 import LoadingBox from '../components/LoadingBox';
@@ -21,8 +21,6 @@ function ProductEditScreen(props) {
     const { loading, error, product } = productDetails;
     const productUpdate = useSelector(state => state.productUpdate);
     const { loading: loadingUpdate, error: errorUpdate, success: successUpdate } = productUpdate;
-    const userSignin = useSelector(state => state.userSignin);
-    const { userInfo } = userSignin;
     const dispatch = useDispatch();
     useEffect(() => {
         if (successUpdate) {
@@ -51,10 +49,9 @@ function ProductEditScreen(props) {
         formData.append('image', file); //expect a single file named image at backend
         setLoadingUpload(true);
         try {
-            const { data } = await axios.post('/api/uploads/s3', formData, { //post('/api/uploads', formData, {})
+            const { data } = await apiClient.post('/api/uploads/s3', formData, { //post('/api/uploads', formData, {})
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${userInfo.token}`,
                 },
             });
             setImage(data);
@@ -124,3 +121,4 @@ function ProductEditScreen(props) {
 }
 
 export default ProductEditScreen;
+

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import apiClient from '../apiClient';
 import { CART_EMPTY } from '../constants/cartConstants';
 import {
     ORDER_CREATE_REQUEST,
@@ -26,13 +26,10 @@ import {
     ORDER_SUMMARY_SUCCESS
 } from '../constants/orderConstants';
 
-export const createOrder = (order) => async (dispatch, getState) => {
+export const createOrder = (order) => async (dispatch) => {
     dispatch({ type: ORDER_CREATE_REQUEST, payload: order });
     try {
-        const {userSignin: { userInfo }} = getState();
-        const { data } = await axios.post('/api/orders', order, {
-            headers: { Authorization: `Bearer ${userInfo.token}` } //backend
-        });
+        const { data } = await apiClient.post('/api/orders', order);
         dispatch({ type: ORDER_CREATE_SUCCESS, payload: data.order }); //orderRouter.js: { message: 'New Order Created', order: createdOrder } sent to frontend
         dispatch({ type: CART_EMPTY }); //remove all items from cart
         localStorage.removeItem('cartItems'); //<Link to={`/product/${item.product}`}>{item.name}</Link> in orderScreen will remove previous items from cart
@@ -46,13 +43,10 @@ export const createOrder = (order) => async (dispatch, getState) => {
     }
 };
 
-export const detailsOrder = (orderId) => async (dispatch, getState) => {
+export const detailsOrder = (orderId) => async (dispatch) => {
     dispatch({ type: ORDER_DETAILS_REQUEST, payload: orderId });
-    const {userSignin: { userInfo }} = getState();
     try {
-        const { data } = await axios.get(`/api/orders/${orderId}`, { //from backend
-            headers: { Authorization: `Bearer ${userInfo.token}` }
-        });
+        const { data } = await apiClient.get(`/api/orders/${orderId}`); //from backend
         dispatch({ type: ORDER_DETAILS_SUCCESS, payload: data });
     } catch (error) {
         dispatch({
@@ -64,13 +58,10 @@ export const detailsOrder = (orderId) => async (dispatch, getState) => {
     }
 };
 
-export const payOrder = (order, paymentResult) => async (dispatch, getState) => {
+export const payOrder = (order, paymentResult) => async (dispatch) => {
     dispatch({ type: ORDER_PAY_REQUEST, payload: { order, paymentResult } });
-    const {userSignin: { userInfo }} = getState();
     try { //put(url, body, options)
-        const { data } = await axios.put(`/api/orders/${order._id}/pay`, paymentResult, { //sent to backend
-            headers: { Authorization: `Bearer ${userInfo.token}` }
-        });
+        const { data } = await apiClient.put(`/api/orders/${order._id}/pay`, paymentResult); //sent to backend
         dispatch({ type: ORDER_PAY_SUCCESS, payload: data });
     } catch (error) {
         dispatch({
@@ -82,13 +73,10 @@ export const payOrder = (order, paymentResult) => async (dispatch, getState) => 
     }
 };
 
-export const listOrderMine = () => async (dispatch, getState) => {
+export const listOrderMine = () => async (dispatch) => {
     dispatch({ type: ORDER_MINE_LIST_REQUEST });
-    const {userSignin: { userInfo }} = getState();
     try { 
-        const { data } = await axios.get('/api/orders/mine', { 
-            headers: { Authorization: `Bearer ${userInfo.token}` }
-        });
+        const { data } = await apiClient.get('/api/orders/mine');
         dispatch({ type: ORDER_MINE_LIST_SUCCESS, payload: data });
     } catch (error) {
         dispatch({
@@ -100,13 +88,10 @@ export const listOrderMine = () => async (dispatch, getState) => {
     }
 };
 
-export const listOrders = ({seller = ''}) => async (dispatch, getState) => {
+export const listOrders = ({seller = ''}) => async (dispatch) => {
     dispatch({ type: ORDER_LIST_REQUEST });
-    const {userSignin: { userInfo }} = getState();
     try {
-        const { data } = await axios.get(`/api/orders?seller=${seller}`, {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
-        });
+        const { data } = await apiClient.get(`/api/orders?seller=${seller}`);
         //console.log(data);
         dispatch({ type: ORDER_LIST_SUCCESS, payload: data }); //order array from backend
     } catch (error) {
@@ -119,13 +104,10 @@ export const listOrders = ({seller = ''}) => async (dispatch, getState) => {
     }
 };
 
-export const deleteOrder = (orderId) => async (dispatch, getState) => {
+export const deleteOrder = (orderId) => async (dispatch) => {
     dispatch({ type: ORDER_DELETE_REQUEST, payload: orderId });
-    const {userSignin: { userInfo }} = getState();
     try {
-        const { data } = await axios.delete(`/api/orders/${orderId}`, {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
-        });
+        const { data } = await apiClient.delete(`/api/orders/${orderId}`);
         dispatch({ type: ORDER_DELETE_SUCCESS, payload: data }); 
     } catch (error) {
         dispatch({
@@ -137,13 +119,10 @@ export const deleteOrder = (orderId) => async (dispatch, getState) => {
     }
 };
 
-export const deliverOrder = (orderId) => async (dispatch, getState) => {
+export const deliverOrder = (orderId) => async (dispatch) => {
     dispatch({ type: ORDER_DELIVER_REQUEST, payload: orderId });
-    const {userSignin: { userInfo }} = getState();
     try { //put(url, body, options)
-        const { data } = await axios.put(`/api/orders/${orderId}/deliver`, {}, { 
-            headers: { Authorization: `Bearer ${userInfo.token}` }
-        });
+        const { data } = await apiClient.put(`/api/orders/${orderId}/deliver`, {});
         dispatch({ type: ORDER_DELIVER_SUCCESS, payload: data });
     } catch (error) {
         dispatch({
@@ -155,13 +134,10 @@ export const deliverOrder = (orderId) => async (dispatch, getState) => {
     }
 };
 
-export const summaryOrder = () => async (dispatch, getState) => {
+export const summaryOrder = () => async (dispatch) => {
     dispatch({ type: ORDER_SUMMARY_REQUEST });
-    const {userSignin: { userInfo }} = getState();
     try {
-        const { data } = await axios.get('/api/orders/summary', {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
-        });
+        const { data } = await apiClient.get('/api/orders/summary');
         dispatch({ type: ORDER_SUMMARY_SUCCESS, payload: data });
     } catch (error) {
         dispatch({
@@ -173,3 +149,4 @@ export const summaryOrder = () => async (dispatch, getState) => {
         });
     }
 };
+

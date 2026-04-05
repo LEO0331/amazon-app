@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {CardElement, Elements, useStripe, useElements} from '@stripe/react-stripe-js';
-import axios from 'axios';
+import apiClient from '../apiClient';
 //https://stripe.com/docs/testing
 function CheckoutForm(props) {
   const stripe = useStripe();
@@ -13,7 +13,7 @@ function CheckoutForm(props) {
     }
     setProcessing(true);
     //https://stripe.com/docs/api/payment_intents/object
-    const { data } = await axios(`/api/stripe/secret/${props.orderId}`);
+    const { data } = await apiClient(`/api/stripe/secret/${props.orderId}`);
     const clientSecret = data.client_secret; //call stripe.confirmCardPayment() from the client secret.
     const result = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
@@ -44,8 +44,10 @@ function CheckoutForm(props) {
 
 const StripeCheckout = (props) => (
   <Elements stripe={props.stripe}>
-    <CheckoutForm rderId={props.orderId} handleSuccessPayment={props.handleSuccessPayment} />
+    <CheckoutForm orderId={props.orderId} handleSuccessPayment={props.handleSuccessPayment} />
   </Elements>
 );
 
 export default StripeCheckout;
+
+

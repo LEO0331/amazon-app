@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 //https://stackoverflow.com/questions/50807929/how-does-react-router-works-and-what-is-the-difference-between-link-androute/50808647
-import {BrowserRouter, Link, Route} from "react-router-dom"; //https://github.com/reactjs/react-router-tutorial/tree/master/lessons
+import {HashRouter, Link, Route} from "react-router-dom"; //https://github.com/reactjs/react-router-tutorial/tree/master/lessons
 import HomeScreen from './screens/HomeScreen';
 import ProductScreen from './screens/ProductScreen';
 import CartScreen from './screens/CartScreen';
@@ -32,6 +32,7 @@ import MapScreen from './screens/MapScreen';
 import DashboardScreen from './screens/DashboardScreen';
 import SupportScreen from './screens/SupportScreen';
 import ChatBox from './components/ChatBox';
+import { initializeCsrfToken } from './apiClient';
 
 function App() {
   const cart = useSelector(state => state.cart);
@@ -44,13 +45,14 @@ function App() {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(listProductCategories());
+    initializeCsrfToken();
   }, [dispatch]);
   const signoutHandler = () => {
     dispatch(signout());
   };
   //history is the prop of react-router-dom obj: https://reactrouter.com/web/api/history
   return ( //https://reactrouter.com/web/api/Route/render-func
-    <BrowserRouter>
+    <HashRouter>
       <div className="grid-container">
         <header className="row">
           <div>
@@ -182,7 +184,7 @@ function App() {
           <p className="lead">All right reserved. Copyright &copy; 2021 EShop</p>
         </footer>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
