@@ -233,3 +233,40 @@ test('support endpoints: create thread + send and list messages', async () => {
   const threadList = await threads.json();
   assert.ok(threadList.length >= 1);
 });
+
+test('security: protected route requires auth cookie', async () => {
+  await seed();
+  const response = await fetch(`${baseUrl}/api/orders/mine`);
+  assert.equal(response.status, 401);
+});
+
+test('security: csrf token required for protected mutation', async () => {
+  await seed();
+
+  const user = new Session(baseUrl);
+  const signin = await user.post('/api/users/signin', { email: 'user@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(signin.status, 200);
+
+  const noCsrf = await user.post('/api/support/threads', { userId: '' }, { withCsrf: false });
+  assert.equal(noCsrf.status, 403);
+});
+
+test('support security: non-admin cannot read another user thread', async () => {
+  await seed();
+
+  const customer = new Session(baseUrl);
+  const customerSignin = await customer.post('/api/users/signin', { email: 'user@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(customerSignin.status, 200);
+  await customer.getCsrfToken();
+
+  const threadResponse = await customer.post('/api/support/threads', { userId: '' });
+  assert.equal(threadResponse.status, 201);
+  const thread = await threadResponse.json();
+
+  const seller = new Session(baseUrl);
+  const sellerSignin = await seller.post('/api/users/signin', { email: 'seller@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(sellerSignin.status, 200);
+
+  const forbidden = await seller.request(`/api/support/threads/${thread._id}/messages`);
+  assert.equal(forbidden.status, 403);
+});
