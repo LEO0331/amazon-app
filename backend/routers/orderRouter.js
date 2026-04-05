@@ -1,168 +1,232 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
-import Order from '../models/orderModel.js';
-import User from '../models/userModel.js';
-import Product from '../models/productModel.js';
-import { isAdmin, isAuth, isAdminOrSeller, mailgun, payOrderEmailTemplate} from '../utils.js';
+import { randomUUID } from 'crypto';
+import { execute } from '../db/client.js';
+import { mapOrder } from '../db/mappers.js';
+import { isAdmin, isAdminOrSeller, isAuth } from '../utils.js';
 
 const orderRouter = express.Router();
 
-orderRouter.get('/', isAuth, isAdminOrSeller, expressAsyncHandler(async (req, res) => { //join() in SQL
+async function hydrateOrders(rows) {
+  const ids = [...new Set(rows.map((row) => row.user_id).filter(Boolean))];
+  const usersById = new Map();
+
+  if (ids.length > 0) {
+    const placeholders = ids.map(() => '?').join(',');
+    const users = await execute(`SELECT id, name FROM users WHERE id IN (${placeholders})`, ids);
+    users.rows.forEach((user) => usersById.set(user.id, { _id: user.id, name: user.name }));
+  }
+
+  return rows.map((row) => {
+    const mapped = mapOrder(row);
+    return {
+      ...mapped,
+      user: usersById.get(row.user_id) || mapped.user,
+    };
+  });
+}
+
+orderRouter.get(
+  '/',
+  isAuth,
+  isAdminOrSeller,
+  expressAsyncHandler(async (req, res) => {
     const seller = req.query.seller || '';
-    const sellerFilter = seller ? { seller } : {};
-    const orders = await Order.find({...sellerFilter}).populate('user', 'name'); //https://mongoosejs.com/docs/populate.html#population
-    res.send(orders);
-}));
+    let sql = 'SELECT * FROM orders';
+    const args = [];
 
-orderRouter.get('/summary', isAuth, isAdmin, expressAsyncHandler(async (req, res) => {
-    const orders = await Order.aggregate([ //https://mongoosejs.com/docs/api/aggregate.html#aggregate_Aggregate
+    if (seller) {
+      sql += ' WHERE seller_id = ?';
+      args.push(seller);
+    } else if (req.user.isSeller && !req.user.isAdmin) {
+      sql += ' WHERE seller_id = ?';
+      args.push(req.user._id);
+    }
+
+    sql += ' ORDER BY created_at DESC';
+    const result = await execute(sql, args);
+    res.send(await hydrateOrders(result.rows));
+  })
+);
+
+orderRouter.get(
+  '/summary',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (_req, res) => {
+    const ordersAgg = await execute(
+      'SELECT COUNT(*) AS numOrders, COALESCE(SUM(total_price), 0) AS totalSales FROM orders'
+    );
+    const usersAgg = await execute('SELECT COUNT(*) AS numUsers FROM users');
+    const daily = await execute(
+      `SELECT substr(created_at, 1, 10) AS _id, COUNT(*) AS orders, COALESCE(SUM(total_price), 0) AS sales
+       FROM orders GROUP BY substr(created_at, 1, 10) ORDER BY _id ASC`
+    );
+    const categories = await execute(
+      'SELECT category AS _id, COUNT(*) AS count FROM products GROUP BY category ORDER BY count DESC'
+    );
+
+    res.send({
+      orders: [
         {
-            $group: { //https://docs.mongodb.com/manual/reference/operator/aggregation/group/
-                _id: null, //null: accumulated values for all the input documents as a whole
-                numOrders: { $sum: 1 }, //https://docs.mongodb.com/manual/reference/operator/aggregation/sum/#mongodb-group-grp.-sum
-                totalSales: { $sum: '$totalPrice' } //all values in totalPrice
-            }
-        }
-    ]);
-    const users = await User.aggregate([ //summary.users[0].numUsers in dashboard screen
-        {
-            $group: {
-                _id: null,
-                numUsers: { $sum: 1 }
-            }
-        }
-    ]);
-    const dailyOrders = await Order.aggregate([
-        {
-            $group: { //https://docs.mongodb.com/manual/reference/operator/aggregation/dateToString/
-                _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-                orders: { $sum: 1 },
-                sales: { $sum: '$totalPrice' }
-            }
+          _id: null,
+          numOrders: Number(ordersAgg.rows[0]?.numOrders || 0),
+          totalSales: Number(ordersAgg.rows[0]?.totalSales || 0),
         },
-        { $sort: { _id: 1 } }
-    ]);
-    const productCategories = await Product.aggregate([
+      ],
+      users: [
         {
-            $group: {
-                _id: '$category',
-                count: { $sum: 1 }
-            }
-        }
-    ]);
-    res.send({ users, orders, dailyOrders, productCategories });
-}));
+          _id: null,
+          numUsers: Number(usersAgg.rows[0]?.numUsers || 0),
+        },
+      ],
+      dailyOrders: daily.rows.map((row) => ({
+        _id: row._id,
+        orders: Number(row.orders),
+        sales: Number(row.sales),
+      })),
+      productCategories: categories.rows.map((row) => ({
+        _id: row._id,
+        count: Number(row.count),
+      })),
+    });
+  })
+);
 
-orderRouter.post('/', isAuth, expressAsyncHandler(async (req, res) => {
-    if (req.body.orderItems.length === 0) {
-        res.status(400).send({ message: 'Cart is empty' }); //client error
-    } else {
-        const order = new Order({
-            seller: req.body.orderItems[0].seller, //one product only one seller
-            orderItems: req.body.orderItems,
-            shippingAddress: req.body.shippingAddress,
-            paymentMethod: req.body.paymentMethod,
-            itemsPrice: req.body.itemsPrice,
-            shippingPrice: req.body.shippingPrice,
-            taxPrice: req.body.taxPrice,
-            totalPrice: req.body.totalPrice,
-            user: req.user._id, //from middleware in util.js to authenticate
-        })
-        const createdOrder = await order.save(); //require save() in post to save new created model() in db
-        res.status(201).send({ message: 'New Order Created', order: createdOrder }); //to frontend '/api/orders/'
+orderRouter.post(
+  '/',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    if (!Array.isArray(req.body.orderItems) || req.body.orderItems.length === 0) {
+      res.status(400).send({ message: 'Cart is empty' });
+      return;
     }
-}));
 
-orderRouter.get('/mine', isAuth, expressAsyncHandler(async (req, res) => { //above /:id due to the concept of precedence for routers
-    const orders = await Order.find({ user: req.user._id }); //decoded JWT payload is available on the request via the user property
-    res.send(orders);
-}));
+    const timestamp = new Date().toISOString();
+    const id = randomUUID();
 
-orderRouter.get('/:id', isAuth, expressAsyncHandler(async (req, res) => {
-    const order = await Order.findById(req.params.id); //similar to product details api
-    if (order) {
-        res.send(order);
-    } else {
-        res.status(404).send({message: 'Order Not Found'});
+    await execute(
+      `INSERT INTO orders (
+        id, user_id, seller_id, order_items_json, shipping_address_json,
+        payment_method, payment_result_json, items_price, shipping_price, tax_price, total_price,
+        is_paid, paid_at, is_delivered, delivered_at, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL, 0, NULL, ?, ?)`,
+      [
+        id,
+        req.user._id,
+        req.body.orderItems[0]?.seller?._id || null,
+        JSON.stringify(req.body.orderItems),
+        JSON.stringify(req.body.shippingAddress || {}),
+        req.body.paymentMethod,
+        null,
+        Number(req.body.itemsPrice || 0),
+        Number(req.body.shippingPrice || 0),
+        Number(req.body.taxPrice || 0),
+        Number(req.body.totalPrice || 0),
+        timestamp,
+        timestamp,
+      ]
+    );
+
+    const created = (await execute('SELECT * FROM orders WHERE id = ?', [id])).rows[0];
+    res.status(201).send({ message: 'New Order Created', order: mapOrder(created) });
+  })
+);
+
+orderRouter.get(
+  '/mine',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const rows = await execute('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC', [req.user._id]);
+    res.send(rows.rows.map((row) => mapOrder(row)));
+  })
+);
+
+orderRouter.get(
+  '/:id',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const row = (await execute('SELECT * FROM orders WHERE id = ?', [req.params.id])).rows[0];
+    if (!row) {
+      res.status(404).send({ message: 'Order Not Found' });
+      return;
     }
-}));
+    res.send(mapOrder(row));
+  })
+);
 
-orderRouter.put('/:id/pay', isAuth, expressAsyncHandler(async (req, res) => { //update status of order
-    const order = await Order.findById(req.params.id).populate('user', 'email name');
-    if (order){
-        order.isPaid = true;
-        order.paidAt = Date.now();
-        order.paymentResult = { //info from paypal; https://developer.paypal.com/docs/api/payments/v2/
-            id: req.body.id,
-            status: req.body.status,
-            update_time: req.body.update_time,
-            email_address: req.body.email_address
-        };
-        const updatedOrder = await order.save();
-        mailgun().messages().send({ //https://help.mailgun.com/hc/en-us/articles/203637190-How-Do-I-Add-or-Delete-a-Domain-
-            from: 'Amazona <amazona@mg.yourdomain.com>',
-            to: `${order.user.name} <${order.user.email}>`,
-            subject: `New order ${order._id}`,
-            html: payOrderEmailTemplate(order) //content in email body
-        }, (error, body) => {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log(body);
-            }
-        });
-        res.send({ message: 'Order Paid', order: updatedOrder });
-    } else {
-        res.status(404).send({ message: 'Order Not Found' });
+orderRouter.put(
+  '/:id/pay',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const row = (await execute('SELECT * FROM orders WHERE id = ?', [req.params.id])).rows[0];
+    if (!row) {
+      res.status(404).send({ message: 'Order Not Found' });
+      return;
     }
-}));
 
-orderRouter.delete('/:id', isAuth, isAdmin, expressAsyncHandler(async (req, res) => {
-    const order = await Order.findById(req.params.id);
-    if (order) {
-        const deleteOrder = await order.remove();
-        res.send({ message: 'Order Deleted', product: deleteOrder });
-    } else {
-        res.status(404).send({ message: 'Order Not Found' });
-    }
-}));
+    const timestamp = new Date().toISOString();
+    await execute(
+      `UPDATE orders SET
+        is_paid = 1,
+        paid_at = ?,
+        payment_result_json = ?,
+        updated_at = ?
+      WHERE id = ?`,
+      [
+        timestamp,
+        JSON.stringify({
+          id: req.body.id,
+          status: req.body.status,
+          update_time: req.body.update_time,
+          email_address: req.body.email_address,
+        }),
+        timestamp,
+        req.params.id,
+      ]
+    );
 
-orderRouter.put('/:id/deliver', isAuth, isAdmin, expressAsyncHandler(async (req, res) => { //update status of order
-    const order = await Order.findById(req.params.id);
-    if (order){
-        order.isDelivered = true;
-        order.deliveredAt = Date.now();
-        const updatedOrder = await order.save();
-        res.send({ message: 'Order Delivered', order: updatedOrder });
-    } else {
-        res.status(404).send({ message: 'Order Not Found' });
-    }
-}));
+    const updated = (await execute('SELECT * FROM orders WHERE id = ?', [req.params.id])).rows[0];
+    res.send({ message: 'Order Paid', order: mapOrder(updated) });
+  })
+);
 
-/*
-https://stripe.com/docs/payments/integration-builder?client=react
-import Stripe from 'stripe'; //https://www.npmjs.com/package/stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-orderRouter.post('/secret/:id', isAuth, expressAsyncHandler(async (req, res) => {
-    const order = await Order.findById(req.params.id);
-    if (order) {
-        order.isPaid = true;
-        order.paidAt = Date.now();
-        order.paymentResult = {
-            id: req.body.id,
-            status: req.body.status,
-        };
-        const { totalPrices } = req.body.totalPrice
-        // Create a PaymentIntent with the order amount and currency
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: totalPrices,
-            currency: "usd"
-        });
-        const updatedOrder = await order.save();
-        res.send({ message: 'Order Paid', order: updatedOrder, clientSecret: paymentIntent.client_secret });
-    } else {
-        res.status(404).send({ message: 'Order Not Found' });
+orderRouter.delete(
+  '/:id',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const row = (await execute('SELECT * FROM orders WHERE id = ?', [req.params.id])).rows[0];
+    if (!row) {
+      res.status(404).send({ message: 'Order Not Found' });
+      return;
     }
-}));
-*/
+
+    await execute('DELETE FROM orders WHERE id = ?', [req.params.id]);
+    res.send({ message: 'Order Deleted', product: mapOrder(row) });
+  })
+);
+
+orderRouter.put(
+  '/:id/deliver',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const row = (await execute('SELECT * FROM orders WHERE id = ?', [req.params.id])).rows[0];
+    if (!row) {
+      res.status(404).send({ message: 'Order Not Found' });
+      return;
+    }
+
+    const timestamp = new Date().toISOString();
+    await execute(
+      'UPDATE orders SET is_delivered = 1, delivered_at = ?, updated_at = ? WHERE id = ?',
+      [timestamp, timestamp, req.params.id]
+    );
+
+    const updated = (await execute('SELECT * FROM orders WHERE id = ?', [req.params.id])).rows[0];
+    res.send({ message: 'Order Delivered', order: mapOrder(updated) });
+  })
+);
+
 export default orderRouter;

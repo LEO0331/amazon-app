@@ -12,6 +12,7 @@
 # production
 build
 /frontend/build
+/frontend/dist
 
 # misc
 .DS_Store
@@ -25,4 +26,6 @@ yarn-debug.log*
 yarn-error.log*
 
 .env
+/dev.db
+/backend/dev.db
 /uploads/*.jpg

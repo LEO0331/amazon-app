@@ -1,126 +1,157 @@
-import jwt from 'jsonwebtoken'; //https://www.npmjs.com/package/jsonwebtoken
-import mg from 'mailgun-js'; //https://www.npmjs.com/package/mailgun-js
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import mg from 'mailgun-js';
 
-export const generateToken = user => { //https://github.com/auth0/express-jwt
-    return jwt.sign( //jwt.sign(payload, secretOrPrivateKey, [options, callback])
-        {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            isAdmin: user.isAdmin,
-            isSeller: user.isSeller,
-        }, process.env.JWT_SECRET || 'secret', {expiresIn: '90d',}
-    );
-};
+const COOKIE_NAME = 'auth_token';
+const CSRF_COOKIE = 'csrf_token';
+const TOKEN_EXPIRES = '7d';
 
-export const isAuth = (req, res, next) => { //middleware to authenticate users
-    const authorization = req.headers.authorization; //https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization
-    if (authorization){ //https://stackoverflow.com/questions/24000580/how-does-req-headers-authorization-get-set
-        const token = authorization.slice(7, authorization.length); // format: Bearer XXXXXX; JWTs can be used as OAuth 2.0 Bearer Tokens to encode all relevant parts of an access token into the access token itself instead of having to store them in a database
-        jwt.verify(token, process.env.JWT_SECRET || 'secret', (err, decode) => { //decrypt; callback 
-            if (err) {
-                res.status(401).send({ message: 'Invalid User Token' });
-            } else {
-                req.user = decode;
-                next();
-            }
-            /*
-            if (err) {
-                return res.status(401).send({ message: 'Invalid Token' });
-            } 
-            req.user = decode;
-            next(); //to next middleware
-            */
-        });
-    } else {
-        res.status(401).send({ message: 'No Token' });
+function isProduction() {
+  return process.env.NODE_ENV === 'production';
+}
+
+export function generateToken(user) {
+  return jwt.sign(
+    {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      isSeller: user.isSeller,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: TOKEN_EXPIRES }
+  );
+}
+
+export function setAuthCookie(res, token) {
+  res.cookie(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: isProduction(),
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: '/',
+  });
+}
+
+export function clearAuthCookie(res) {
+  res.clearCookie(COOKIE_NAME, {
+    httpOnly: true,
+    secure: isProduction(),
+    sameSite: 'lax',
+    path: '/',
+  });
+}
+
+export function issueCsrfToken(res) {
+  const token = crypto.randomBytes(24).toString('hex');
+  res.cookie(CSRF_COOKIE, token, {
+    httpOnly: false,
+    secure: isProduction(),
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000,
+    path: '/',
+  });
+  return token;
+}
+
+export function csrfProtection(req, res, next) {
+  const safeMethod = ['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+  if (safeMethod) {
+    return next();
+  }
+
+  const ignoredPaths = new Set([
+    '/api/users/signin',
+    '/api/users/register',
+    '/api/users/signout',
+  ]);
+
+  if (ignoredPaths.has(req.path)) {
+    return next();
+  }
+
+  const cookieToken = req.cookies?.[CSRF_COOKIE];
+  const headerToken = req.headers['x-csrf-token'];
+
+  if (!cookieToken || !headerToken || cookieToken !== headerToken) {
+    return res.status(403).send({ message: 'CSRF token missing or invalid' });
+  }
+
+  return next();
+}
+
+export function isAuth(req, res, next) {
+  const bearer = req.headers.authorization?.startsWith('Bearer ')
+    ? req.headers.authorization.slice(7)
+    : null;
+  const token = req.cookies?.[COOKIE_NAME] || bearer;
+
+  if (!token) {
+    return res.status(401).send({ message: 'No Token' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decode) => {
+    if (err) {
+      return res.status(401).send({ message: 'Invalid User Token' });
     }
-};
+    req.user = decode;
+    return next();
+  });
+}
 
-export const isAdmin = (req, res, next) => {
-    if(req.user && req.user.isAdmin){
-        next();
-    } else {
-        res.status(401).send({ message: 'Invalid Admin Token' });
-    }
-};
+export function isAdmin(req, res, next) {
+  if (req.user?.isAdmin) {
+    return next();
+  }
+  return res.status(401).send({ message: 'Invalid Admin Token' });
+}
 
-export const isSeller = (req, res, next) => {
-    if(req.user && req.user.isSeller){
-        next();
-    } else {
-        res.status(401).send({ message: 'Invalid Seller Token' });
-    }
-};
+export function isSeller(req, res, next) {
+  if (req.user?.isSeller) {
+    return next();
+  }
+  return res.status(401).send({ message: 'Invalid Seller Token' });
+}
 
-export const isAdminOrSeller = (req, res, next) => {
-    if(req.user && (req.user.isAdmin || req.user.isSeller)){
-        next();
-    } else {
-        res.status(401).send({ message: 'Invalid Admin/Seller Token' });
-    }
-};
+export function isAdminOrSeller(req, res, next) {
+  if (req.user?.isAdmin || req.user?.isSeller) {
+    return next();
+  }
+  return res.status(401).send({ message: 'Invalid Admin/Seller Token' });
+}
 
-export const mailgun = () => mg({ //const mg = mailgun({apiKey: api_key, domain: DOMAIN});
+export function mailgun() {
+  return mg({
     apiKey: process.env.MAILGUN_API_KEY,
-    domain: process.env.MAILGUN_DOMAIN
-});
+    domain: process.env.MAILGUN_DOMAIN,
+  });
+}
 
-export const payOrderEmailTemplate = (order) => {
-    return `<h1>Thank you for shopping with us!</h1>
-    <p>Hi ${order.user.name},</p>
-    <p>Congratulations! We have finished processing your order.</p>
-    <h2>[Order ${order._id}] (${order.createdAt.toString().substring(0, 10)})</h2>
-    <table>
-    <thead>
+export function payOrderEmailTemplate(order) {
+  return `<h1>Thank you for shopping with us!</h1>
+  <p>Hi ${order.user?.name || 'Customer'},</p>
+  <p>Congratulations! We have finished processing your order.</p>
+  <h2>[Order ${order._id}] (${new Date(order.createdAt).toISOString().substring(0, 10)})</h2>
+  <table>
+  <thead>
+  <tr>
+  <td><strong>Product</strong></td>
+  <td><strong>Quantity</strong></td>
+  <td><strong align="right">Price</strong></td>
+  </tr>
+  </thead>
+  <tbody>
+  ${(order.orderItems || [])
+    .map(
+      (item) => `
     <tr>
-    <td><strong>Product</strong></td>
-    <td><strong>Quantity</strong></td>
-    <td><strong align="right">Price</strong></td>
-    </thead>
-    <tbody>
-    ${order.orderItems.map(item => `
-      <tr>
       <td>${item.name}</td>
       <td align="center">${item.qty}</td>
-      <td align="right"> $${item.price.toFixed(2)}</td>
-      </tr>
-    `
-    ).join('\n')}
-    </tbody>
-    <tfoot>
-    <tr>
-    <td colspan="2">Items Price:</td>
-    <td align="right"> $${order.itemsPrice.toFixed(2)}</td>
-    </tr>
-    <tr>
-    <td colspan="2">Tax Price:</td>
-    <td align="right"> $${order.taxPrice.toFixed(2)}</td>
-    </tr>
-    <tr>
-    <td colspan="2">Shipping Price:</td>
-    <td align="right"> $${order.shippingPrice.toFixed(2)}</td>
-    </tr>
-    <tr>
-    <td colspan="2"><strong>Total Price:</strong></td>
-    <td align="right"><strong> $${order.totalPrice.toFixed(2)}</strong></td>
-    </tr>
-    <tr>
-    <td colspan="2">Payment Method:</td>
-    <td align="right">${order.paymentMethod}</td>
-    </tr>
-    </table>
-    <h2>Shipping Address</h2>
-    <p>
-    ${order.shippingAddress.fullName},<br/>
-    ${order.shippingAddress.address},<br/>
-    ${order.shippingAddress.city},<br/>
-    ${order.shippingAddress.postalCode},<br/>
-    ${order.shippingAddress.country}<br/>
-    </p>
-    <hr/>
-    <p>
-    Thanks for shopping with us!
-    </p>
-    `;
-};
+      <td align="right">$${Number(item.price).toFixed(2)}</td>
+    </tr>`
+    )
+    .join('')}
+  </tbody>
+  </table>`;
+}

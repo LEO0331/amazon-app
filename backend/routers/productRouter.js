@@ -1,151 +1,276 @@
 import express from 'express';
-import expressAsyncHandler from 'express-async-handler'; //try-catch
-import data from '../data.js';
-import Product from '../models/productModel.js';
-import User from '../models/userModel.js';
+import expressAsyncHandler from 'express-async-handler';
+import { randomUUID } from 'crypto';
+import { execute } from '../db/client.js';
+import { mapProduct, mapUser } from '../db/mappers.js';
 import { isAdmin, isAdminOrSeller, isAuth } from '../utils.js';
+import { resetDatabase, seedProducts, seedUsers } from '../services/seedService.js';
 
 const productRouter = express.Router();
-//https://www.geeksforgeeks.org/mongoose-find-function/
-productRouter.get('/', expressAsyncHandler(async (req, res) => { //add to the end: /api/products/ -> exact api frontend send to
-    const pageSize = 8; //contain ? products in a page
-    const page = Number(req.query.pageNumber) || 1;
+
+const PAGE_SIZE = 12;
+const MAX_PAGE_SIZE = 30;
+
+function toNumber(value, fallback = 0) {
+  const next = Number(value);
+  return Number.isFinite(next) ? next : fallback;
+}
+
+async function loadSellerMap(rows) {
+  const ids = [...new Set(rows.map((row) => row.seller_id).filter(Boolean))];
+  if (ids.length === 0) {
+    return new Map();
+  }
+
+  const placeholders = ids.map(() => '?').join(',');
+  const users = await execute(`SELECT * FROM users WHERE id IN (${placeholders})`, ids);
+  return new Map(users.rows.map((user) => [user.id, mapUser(user)]));
+}
+
+productRouter.get(
+  '/',
+  expressAsyncHandler(async (req, res) => {
+    const page = Math.max(1, toNumber(req.query.pageNumber, 1));
+    const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, toNumber(req.query.pageSize, PAGE_SIZE)));
     const seller = req.query.seller || '';
     const name = req.query.name || '';
     const category = req.query.category || '';
-    const min = req.query.min && Number(req.query.min) !== 0 ? Number(req.query.min) : 0;
-    const max = req.query.max && Number(req.query.max) !== 0 ? Number(req.query.max) : 0; //max can be 0 as Any product in util.js
+    const min = req.query.min ? toNumber(req.query.min, 0) : 0;
+    const max = req.query.max ? toNumber(req.query.max, 0) : 0;
+    const rating = req.query.rating ? toNumber(req.query.rating, 0) : 0;
     const order = req.query.order || '';
-    const rating = req.query.rating && Number(req.query.rating) !== 0 ? Number(req.query.rating) : 0;
-    const sellerFilter = seller ? { seller } : {}; //{}: all products; get from '/seed' and post('/')
-    const nameFilter = name ? { name: { $regex: name, $options: 'i' } } : {}; //contained check: https://docs.mongodb.com/manual/reference/operator/query/regex/
-    const categoryFilter = category ? { category } : {};
-    const priceFilter = min && max ? { price: { $gte: min, $lte: max } } : {}; //>=, <=
-    const ratingFilter = rating ? { rating: { $gte: rating } } : {};
-    const sortOrder = order === 'lowest'
-        ? { price: 1 }
+
+    const where = [];
+    const args = [];
+
+    if (seller) {
+      where.push('seller_id = ?');
+      args.push(seller);
+    }
+
+    if (name) {
+      where.push('LOWER(name) LIKE ?');
+      args.push(`%${name.toLowerCase()}%`);
+    }
+
+    if (category) {
+      where.push('category = ?');
+      args.push(category);
+    }
+
+    if (min && max) {
+      where.push('price BETWEEN ? AND ?');
+      args.push(min, max);
+    }
+
+    if (rating) {
+      where.push('rating >= ?');
+      args.push(rating);
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+    const sortOrder =
+      order === 'lowest'
+        ? 'price ASC'
         : order === 'highest'
-        ? { price: -1 }
-        : order === 'toprated'
-        ? { rating: -1 }
-        : { _id: -1 }; //newest
-    const count = await Product.count({
-        ...sellerFilter,
-        ...nameFilter,
-        ...categoryFilter,
-        ...priceFilter,
-        ...ratingFilter,
+          ? 'price DESC'
+          : order === 'toprated'
+            ? 'rating DESC'
+            : 'created_at DESC';
+
+    const countResult = await execute(`SELECT COUNT(*) AS count FROM products ${whereSql}`, args);
+    const count = Number(countResult.rows[0]?.count || 0);
+
+    const rows = await execute(
+      `SELECT * FROM products ${whereSql} ORDER BY ${sortOrder} LIMIT ? OFFSET ?`,
+      [...args, pageSize, pageSize * (page - 1)]
+    );
+
+    const sellerMap = await loadSellerMap(rows.rows);
+    const products = rows.rows.map((row) =>
+      mapProduct(row, row.seller_id ? sellerMap.get(row.seller_id) || { _id: row.seller_id } : null)
+    );
+
+    res.send({
+      products,
+      page,
+      pages: Math.ceil(count / pageSize),
     });
-    const products = await Product.find({
-        ...sellerFilter,
-        ...nameFilter,
-        ...categoryFilter,
-        ...priceFilter,
-        ...ratingFilter
-    }).populate('seller', 'seller.name seller.logo').sort(sortOrder).skip(pageSize * (page - 1)).limit(pageSize); //only obj fields
-    res.send({products, page, pages: Math.ceil(count / pageSize)}); //https://stackoverflow.com/questions/5539955/how-to-paginate-with-mongoose-in-node-js
-}));
+  })
+);
 
-productRouter.get('/categories', expressAsyncHandler(async (req, res) => {
-    const categories = await Product.find().distinct('category'); //Return Distinct Values for a Field
-    res.send(categories);
-}));
+productRouter.get(
+  '/categories',
+  expressAsyncHandler(async (_req, res) => {
+    const categories = await execute('SELECT DISTINCT category FROM products ORDER BY category ASC');
+    res.send(categories.rows.map((row) => row.category));
+  })
+);
 
-productRouter.get('/seed', expressAsyncHandler(async (req, res) => { //products showing on the homeScreen
-    await Product.remove({});
-    //https://www.geeksforgeeks.org/mongoose-insertmany-function/
-    const seller = await User.findOne({ isSeller: true });
-    if (seller) { //all products have sellers
-        const products = data.products.map(product => ({...product, seller: seller._id,}));
-        const createdProducts = await Product.insertMany(products); //insertMany() function is used to insert multiple documents into a collection. It accepts an array of documents to insert into the collection.
-        res.send({ createdProducts }); //{[{p1},{p2}]}; can be reach from get('/')
-    } else {
-        res.status(500).send({ message: 'No seller found. Please first run /api/users/seed' });
-    }
-}));
-//put at the end to avoid get '/seed' as id; https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes
-productRouter.get('/:id', expressAsyncHandler(async (req, res) => { //product details api
-    const product = await Product.findById(req.params.id).populate('seller', 'seller.name seller.logo seller.rating seller.numReviews');
-    if (product) {
-        res.send(product);
-    } else {
-        res.status(404).send({ message: 'Product Not Found' });
-    }
-    /* https://stackoverflow.com/questions/43055600/app-get-is-there-any-difference-between-res-send-vs-return-res-send
-    if (product) {
-        return res.send(product);
-    }
-    res.status(404).send({message: 'Product Not Found'});
-    */
-}));
-
-productRouter.post('/',  isAuth, isAdminOrSeller, expressAsyncHandler(async (req, res) => {
-    const product = new Product({ //sample data; timestamp to unique data avoid duplicate error
-        name: 'sample name ' + Date.now(),
-        seller: req.user._id, //current user see their products
-        image: '/images/p1.jpg',
-        price: 0,
-        category: 'sample category',
-        brand: 'sample brand',
-        countInStock: 0,
-        rating: 0,
-        numReviews: 0,
-        description: 'sample description',
+productRouter.get(
+  '/seed',
+  expressAsyncHandler(async (_req, res) => {
+    await resetDatabase();
+    const users = await seedUsers();
+    await seedProducts({
+      count: 500,
+      sellerIds: users.filter((user) => user.isSeller).map((user) => user.id),
     });
-    const createdProduct = await product.save();
-    res.send({ message: 'Product Created', product: createdProduct }); //product: use in createProduct action; not related to get('/') cuz its product is directly from db
-}));
+    res.send({ message: 'Seed complete', productCount: 500 });
+  })
+);
 
-productRouter.put('/:id', isAuth, isAdminOrSeller, expressAsyncHandler(async (req, res) => {
-    const product = await Product.findById(req.params.id);
-    if (product) {
-        product.name = req.body.name;
-        product.price = req.body.price;
-        product.image = req.body.image;
-        product.category = req.body.category;
-        product.brand = req.body.brand;
-        product.countInStock = req.body.countInStock;
-        product.description = req.body.description;
-        const updatedProduct = await product.save();
-        res.send({ message: 'Product Updated', product: updatedProduct });
-    } else {
-        res.status(404).send({ message: 'Product Not Found' });
+productRouter.get(
+  '/:id',
+  expressAsyncHandler(async (req, res) => {
+    const result = await execute('SELECT * FROM products WHERE id = ?', [req.params.id]);
+    const row = result.rows[0];
+    if (!row) {
+      res.status(404).send({ message: 'Product Not Found' });
+      return;
     }
-}));
 
-productRouter.delete('/:id', isAuth, isAdmin, expressAsyncHandler(async (req, res) => {
-    const product = await Product.findById(req.params.id);
-    if (product) {
-        const deleteProduct = await product.remove();
-        res.send({ message: 'Product Deleted', product: deleteProduct });
-    } else {
-        res.status(404).send({ message: 'Product Not Found' });
+    let seller = null;
+    if (row.seller_id) {
+      const sellerResult = await execute('SELECT * FROM users WHERE id = ?', [row.seller_id]);
+      if (sellerResult.rows[0]) {
+        seller = mapUser(sellerResult.rows[0]);
+      }
     }
-}));
 
-productRouter.post('/:id/reviews', isAuth, expressAsyncHandler(async (req, res) => {
-    const productId = req.params.id;
-    const product = await Product.findById(productId);
-    if (product) {
-        if (product.reviews.find(n => n.name === req.user.name)){
-            return res.status(404).send({ message: 'You have already submitted a review' });
-        }
-        const review = {
-            name: req.user.name,
-            rating: Number(req.body.rating),
-            comment: req.body.comment,
-        };
-        product.reviews.push(review); //array end
-        product.numReviews = product.reviews.length;
-        product.rating = product.reviews.reduce((a, c) => c.rating + a, 0) / product.reviews.length;
-        const updatedProduct = await product.save();
-        res.status(201).send({
-            message: 'Review Created',
-            review: updatedProduct.reviews[updatedProduct.reviews.length - 1] //array end
-        });
-    } else {
-        res.status(404).send({ message: 'Product Not Found' });
+    res.send(mapProduct(row, seller));
+  })
+);
+
+productRouter.post(
+  '/',
+  isAuth,
+  isAdminOrSeller,
+  expressAsyncHandler(async (req, res) => {
+    const now = new Date().toISOString();
+    const id = randomUUID();
+    await execute(
+      `INSERT INTO products (
+        id, seller_id, name, image, brand, category, description,
+        price, count_in_stock, rating, num_reviews, reviews_json, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        req.user._id,
+        `sample name ${Date.now()}`,
+        '/images/p1.jpg',
+        'sample brand',
+        'sample category',
+        'sample description',
+        0,
+        0,
+        0,
+        0,
+        '[]',
+        now,
+        now,
+      ]
+    );
+
+    const product = (await execute('SELECT * FROM products WHERE id = ?', [id])).rows[0];
+    res.send({ message: 'Product Created', product: mapProduct(product, { _id: req.user._id }) });
+  })
+);
+
+productRouter.put(
+  '/:id',
+  isAuth,
+  isAdminOrSeller,
+  expressAsyncHandler(async (req, res) => {
+    const row = (await execute('SELECT * FROM products WHERE id = ?', [req.params.id])).rows[0];
+    if (!row) {
+      res.status(404).send({ message: 'Product Not Found' });
+      return;
     }
-}));
+
+    await execute(
+      `UPDATE products SET
+        name = ?,
+        price = ?,
+        image = ?,
+        category = ?,
+        brand = ?,
+        count_in_stock = ?,
+        description = ?,
+        updated_at = ?
+      WHERE id = ?`,
+      [
+        req.body.name,
+        req.body.price,
+        req.body.image,
+        req.body.category,
+        req.body.brand,
+        req.body.countInStock,
+        req.body.description,
+        new Date().toISOString(),
+        req.params.id,
+      ]
+    );
+
+    const updated = (await execute('SELECT * FROM products WHERE id = ?', [req.params.id])).rows[0];
+    res.send({ message: 'Product Updated', product: mapProduct(updated, { _id: updated.seller_id }) });
+  })
+);
+
+productRouter.delete(
+  '/:id',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const row = (await execute('SELECT * FROM products WHERE id = ?', [req.params.id])).rows[0];
+    if (!row) {
+      res.status(404).send({ message: 'Product Not Found' });
+      return;
+    }
+
+    await execute('DELETE FROM products WHERE id = ?', [req.params.id]);
+    res.send({ message: 'Product Deleted', product: mapProduct(row, { _id: row.seller_id }) });
+  })
+);
+
+productRouter.post(
+  '/:id/reviews',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const row = (await execute('SELECT * FROM products WHERE id = ?', [req.params.id])).rows[0];
+    if (!row) {
+      res.status(404).send({ message: 'Product Not Found' });
+      return;
+    }
+
+    const reviews = JSON.parse(row.reviews_json || '[]');
+    if (reviews.some((review) => review.name === req.user.name)) {
+      res.status(400).send({ message: 'You have already submitted a review' });
+      return;
+    }
+
+    const review = {
+      name: req.user.name,
+      rating: Number(req.body.rating),
+      comment: req.body.comment,
+      createdAt: new Date().toISOString(),
+    };
+
+    reviews.push(review);
+    const numReviews = reviews.length;
+    const rating = reviews.reduce((total, item) => total + Number(item.rating), 0) / numReviews;
+
+    await execute(
+      'UPDATE products SET reviews_json = ?, num_reviews = ?, rating = ?, updated_at = ? WHERE id = ?',
+      [JSON.stringify(reviews), numReviews, Number(rating.toFixed(2)), new Date().toISOString(), req.params.id]
+    );
+
+    res.status(201).send({
+      message: 'Review Created',
+      review,
+    });
+  })
+);
 
 export default productRouter;

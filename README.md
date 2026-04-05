@@ -1,36 +1,63 @@
-# ECommerce Website
-![Eshop](/template/ProfilePic.jpg)
-This is an e-commerce website similar to Amazon using MERN stack (MongoDB, ExpressJS, React and Node.JS).
+# ECommerce Website (SQLite + Vite)
+
+This project is an Amazon-style ecommerce app with:
+- Backend: Express + Turso/libSQL (SQLite protocol)
+- Frontend: React + Redux + Vite
+- Security: HTTP-only auth cookies, CSRF token checks, strict CORS
+- Support: Async support inbox (no websocket dependency)
+
+## Prerequisites
+
+- Node.js 20+
+- A Turso/libSQL database (or local sqlite URL: `file:./dev.db`)
+
+## Environment
+
+Copy `.env.example` to `.env` and set values.
+
+Required:
+- `JWT_SECRET`
+- `DATABASE_URL`
+
+## Install
+
+```bash
+npm install
+cd frontend && npm install
+```
+
 ## Run Locally
-### 1. Clone repo
+
+Backend:
+```bash
+npm run backend:start
 ```
-$ git clone https://github.com/LEO0331/amazon-app.git
-$ cd Ecommerce
+
+Frontend (Vite):
+```bash
+cd frontend
+npm run dev
 ```
-### 2. Setup MongoDB
-- Local MongoDB
-  - Install from [https://www.mongodb.com/try/download/community](https://www.mongodb.com/try/download/community)
-  - Create .env file in the root folder
-  - Set MONGODB_URL=mongodb://localhost/Ecommerce  
-- Atlas Cloud MongoDB
-  - Create database at [https://cloud.mongodb.com](https://cloud.mongodb.com)
-  - Create .env file in root folder
-  - Set MONGODB_URL=mongodb+srv://your-db-connection
-### 3. Run Backend
+
+## Seed Demo Data
+
+1. Sign in as admin (`admin@gmail.com` / `1234`) after initial user seed endpoint is run.
+2. Call `POST /api/seed` with admin auth to generate demo data (500 products by default).
+
+## Tests
+
+```bash
+npm test
 ```
-$ npm install
-$ npm start
+
+## Build Frontend
+
+```bash
+cd frontend
+npm run build
 ```
-### 4. Run Frontend
-```
-# open another/new terminal
-$ cd frontend
-$ npm install
-$ npm start
-```
-### 5. Seed Users and Products
-- Run on chrome: http://localhost:5000/api/users/seed
-- Returns admin/seller/customer email and password
-- Run on chrome: http://localhost:5000/api/products/seed
-- Creates 6 sample products
-- Remove **await Product.remove({})** at productRouter.js and **await User.remove({})** at userRouter.js after seeding
+
+## Deployment
+
+- Backend: Vercel (`vercel.json` routes `/api/*` to `api/index.js`)
+- Frontend: GitHub Pages (set `VITE_BASE_PATH` and `VITE_API_BASE_URL` in frontend env)
