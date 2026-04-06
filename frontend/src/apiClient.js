@@ -1,7 +1,23 @@
 import axios from 'axios';
 
-const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || '/';
-const baseURL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
+function normalizeBaseUrl(rawValue) {
+  const value = (rawValue || '/').trim();
+  if (value === '/') {
+    return '/';
+  }
+  if (/^https?:\/\//i.test(value)) {
+    return value.endsWith('/') ? value.slice(0, -1) : value;
+  }
+  if (value.startsWith('//')) {
+    const prefixed = `https:${value}`;
+    return prefixed.endsWith('/') ? prefixed.slice(0, -1) : prefixed;
+  }
+  // Support domain-only secret values like "my-api.vercel.app".
+  const withProtocol = `https://${value.replace(/^\/+/, '')}`;
+  return withProtocol.endsWith('/') ? withProtocol.slice(0, -1) : withProtocol;
+}
+
+const baseURL = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
 const apiClient = axios.create({
   baseURL,
