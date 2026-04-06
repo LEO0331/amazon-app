@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { listProducts } from '../actions/productActions';
@@ -14,6 +14,7 @@ function SearchScreen(props) { // /search/name/${name}
     const { loading, error, products, page, pages } = productList;
     const productCategoryList = useSelector(state => state.productCategoryList);
     const { loading: loadingCategories, error: errorCategories, categories } = productCategoryList;
+    const [filtersOpen, setFiltersOpen] = useState(true);
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(listProducts({ // /all&/ return all products
@@ -44,16 +45,19 @@ function SearchScreen(props) { // /search/name/${name}
                             <label htmlFor="sortOrder">Sort By</label>
                             <select id="sortOrder" className="s-box" value={order} onChange={e => {props.history.push(getFilterUrl({ order: e.target.value }))}}>
                                 <option value="newest">Newest Arrivals</option>
-                                <option value="toprated">Avg. Customer Reviews</option>
+                                <option value="toprated">Average Customer Rating</option>
                                 <option value="lowest">Price: Low to High</option>
                                 <option value="highest">Price: High to Low</option>
                             </select>
                         </div>
+                        <button type="button" className="filter-toggle-btn" onClick={() => setFiltersOpen(!filtersOpen)}>
+                            {filtersOpen ? 'Hide Filters' : 'Show Filters'}
+                        </button>
                     </>
                 )}
             </div>
             <div className="search-layout">
-                <div className="search-filters">
+                <div className={`search-filters ${filtersOpen ? '' : 'collapsed'}`}>
                     <section className="filter-card">
                         <h3>Department</h3>
                         {loadingCategories ? (
@@ -84,12 +88,12 @@ function SearchScreen(props) { // /search/name/${name}
                         </ul>
                     </section>
                     <section className="filter-card">
-                        <h3>Avg. Customer Review</h3>
+                        <h3>Average Customer Rating</h3>
                         <ul className="filter-list">
                             {ratings.map(r => ( //side bar shows reviews
                                 <li key={r.name}>
                                     <Link className={`filter-link filter-rating-link ${`${r.rating}` === `${rating}` ? 'active' : ''}`} to={getFilterUrl({ rating: r.rating })}>
-                                        <Ratings caption={' & up'} rating={r.rating} />
+                                        <Ratings caption={' stars & up'} rating={r.rating} />
                                     </Link>
                                 </li>
                             ))}

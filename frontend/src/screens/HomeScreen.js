@@ -29,6 +29,15 @@ const heroSlides = [
   },
 ];
 
+const topSellerShowcase = [
+  'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1400&q=80',
+  'https://images.unsplash.com/photo-1467043198406-dc953a3defa0?auto=format&fit=crop&w=1400&q=80',
+  'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=1400&q=80',
+  'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1400&q=80',
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1400&q=80',
+  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1400&q=80',
+];
+
 function HomeScreen() {
   const dispatch = useDispatch();
   const productList = useSelector(state => state.productList); //from store to reflect on the view
@@ -59,6 +68,13 @@ function HomeScreen() {
       ) : (
         <>
           {sellers.length === 0 && <MessageBox>No Seller Found</MessageBox>}
+          <Carousel className="seller-showcase-carousel" showArrows autoPlay infiniteLoop interval={3000} showThumbs={false} showStatus={false}>
+            {topSellerShowcase.map((image, index) => (
+              <div key={image}>
+                <img src={image} alt={`Top Seller Showcase ${index + 1}`} />
+              </div>
+            ))}
+          </Carousel>
           <Carousel className="seller-carousel" showArrows autoPlay showThumbs={false} showStatus={false}>
             {sellers.map(seller => (
               <div key={seller._id}>

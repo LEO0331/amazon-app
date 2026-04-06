@@ -6,7 +6,7 @@ import { resolveAssetUrl } from '../utils';
 function Products(props){
     const {product} = props; //const product = props.product
     return(
-        <div className="card">
+        <div className="card product-card">
             <Link to={`/product/${product._id}`}>
                 <img className="medium" src={resolveAssetUrl(product.image)} alt={product.name}/>
             </Link>
