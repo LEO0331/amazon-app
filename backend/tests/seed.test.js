@@ -18,4 +18,7 @@ test('seed pipeline generates 500 products', async () => {
   await seedProducts({ count: 500, sellerIds });
   const productCount = await execute('SELECT COUNT(*) AS count FROM products');
   assert.equal(Number(productCount.rows[0].count), 500);
+
+  const imageRows = await execute('SELECT image FROM products GROUP BY image');
+  assert.ok(imageRows.rows.length >= 6);
 });

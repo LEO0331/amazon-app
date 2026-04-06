@@ -5,8 +5,7 @@ import { listProducts } from '../actions/productActions';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import Products from '../components/Products';
-import Ratings from '../components/Ratings';
-import { prices, ratings } from '../utils';
+import { prices } from '../utils';
 
 function SearchScreen(props) { // /search/name/${name}
     const { name = 'all', category = 'all', min = 0, max = 0, rating = 0, order = 'newest', pageNumber = 1 } = useParams(); //https://reactrouter.com/web/api/Hooks/useparams
@@ -83,18 +82,6 @@ function SearchScreen(props) { // /search/name/${name}
                             {prices.map(p => ( //side bar shows prices
                                 <li key={p.name}>
                                     <Link className={`filter-link ${`${p.min}-${p.max}` === `${min}-${max}` ? 'active' : ''}`} to={getFilterUrl({ min: p.min, max: p.max })}>{p.name}</Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
-                    <section className="filter-card">
-                        <h3>Average Customer Rating</h3>
-                        <ul className="filter-list">
-                            {ratings.map(r => ( //side bar shows reviews
-                                <li key={r.name}>
-                                    <Link className={`filter-link filter-rating-link ${`${r.rating}` === `${rating}` ? 'active' : ''}`} to={getFilterUrl({ rating: r.rating })}>
-                                        <Ratings caption={' stars & up'} rating={r.rating} />
-                                    </Link>
                                 </li>
                             ))}
                         </ul>

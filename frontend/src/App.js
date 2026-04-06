@@ -74,7 +74,7 @@ function App() {
               aria-label={sidebarIsOpen ? 'Close categories menu' : 'Open categories menu'}
               onClick={() => setSidebarIsOpen((prev) => !prev)}
             >
-              <i className="fa fa-bars"></i>
+              <span className="sidebar-icon" aria-hidden="true">{sidebarIsOpen ? '\u00D7' : '\u2630'}</span>
             </button>
             <Link className="brand" to="/">EShop</Link>
           </div>
@@ -152,8 +152,9 @@ function App() {
                 onClick={() => setSidebarIsOpen(false)}
                 className="close-sidebar"
                 type="button"
+                aria-label="Close categories menu"
               >
-                <i className="fa fa-close"></i>
+                <span className="sidebar-icon" aria-hidden="true">\u00D7</span>
               </button>
             </li>
             {loadingCategories ? (

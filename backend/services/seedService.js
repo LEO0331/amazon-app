@@ -16,6 +16,12 @@ const sellerLogos = [
 const productImages = [
   'https://opengameart.org/sites/default/files/items.png',
   'https://opengameart.org/sites/default/files/items_31.png',
+  'https://opengameart.org/sites/default/files/preview_47.png',
+  'https://opengameart.org/sites/default/files/preview_79.png',
+  'https://opengameart.org/sites/default/files/preview_102.png',
+  'https://opengameart.org/sites/default/files/preview_138.png',
+  'https://opengameart.org/sites/default/files/preview_187.png',
+  'https://opengameart.org/sites/default/files/preview_214.png',
 ];
 
 export async function resetDatabase() {
