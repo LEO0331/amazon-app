@@ -37,8 +37,8 @@ function CartScreen(props) { //path="/cart/:id?"
                     <ul>
                         {
                             cartItems.map(item => (
-                                <li key={item.product}>
-                                    <div className="row">
+                                <li key={item.product} className="cart-item">
+                                    <div className="row cart-item-row">
                                         <div>
                                             <img src={resolveAssetUrl(item.image)} alt={item.name} className="small" />
                                         </div>

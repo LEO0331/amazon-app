@@ -52,33 +52,35 @@ function ProductListScreen(props) {
                 <MessageBox variant="danger">{error}</MessageBox>
                 ) : (
                 <>
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>NAME</th>
-                                <th>PRICE</th>
-                                <th>CATEGORY</th>
-                                <th>BRAND</th>
-                                <th>ACTIONS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {products.map(product => (
-                                <tr key={product._id}>
-                                    <td>{product._id}</td>
-                                    <td>{product.name}</td>
-                                    <td>{product.price}</td>
-                                    <td>{product.category}</td>
-                                    <td>{product.brand}</td>
-                                    <td>
-                                        <button type="button" className="small" onClick={() => {props.history.push(`/product/${product._id}/edit`)}}>Edit</button>
-                                        <button type="button" className="small" onClick={() => deleteHandler(product)}>Delete</button>
-                                    </td>
+                    <div className="table-wrap">
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>NAME</th>
+                                    <th>PRICE</th>
+                                    <th>CATEGORY</th>
+                                    <th>BRAND</th>
+                                    <th>ACTIONS</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {products.map(product => (
+                                    <tr key={product._id}>
+                                        <td>{product._id}</td>
+                                        <td>{product.name}</td>
+                                        <td>{product.price}</td>
+                                        <td>{product.category}</td>
+                                        <td>{product.brand}</td>
+                                        <td>
+                                            <button type="button" className="small" onClick={() => {props.history.push(`/product/${product._id}/edit`)}}>Edit</button>
+                                            <button type="button" className="small" onClick={() => deleteHandler(product)}>Delete</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                     <div className="row center pagination">
                         {[...Array(pages).keys()].map(x => ( //convert pages to link; similar format as Qty in productScreen -- implement pages in other listScreen
                             <Link className={x + 1 === page ? 'active' : ''} key={x + 1} to={`/productlist/pageNumber/${x + 1}`}>

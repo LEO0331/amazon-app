@@ -93,7 +93,7 @@ function SupportScreen() {
         {!selectedThreadId ? (
           <MessageBox>Select a thread to start support</MessageBox>
         ) : (
-          <div>
+          <div className="support-chat-panel">
             <div className="row">
               <strong>{`Chat with ${selectedThread?.user?.name || 'Customer'}`}</strong>
             </div>
@@ -106,7 +106,7 @@ function SupportScreen() {
                 </li>
               ))}
             </ul>
-            <form onSubmit={submitHandler} className="row">
+            <form onSubmit={submitHandler} className="row support-compose">
               <input
                 value={messageBody}
                 onChange={(event) => setMessageBody(event.target.value)}

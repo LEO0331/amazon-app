@@ -99,7 +99,7 @@ function OrderScreen(props) { // /order/${order._id} screen
                                 <ul>
                                     {order.orderItems.map(item => (
                                         <li key={item.product}>
-                                            <div className="row">
+                                            <div className="row order-item-row">
                                                 <div>
                                                     <img src={resolveAssetUrl(item.image)} alt={item.name} className="small" />
                                                 </div>
