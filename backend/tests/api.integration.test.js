@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
 process.env.DATABASE_URL = process.env.DATABASE_URL || 'file:./test-api.db';
 process.env.FRONTEND_ORIGINS = process.env.FRONTEND_ORIGINS || 'http://localhost:5173';
+process.env.RATE_LIMIT_MAX = process.env.RATE_LIMIT_MAX || '5000';
+process.env.AUTH_RATE_LIMIT_MAX = process.env.AUTH_RATE_LIMIT_MAX || '5000';
 
 class Session {
   constructor(baseUrl) {
@@ -372,4 +374,391 @@ test('upload safety: /api/uploads/s3 requires auth and returns 503 when not conf
 
   const configuredCheck = await admin.post('/api/uploads/s3', {});
   assert.equal(configuredCheck.status, 503);
+});
+
+test('platform endpoints: health/root and disallowed CORS origin handling', async () => {
+  const health = await fetch(`${baseUrl}/health`);
+  assert.equal(health.status, 200);
+
+  const root = await fetch(`${baseUrl}/`);
+  assert.equal(root.status, 200);
+
+  const blockedOrigin = await fetch(`${baseUrl}/api/products/categories`, {
+    headers: {
+      origin: 'https://malicious.example',
+    },
+  });
+  assert.equal(blockedOrigin.status, 403);
+});
+
+test('users branches: register, duplicate rejection, top-sellers, user by id and not found', async () => {
+  await seed();
+
+  const register = await fetch(`${baseUrl}/api/users/register`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      name: 'Branch Tester',
+      email: 'branch@example.com',
+      password: '1234',
+    }),
+  });
+  assert.equal(register.status, 200);
+  const registered = await register.json();
+  assert.equal(registered.email, 'branch@example.com');
+
+  const duplicate = await fetch(`${baseUrl}/api/users/register`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      name: 'Branch Tester',
+      email: 'branch@example.com',
+      password: '1234',
+    }),
+  });
+  assert.equal(duplicate.status, 400);
+
+  const topSellers = await fetch(`${baseUrl}/api/users/top-sellers`);
+  assert.equal(topSellers.status, 200);
+  assert.equal(topSellers.headers.get('cache-control'), 'public, max-age=300, s-maxage=600');
+  const sellers = await topSellers.json();
+  assert.ok(Array.isArray(sellers));
+  assert.ok(sellers.length >= 1);
+
+  const byId = await fetch(`${baseUrl}/api/users/${registered._id}`);
+  assert.equal(byId.status, 200);
+
+  const missing = await fetch(`${baseUrl}/api/users/00000000-0000-0000-0000-000000000000`);
+  assert.equal(missing.status, 404);
+});
+
+test('users admin branches: update/delete paths including not found and admin deletion guard', async () => {
+  await seed();
+
+  const admin = new Session(baseUrl);
+  const adminSignin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(adminSignin.status, 200);
+  await admin.getCsrfToken();
+
+  const register = await fetch(`${baseUrl}/api/users/register`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      name: 'Delete Me',
+      email: 'deleteme@example.com',
+      password: '1234',
+    }),
+  });
+  const created = await register.json();
+
+  const updateUser = await admin.put(`/api/users/${created._id}`, {
+    name: 'Delete Me Updated',
+    email: created.email,
+    isSeller: true,
+    isAdmin: false,
+  });
+  assert.equal(updateUser.status, 200);
+
+  const updateMissing = await admin.put('/api/users/00000000-0000-0000-0000-000000000000', {
+    name: 'Missing',
+    email: 'missing@example.com',
+    isSeller: false,
+    isAdmin: false,
+  });
+  assert.equal(updateMissing.status, 404);
+
+  const usersResponse = await admin.request('/api/users');
+  assert.equal(usersResponse.status, 200);
+  const users = await usersResponse.json();
+  const seededAdmin = users.find((entry) => entry.email === 'admin@gmail.com');
+  assert.ok(seededAdmin?._id);
+
+  const deleteAdmin = await admin.request(`/api/users/${seededAdmin._id}`, {
+    method: 'DELETE',
+    headers: {
+      'x-csrf-token': admin.csrfToken,
+    },
+  });
+  assert.equal(deleteAdmin.status, 400);
+
+  const deleteCreated = await admin.request(`/api/users/${created._id}`, {
+    method: 'DELETE',
+    headers: {
+      'x-csrf-token': admin.csrfToken,
+    },
+  });
+  assert.equal(deleteCreated.status, 200);
+
+  const deleteMissing = await admin.request('/api/users/00000000-0000-0000-0000-000000000000', {
+    method: 'DELETE',
+    headers: {
+      'x-csrf-token': admin.csrfToken,
+    },
+  });
+  assert.equal(deleteMissing.status, 404);
+});
+
+test('products branches: filter validation, seed route, CRUD, and review guardrails', async () => {
+  await seed();
+
+  const invalidOrder = await fetch(`${baseUrl}/api/products?order=invalid-order`);
+  assert.equal(invalidOrder.status, 400);
+
+  const productSeed = await fetch(`${baseUrl}/api/products/seed`);
+  assert.equal(productSeed.status, 200);
+  const productSeedBody = await productSeed.json();
+  assert.equal(productSeedBody.productCount, 500);
+
+  const missingProduct = await fetch(`${baseUrl}/api/products/00000000-0000-0000-0000-000000000000`);
+  assert.equal(missingProduct.status, 404);
+
+  const seller = new Session(baseUrl);
+  const sellerSignin = await seller.post('/api/users/signin', { email: 'seller@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(sellerSignin.status, 200);
+  await seller.getCsrfToken();
+
+  const createProduct = await seller.post('/api/products', {});
+  assert.equal(createProduct.status, 200);
+  const createdProduct = (await createProduct.json()).product;
+  assert.ok(createdProduct._id);
+
+  const updateProduct = await seller.put(`/api/products/${createdProduct._id}`, {
+    name: 'Updated Product',
+    price: 19.99,
+    image: 'https://opengameart.org/sites/default/files/items.png',
+    category: 'Accessories',
+    brand: 'Brand X',
+    countInStock: 15,
+    description: 'Updated description',
+  });
+  assert.equal(updateProduct.status, 200);
+
+  const updateMissing = await seller.put('/api/products/00000000-0000-0000-0000-000000000000', {
+    name: 'Missing',
+    price: 10,
+    image: 'https://opengameart.org/sites/default/files/items.png',
+    category: 'Shoes',
+    brand: 'Brand Y',
+    countInStock: 1,
+    description: 'Missing product',
+  });
+  assert.equal(updateMissing.status, 404);
+
+  const reviewProduct = await seller.post(`/api/products/${createdProduct._id}/reviews`, {
+    rating: 4,
+    comment: 'Looks good',
+  });
+  assert.equal(reviewProduct.status, 201);
+
+  const duplicateReview = await seller.post(`/api/products/${createdProduct._id}/reviews`, {
+    rating: 5,
+    comment: 'Second review should fail',
+  });
+  assert.equal(duplicateReview.status, 400);
+
+  const missingReviewTarget = await seller.post('/api/products/00000000-0000-0000-0000-000000000000/reviews', {
+    rating: 4,
+    comment: 'Missing target',
+  });
+  assert.equal(missingReviewTarget.status, 404);
+
+  const sellerDeleteAttempt = await seller.request(`/api/products/${createdProduct._id}`, {
+    method: 'DELETE',
+    headers: {
+      'x-csrf-token': seller.csrfToken,
+    },
+  });
+  assert.equal(sellerDeleteAttempt.status, 401);
+
+  const admin = new Session(baseUrl);
+  const adminSignin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(adminSignin.status, 200);
+  await admin.getCsrfToken();
+
+  const adminDelete = await admin.request(`/api/products/${createdProduct._id}`, {
+    method: 'DELETE',
+    headers: {
+      'x-csrf-token': admin.csrfToken,
+    },
+  });
+  assert.equal(adminDelete.status, 200);
+});
+
+test('orders branches: empty cart rejection, order detail/missing, seller listing, deliver/delete flows', async () => {
+  await seed();
+
+  const user = new Session(baseUrl);
+  const userSignin = await user.post('/api/users/signin', { email: 'user@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(userSignin.status, 200);
+  await user.getCsrfToken();
+
+  const emptyCart = await user.post('/api/orders', {
+    orderItems: [],
+    shippingAddress: {},
+    paymentMethod: 'PayPal',
+  });
+  assert.equal(emptyCart.status, 400);
+
+  const productsResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
+  const products = (await productsResponse.json()).products;
+  const item = products[0];
+
+  const createOrder = await user.post('/api/orders', {
+    orderItems: [
+      {
+        name: item.name,
+        qty: 1,
+        image: item.image,
+        price: item.price,
+        product: item._id,
+        seller: { _id: item.seller?._id || null },
+      },
+    ],
+    shippingAddress: { fullName: 'User', address: 'A', city: 'B', postalCode: '100', country: 'TW' },
+    paymentMethod: 'PayPal',
+    itemsPrice: item.price,
+    shippingPrice: 0,
+    taxPrice: 0,
+    totalPrice: item.price,
+  });
+  assert.equal(createOrder.status, 201);
+  const createdOrder = (await createOrder.json()).order;
+
+  const readOrder = await user.request(`/api/orders/${createdOrder._id}`);
+  assert.equal(readOrder.status, 200);
+
+  const readMissingOrder = await user.request('/api/orders/00000000-0000-0000-0000-000000000000');
+  assert.equal(readMissingOrder.status, 404);
+
+  const seller = new Session(baseUrl);
+  const sellerSignin = await seller.post('/api/users/signin', { email: 'seller@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(sellerSignin.status, 200);
+  await seller.getCsrfToken();
+
+  const sellerOrders = await seller.request('/api/orders?seller=');
+  assert.equal(sellerOrders.status, 200);
+
+  const admin = new Session(baseUrl);
+  const adminSignin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(adminSignin.status, 200);
+  await admin.getCsrfToken();
+
+  const deliverOrder = await admin.put(`/api/orders/${createdOrder._id}/deliver`, {});
+  assert.equal(deliverOrder.status, 200);
+
+  const deliverMissing = await admin.put('/api/orders/00000000-0000-0000-0000-000000000000/deliver', {});
+  assert.equal(deliverMissing.status, 404);
+
+  const deleteOrder = await admin.request(`/api/orders/${createdOrder._id}`, {
+    method: 'DELETE',
+    headers: {
+      'x-csrf-token': admin.csrfToken,
+    },
+  });
+  assert.equal(deleteOrder.status, 200);
+
+  const deleteMissing = await admin.request('/api/orders/00000000-0000-0000-0000-000000000000', {
+    method: 'DELETE',
+    headers: {
+      'x-csrf-token': admin.csrfToken,
+    },
+  });
+  assert.equal(deleteMissing.status, 404);
+});
+
+test('support branches: admin user listing, thread validation, message validation, and missing thread', async () => {
+  await seed();
+
+  const admin = new Session(baseUrl);
+  const adminSignin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(adminSignin.status, 200);
+  await admin.getCsrfToken();
+
+  const supportUsers = await admin.request('/api/support/admin/users');
+  assert.equal(supportUsers.status, 200);
+  const users = await supportUsers.json();
+  assert.ok(Array.isArray(users));
+
+  const createWithoutUserId = await admin.post('/api/support/threads', { userId: '' });
+  assert.equal(createWithoutUserId.status, 400);
+
+  const user = new Session(baseUrl);
+  const userSignin = await user.post('/api/users/signin', { email: 'user@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(userSignin.status, 200);
+  await user.getCsrfToken();
+
+  const threadResponse = await user.post('/api/support/threads', { userId: '' });
+  assert.equal(threadResponse.status, 201);
+  const thread = await threadResponse.json();
+
+  const emptyMessage = await user.post(`/api/support/threads/${thread._id}/messages`, { body: '   ' });
+  assert.equal(emptyMessage.status, 400);
+
+  const missingThreadMessage = await user.post('/api/support/threads/00000000-0000-0000-0000-000000000000/messages', {
+    body: 'Hello',
+  });
+  assert.equal(missingThreadMessage.status, 404);
+});
+
+test('seed router branches: auth/admin checks and successful reseed', async () => {
+  await seed();
+
+  const anonymous = await fetch(`${baseUrl}/api/seed`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ count: 10 }),
+  });
+  assert.ok([401, 403].includes(anonymous.status));
+
+  const user = new Session(baseUrl);
+  const userSignin = await user.post('/api/users/signin', { email: 'user@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(userSignin.status, 200);
+  await user.getCsrfToken();
+
+  const forbidden = await user.post('/api/seed', { count: 10 });
+  assert.equal(forbidden.status, 401);
+
+  const admin = new Session(baseUrl);
+  const adminSignin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(adminSignin.status, 200);
+  await admin.getCsrfToken();
+
+  const reseed = await admin.post('/api/seed', { count: 10 });
+  assert.equal(reseed.status, 200);
+  const payload = await reseed.json();
+  assert.equal(payload.products, 10);
+  assert.equal(payload.users, 3);
+});
+
+test('upload router branches: reject non-image and accept image upload', async () => {
+  await seed();
+
+  const admin = new Session(baseUrl);
+  const adminSignin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(adminSignin.status, 200);
+  await admin.getCsrfToken();
+
+  const plainForm = new FormData();
+  plainForm.append('image', new Blob(['not-image'], { type: 'text/plain' }), 'bad.txt');
+  const plainUpload = await admin.request('/api/uploads', {
+    method: 'POST',
+    headers: {
+      'x-csrf-token': admin.csrfToken,
+    },
+    body: plainForm,
+  });
+  assert.equal(plainUpload.status, 500);
+
+  const imageForm = new FormData();
+  imageForm.append('image', new Blob(['fake-image-bytes'], { type: 'image/png' }), 'ok.png');
+  const imageUpload = await admin.request('/api/uploads', {
+    method: 'POST',
+    headers: {
+      'x-csrf-token': admin.csrfToken,
+    },
+    body: imageForm,
+  });
+  assert.equal(imageUpload.status, 200);
+  const uploadedPath = await imageUpload.text();
+  assert.match(uploadedPath, /uploads[\\/]/);
 });

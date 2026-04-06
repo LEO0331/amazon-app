@@ -154,7 +154,7 @@ function App() {
                 type="button"
                 aria-label="Close categories menu"
               >
-                <span className="sidebar-icon" aria-hidden="true">\u00D7</span>
+                <span className="sidebar-icon" aria-hidden="true">×</span>
               </button>
             </li>
             {loadingCategories ? (
