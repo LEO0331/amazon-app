@@ -509,7 +509,7 @@ aside {
   height: 100%;
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
-  z-index: 10;
+  z-index: 70;
   transform: translateX(-22rem);
   transition: transform 0.25s ease;
   box-shadow: var(--shadow-card);
@@ -517,6 +517,17 @@ aside {
 
 aside.open {
   transform: translateX(0);
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(1px);
+  border-radius: 0;
 }
 
 button.open-sidebar {

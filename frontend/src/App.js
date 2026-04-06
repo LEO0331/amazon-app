@@ -47,6 +47,16 @@ function App() {
     dispatch(listProductCategories());
     initializeCsrfToken();
   }, [dispatch]);
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setSidebarIsOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, []);
   const signoutHandler = () => {
     dispatch(signout());
   };
@@ -56,7 +66,16 @@ function App() {
       <div className="grid-container">
         <header className="row">
           <div className="header-left">
-            <button type="button" className="open-sidebar" onClick={() => setSidebarIsOpen(true)}><i className="fa fa-bars"></i></button>
+            <button
+              type="button"
+              className="open-sidebar"
+              aria-controls="main-sidebar"
+              aria-expanded={sidebarIsOpen}
+              aria-label={sidebarIsOpen ? 'Close categories menu' : 'Open categories menu'}
+              onClick={() => setSidebarIsOpen((prev) => !prev)}
+            >
+              <i className="fa fa-bars"></i>
+            </button>
             <Link className="brand" to="/">EShop</Link>
           </div>
           <div className="header-center">
@@ -125,7 +144,7 @@ function App() {
             )}
           </div>
         </header>
-        <aside className={sidebarIsOpen ? 'open' : ''}>
+        <aside id="main-sidebar" className={sidebarIsOpen ? 'open' : ''}>
           <ul className="categories">
             <li>
               <strong>Categories</strong>
@@ -150,6 +169,7 @@ function App() {
             )}
           </ul>
         </aside>
+        {sidebarIsOpen && <button type="button" className="sidebar-backdrop" aria-label="Close sidebar" onClick={() => setSidebarIsOpen(false)} />}
         <main>
           <Suspense fallback={<LoadingBox />}>
             <Route exact path="/" component={HomeScreen} />

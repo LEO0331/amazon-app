@@ -347,3 +347,29 @@ test('seed validation: rejects count beyond hard limit', async () => {
   const response = await admin.post('/api/seed', { count: 2000 });
   assert.equal(response.status, 400);
 });
+
+test('security: /api/users/seed is disabled in production mode', async () => {
+  const previous = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    const response = await fetch(`${baseUrl}/api/users/seed`);
+    assert.equal(response.status, 403);
+  } finally {
+    process.env.NODE_ENV = previous;
+  }
+});
+
+test('upload safety: /api/uploads/s3 requires auth and returns 503 when not configured', async () => {
+  await seed();
+
+  const unauthenticated = await fetch(`${baseUrl}/api/uploads/s3`, { method: 'POST' });
+  assert.ok([401, 403].includes(unauthenticated.status));
+
+  const admin = new Session(baseUrl);
+  const adminSignin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(adminSignin.status, 200);
+  await admin.getCsrfToken();
+
+  const configuredCheck = await admin.post('/api/uploads/s3', {});
+  assert.equal(configuredCheck.status, 503);
+});

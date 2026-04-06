@@ -1,5 +1,9 @@
 export const ratings = [
     {
+      name: '5stars & up',
+      rating: 5
+    },
+    {
       name: '4stars & up',
       rating: 4
     },

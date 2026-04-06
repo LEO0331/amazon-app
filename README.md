@@ -1,6 +1,8 @@
 # Amazon App (Vite + SQLite on Turso)
 
 [![CI and Deploy](https://github.com/LEO0331/amazon-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/LEO0331/amazon-app/actions/workflows/deploy.yml)
+[![Demo Ready](https://img.shields.io/badge/demo-ready-22c55e)](#tests-and-coverage)
+[![Coverage](https://img.shields.io/badge/test%20coverage-enabled-0ea5e9)](#tests-and-coverage)
 [![Frontend](https://img.shields.io/badge/frontend-Vite-646CFF?logo=vite&logoColor=fff)](./frontend)
 [![Backend](https://img.shields.io/badge/backend-Express%20%2B%20libSQL-0f172a?logo=sqlite&logoColor=fff)](./backend)
 
@@ -89,16 +91,28 @@ Run all tests (backend + frontend):
 npm test
 ```
 
+Run coverage reports:
+
+```bash
+npm run test:backend:coverage
+npm --prefix frontend run test:coverage
+# or run both
+npm run test:coverage
+```
+
 What is covered now:
 - Backend integration tests:
   - `/api/users`, `/api/products`, `/api/orders`, `/api/support`
   - auth-required route checks, CSRF enforcement, CORS allowlist behavior
   - pagination/filter validation, seed count bounds, cache header checks
+  - production lockout for `/api/users/seed`
+  - upload safety checks for `/api/uploads/s3` auth/config behavior
 - Frontend unit tests:
   - asset URL resolution for GitHub Pages base path
   - cart reducer behavior (add/update/remove/clear/address/payment)
   - user reducer flows (signin/register/profile update)
   - order reducer flows (create/details/summary)
+  - product reducer flows (list/details/create/update/delete/category/review)
 
 Build frontend:
 
