@@ -1,114 +1,129 @@
-# Amazon-App - AI Reference Document
+# Amazon-App - AI Reference / AI 參考文件
 
-This file is for AI assistants resuming work on this repository.
-Read this together with `docs/flow.md` before implementing changes.
-For workflow rules and guardrails, see `claude.md` at project root.
+For assistants resuming work on this repository.  
+提供給接手本專案的 AI 助手。
+
+Read this with `docs/flow.md` before making code changes.  
+實作前請搭配 `docs/flow.md` 閱讀。
 
 ---
 
-## Project Identity
+## Project Identity / 專案定位
 
-- **Name**: Amazon-App
-- **Type**: React/Redux ecommerce app with Express API
-- **Purpose**: Product discovery, cart/checkout, order management, seller/admin operations, support inbox
-- **Primary stack**:
+- **Name / 名稱**: Amazon-App
+- **Type / 類型**: React/Redux ecommerce app with Express API
+- **Purpose / 目的**: product discovery, cart/checkout, order management, seller/admin ops, support inbox  
+  商品瀏覽、購物結帳、訂單管理、賣家與管理者作業、客服收件匣
+- **Primary stack / 主要技術棧**:
   - Frontend: React 17, Redux, React Router v5, Vite
-  - Backend: Express, `@libsql/client`, SQLite schema bootstrap
+  - Backend: Express, `@libsql/client`, SQLite/libSQL
   - Infra: GitHub Pages (frontend), Vercel (backend)
 
 ---
 
-## Problem Context
+## Current Goals / 當前架構目標
 
-Current architecture goals:
-- Handle larger catalog data reliably (SQLite + tuned queries and bounded pagination)
-- Reduce latency (Vite build/dev flow, lazy-loaded routes, cache headers on selected endpoints)
-- Improve security baseline (cookie auth, CSRF, strict CORS, Helmet, rate limiting)
-- Keep demo-friendly setup (deterministic seed with Faker and admin seed endpoint)
+- Handle larger product data with stable pagination/filtering.  
+  提升大量商品資料下的分頁與篩選穩定性。
+- Reduce latency through Vite tooling and efficient API paths.  
+  透過 Vite 與 API 路徑優化降低延遲。
+- Keep secure defaults: cookie auth + CSRF + strict CORS + rate limits.  
+  維持安全預設：cookie 驗證、CSRF、嚴格 CORS、rate limits。
+- Support demo mode via deterministic seeding.  
+  透過可重現資料種子支援展示環境。
 
 ---
 
-## Runtime Layers
+## Runtime Layers / 執行層級
 
 | Layer | Main Location | Responsibility |
 |------|---------------|----------------|
-| UI | `frontend/src/*` | routing, views, events, loading/error states |
-| State/API | `frontend/src/actions/*`, `frontend/src/reducers/*` | async calls + state transitions |
+| UI | `frontend/src/*` | routing, views, events, loading/error |
+| State/API | `frontend/src/actions/*`, `frontend/src/reducers/*` | async dispatch and state transitions |
 | API | `backend/app.js`, `backend/routers/*` | auth, validation, business rules |
-| Data | `backend/db/*`, `backend/services/seedService.js` | schema, mapping, SQL operations, seeding |
+| Data | `backend/db/*`, `backend/services/seedService.js` | schema, SQL access, seed pipeline |
 
 ---
 
-## Key Entry Points
+## Key Entrypoints / 主要進入點
 
 - Frontend entry: `frontend/src/main.js`
-- Frontend app shell/router: `frontend/src/App.js`
+- Frontend app shell: `frontend/src/App.js`
 - Backend entry: `backend/server.js`
-- Backend app/middleware wiring: `backend/app.js`
+- Backend middleware/router assembly: `backend/app.js`
 
 ---
 
-## API Surface (High-Value)
+## API Surface / 主要 API 範圍
 
 - `/api/auth/csrf-token`
 - `/api/users/*`
 - `/api/products/*`
 - `/api/orders/*`
 - `/api/support/*`
-- `/api/seed` (admin + CSRF)
+- `/api/seed` (admin + csrf)
 - `/api/config/paypal`
 - `/health`, `/`
 
 ---
 
-## Security Contract
+## Security Contract / 安全契約
 
-- Auth: JWT in secure HTTP-only cookie.
-- CSRF: token issued by `/api/auth/csrf-token`, required for mutations.
-- CORS: origin allowlist from `FRONTEND_ORIGINS`.
-- Headers: `helmet()` baseline hardening.
-- Limits:
-  - global limiter (`RATE_LIMIT_MAX`)
-  - auth limiter (`AUTH_RATE_LIMIT_MAX`) on signin/register
-- Authorization checks:
-  - products update ownership for non-admin sellers
-  - order detail/pay access checks
-  - admin-only ops for user/order/admin views and seed controls
+- Auth: JWT in secure HTTP-only cookie.  
+  使用安全 HTTP-only cookie 儲存 JWT。
+- CSRF: required for mutating requests.  
+  修改型請求必須帶 CSRF token。
+- CORS: enforced by allowlist (`FRONTEND_ORIGINS`).  
+  以白名單方式限制跨網域來源。
+- Security headers: Helmet baseline.  
+  以 Helmet 提供基礎安全標頭。
+- Rate limiting:
+  - Global limiter: `RATE_LIMIT_MAX`
+  - Auth limiter: `AUTH_RATE_LIMIT_MAX` on signin/register
+- Authorization:
+  - product update ownership checks for sellers
+  - order access checks (owner/admin/seller as defined)
+  - admin-only controls for user/order summary/seed paths
 
 ---
 
-## Data / Seed Notes
+## Data and Seeding / 資料與種子
 
-- DB configured by `DATABASE_URL` (+ `DATABASE_AUTH_TOKEN` for Turso).
-- Development bootstrap: `GET /api/users/seed` (disabled in production).
-- Demo reseed: `POST /api/seed` as admin with CSRF, `count` in `1..1000` (default 500).
-- Deterministic demo users:
+- DB config:
+  - `DATABASE_URL` (required)
+  - `DATABASE_AUTH_TOKEN` (for Turso, if required)
+- Development bootstrap:
+  - `GET /api/users/seed` (disabled in production)
+- Demo reseed:
+  - `POST /api/seed` as admin with CSRF
+  - `count` range: `1..1000` (default 500)
+- Demo accounts:
   - `admin@gmail.com / 1234`
   - `seller@gmail.com / 1234`
   - `user@gmail.com / 1234`
 
 ---
 
-## CI/CD
+## CI/CD / 持續整合與部署
 
 - Workflow: `.github/workflows/deploy.yml`
-- Test/build on PR and push to `master`
-- Frontend deploy: GitHub Pages (`frontend/dist`)
-- Backend deploy: Vercel when `VERCEL_TOKEN` exists
-- Build-time frontend runtime vars:
+- Runs test/build on PR and push to `master`.
+- Frontend deploys to GitHub Pages (`frontend/dist`).
+- Backend deploys to Vercel when `VERCEL_TOKEN` exists.
+- Frontend build-time env:
   - `VITE_API_BASE_URL`
-  - `VITE_BASE_PATH` (for repo pages, e.g. `/amazon-app/`)
+  - `VITE_BASE_PATH` (e.g. `/amazon-app/`)
 
 ---
 
-## Assistant Workflow
+## Assistant Workflow / 助手工作流程
 
-Before editing:
-1. Read `claude.md`
-2. Read `docs/flow.md` and this file
-3. Confirm target layer (frontend/backend/docs/tests)
+Before editing / 修改前:
+1. Read `claude.md`.
+2. Read `docs/flow.md` and this file.
+3. Confirm target layer and affected contracts.
 
-After editing:
-1. Run targeted tests
-2. Run coverage if relevant
-3. Update docs when architecture/flow/contracts change
+After editing / 修改後:
+1. Run targeted tests.
+2. Run coverage for touched modules.
+3. Update docs when architecture/flow/contracts changed.
