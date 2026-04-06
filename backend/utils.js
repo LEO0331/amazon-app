@@ -9,6 +9,20 @@ function isProduction() {
   return process.env.NODE_ENV === 'production';
 }
 
+function cookieSecurityOptions() {
+  if (isProduction()) {
+    return {
+      secure: true,
+      sameSite: 'none',
+    };
+  }
+
+  return {
+    secure: false,
+    sameSite: 'lax',
+  };
+}
+
 export function generateToken(user) {
   return jwt.sign(
     {
@@ -24,34 +38,47 @@ export function generateToken(user) {
 }
 
 export function setAuthCookie(res, token) {
+  const { secure, sameSite } = cookieSecurityOptions();
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: isProduction(),
-    sameSite: 'lax',
+    secure,
+    sameSite,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/',
   });
 }
 
 export function clearAuthCookie(res) {
+  const { secure, sameSite } = cookieSecurityOptions();
   res.clearCookie(COOKIE_NAME, {
     httpOnly: true,
-    secure: isProduction(),
-    sameSite: 'lax',
+    secure,
+    sameSite,
     path: '/',
   });
 }
 
 export function issueCsrfToken(res) {
+  const { secure, sameSite } = cookieSecurityOptions();
   const token = crypto.randomBytes(24).toString('hex');
   res.cookie(CSRF_COOKIE, token, {
     httpOnly: false,
-    secure: isProduction(),
-    sameSite: 'lax',
+    secure,
+    sameSite,
     maxAge: 24 * 60 * 60 * 1000,
     path: '/',
   });
   return token;
+}
+
+export function clearCsrfCookie(res) {
+  const { secure, sameSite } = cookieSecurityOptions();
+  res.clearCookie(CSRF_COOKIE, {
+    httpOnly: false,
+    secure,
+    sameSite,
+    path: '/',
+  });
 }
 
 export function csrfProtection(req, res, next) {

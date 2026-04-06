@@ -6,6 +6,7 @@ import { execute } from '../db/client.js';
 import { mapUser } from '../db/mappers.js';
 import {
   clearAuthCookie,
+  clearCsrfCookie,
   generateToken,
   isAdmin,
   isAuth,
@@ -125,7 +126,7 @@ userRouter.post(
 
 userRouter.post('/signout', (_req, res) => {
   clearAuthCookie(res);
-  res.clearCookie('csrf_token', { path: '/' });
+  clearCsrfCookie(res);
   res.send({ message: 'Signed out' });
 });
 

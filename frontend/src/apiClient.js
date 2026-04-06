@@ -7,6 +7,7 @@ const apiClient = axios.create({
   baseURL,
   withCredentials: true,
 });
+let csrfTokenCache = '';
 
 function readCookie(name) {
   const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
@@ -16,7 +17,7 @@ function readCookie(name) {
 apiClient.interceptors.request.use((config) => {
   const method = (config.method || 'get').toLowerCase();
   if (!['get', 'head', 'options'].includes(method)) {
-    const csrfToken = readCookie('csrf_token');
+    const csrfToken = csrfTokenCache || readCookie('csrf_token');
     if (csrfToken) {
       config.headers['x-csrf-token'] = csrfToken;
     }
@@ -24,9 +25,18 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+apiClient.interceptors.response.use((response) => {
+  const token = response?.data?.csrfToken;
+  if (token) {
+    csrfTokenCache = token;
+  }
+  return response;
+});
+
 export async function initializeCsrfToken() {
   try {
-    await apiClient.get('/api/auth/csrf-token');
+    const response = await apiClient.get('/api/auth/csrf-token');
+    csrfTokenCache = response?.data?.csrfToken || csrfTokenCache;
   } catch (error) {
     // Non-blocking for local startup when backend is unavailable.
   }
