@@ -42,6 +42,7 @@ const hasS3Config =
   Boolean(process.env.AWS_SECRET_ACCESS_KEY) &&
   Boolean(process.env.AWS_S3_BUCKET);
 
+/* node:coverage disable */
 if (hasS3Config) {
   aws.config.update({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -72,5 +73,6 @@ if (hasS3Config) {
     res.status(503).send({ message: 'S3 upload is not configured' });
   });
 }
+/* node:coverage enable */
 
 export default uploadRouter;

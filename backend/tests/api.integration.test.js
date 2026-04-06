@@ -498,6 +498,67 @@ test('users admin branches: update/delete paths including not found and admin de
   assert.equal(deleteMissing.status, 404);
 });
 
+test('users profile branches: update fields/password and handle missing authenticated user', async () => {
+  await seed();
+
+  const user = new Session(baseUrl);
+  const signin = await user.post('/api/users/signin', { email: 'user@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(signin.status, 200);
+  await user.getCsrfToken();
+
+  const updateProfile = await user.put('/api/users/profile', {
+    name: 'Updated User',
+    email: 'user.updated@gmail.com',
+    password: 'new-password',
+    sellerName: 'Updated Seller Name',
+    sellerLogo: 'https://example.com/logo.png',
+    sellerDescription: 'Updated seller bio',
+  });
+  assert.equal(updateProfile.status, 200);
+  const updatedBody = await updateProfile.json();
+  assert.equal(updatedBody.name, 'Updated User');
+  assert.equal(updatedBody.email, 'user.updated@gmail.com');
+
+  const signout = await user.post('/api/users/signout', {});
+  assert.equal(signout.status, 200);
+
+  const signinWithNewPassword = await user.post(
+    '/api/users/signin',
+    { email: 'user.updated@gmail.com', password: 'new-password' },
+    { withCsrf: false }
+  );
+  assert.equal(signinWithNewPassword.status, 200);
+
+  const temporary = new Session(baseUrl);
+  const registerTemporary = await temporary.post(
+    '/api/users/register',
+    { name: 'Temporary', email: 'temporary@gmail.com', password: '1234' },
+    { withCsrf: false }
+  );
+  assert.equal(registerTemporary.status, 200);
+  const temporaryUser = await registerTemporary.json();
+  assert.ok(temporaryUser._id);
+  await temporary.getCsrfToken();
+
+  const admin = new Session(baseUrl);
+  const adminSignin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(adminSignin.status, 200);
+  await admin.getCsrfToken();
+
+  const deleteTemporary = await admin.request(`/api/users/${temporaryUser._id}`, {
+    method: 'DELETE',
+    headers: {
+      'x-csrf-token': admin.csrfToken,
+    },
+  });
+  assert.equal(deleteTemporary.status, 200);
+
+  const missingProfile = await temporary.put('/api/users/profile', {
+    name: 'Should Fail',
+  });
+  assert.equal(missingProfile.status, 404);
+});
+
 test('products branches: filter validation, seed route, CRUD, and review guardrails', async () => {
   await seed();
 
@@ -505,9 +566,7 @@ test('products branches: filter validation, seed route, CRUD, and review guardra
   assert.equal(invalidOrder.status, 400);
 
   const productSeed = await fetch(`${baseUrl}/api/products/seed`);
-  assert.equal(productSeed.status, 200);
-  const productSeedBody = await productSeed.json();
-  assert.equal(productSeedBody.productCount, 500);
+  assert.ok([401, 403].includes(productSeed.status));
 
   const missingProduct = await fetch(`${baseUrl}/api/products/00000000-0000-0000-0000-000000000000`);
   assert.equal(missingProduct.status, 404);
@@ -664,6 +723,147 @@ test('orders branches: empty cart rejection, order detail/missing, seller listin
     },
   });
   assert.equal(deleteMissing.status, 404);
+});
+
+test('orders security: non-owner cannot read or pay another user order', async () => {
+  await seed();
+
+  const buyer = new Session(baseUrl);
+  const buyerSignin = await buyer.post('/api/users/signin', { email: 'user@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(buyerSignin.status, 200);
+  await buyer.getCsrfToken();
+
+  const productsResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
+  const product = (await productsResponse.json()).products[0];
+
+  const createOrder = await buyer.post('/api/orders', {
+    orderItems: [
+      {
+        name: product.name,
+        qty: 1,
+        image: product.image,
+        price: product.price,
+        product: product._id,
+        seller: { _id: product.seller?._id || null },
+      },
+    ],
+    shippingAddress: { fullName: 'Buyer', address: 'A', city: 'B', postalCode: '100', country: 'TW' },
+    paymentMethod: 'PayPal',
+    itemsPrice: product.price,
+    shippingPrice: 0,
+    taxPrice: 0,
+    totalPrice: product.price,
+  });
+  assert.equal(createOrder.status, 201);
+  const orderId = (await createOrder.json()).order._id;
+
+  const outsider = new Session(baseUrl);
+  const registerOutsider = await outsider.post(
+    '/api/users/register',
+    { name: 'Outsider', email: 'outsider@gmail.com', password: '1234' },
+    { withCsrf: false }
+  );
+  assert.equal(registerOutsider.status, 200);
+  await outsider.getCsrfToken();
+
+  const forbiddenRead = await outsider.request(`/api/orders/${orderId}`);
+  assert.equal(forbiddenRead.status, 403);
+
+  const forbiddenPay = await outsider.put(`/api/orders/${orderId}/pay`, {
+    id: 'forged',
+    status: 'COMPLETED',
+    update_time: new Date().toISOString(),
+    email_address: 'outsider@gmail.com',
+  });
+  assert.equal(forbiddenPay.status, 403);
+});
+
+test('products security: seed route requires admin auth and sellers cannot update other seller product', async () => {
+  await seed();
+
+  const anonSeed = await fetch(`${baseUrl}/api/products/seed`);
+  assert.ok([401, 403].includes(anonSeed.status));
+
+  const seller = new Session(baseUrl);
+  const sellerSignin = await seller.post('/api/users/signin', { email: 'seller@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(sellerSignin.status, 200);
+  await seller.getCsrfToken();
+
+  const admin = new Session(baseUrl);
+  const adminSignin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(adminSignin.status, 200);
+  await admin.getCsrfToken();
+
+  const usersResponse = await admin.request('/api/users');
+  assert.equal(usersResponse.status, 200);
+  const users = await usersResponse.json();
+  const buyer = users.find((entry) => entry.email === 'user@gmail.com');
+  assert.ok(buyer?._id);
+
+  const promoteBuyer = await admin.put(`/api/users/${buyer._id}`, {
+    name: buyer.name,
+    email: buyer.email,
+    isSeller: true,
+    isAdmin: false,
+  });
+  assert.equal(promoteBuyer.status, 200);
+
+  const buyerAsSeller = new Session(baseUrl);
+  const promotedSignin = await buyerAsSeller.post('/api/users/signin', { email: 'user@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(promotedSignin.status, 200);
+  await buyerAsSeller.getCsrfToken();
+
+  const productsResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
+  const targetProduct = (await productsResponse.json()).products.find((item) => item.seller?._id);
+  assert.ok(targetProduct?._id);
+
+  const forbiddenUpdate = await buyerAsSeller.put(`/api/products/${targetProduct._id}`, {
+    name: 'Hacked Name',
+    price: targetProduct.price,
+    image: targetProduct.image,
+    category: targetProduct.category,
+    brand: targetProduct.brand,
+    countInStock: targetProduct.countInStock,
+    description: targetProduct.description,
+  });
+  assert.equal(forbiddenUpdate.status, 403);
+});
+
+test('orders security: seller_id is derived from product records, not trusted from client payload', async () => {
+  await seed();
+
+  const buyer = new Session(baseUrl);
+  const buyerSignin = await buyer.post('/api/users/signin', { email: 'user@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(buyerSignin.status, 200);
+  await buyer.getCsrfToken();
+
+  const productsResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
+  const product = (await productsResponse.json()).products.find((entry) => entry.seller?._id);
+  assert.ok(product?._id);
+  const forgedSellerId = '00000000-0000-0000-0000-000000000000';
+
+  const createOrder = await buyer.post('/api/orders', {
+    orderItems: [
+      {
+        name: product.name,
+        qty: 1,
+        image: product.image,
+        price: product.price,
+        product: product._id,
+        seller: { _id: forgedSellerId },
+      },
+    ],
+    shippingAddress: { fullName: 'Buyer', address: 'A', city: 'B', postalCode: '100', country: 'TW' },
+    paymentMethod: 'PayPal',
+    itemsPrice: product.price,
+    shippingPrice: 0,
+    taxPrice: 0,
+    totalPrice: product.price,
+  });
+  assert.equal(createOrder.status, 201);
+  const order = (await createOrder.json()).order;
+  assert.equal(order.seller, product.seller._id);
+  assert.notEqual(order.seller, forgedSellerId);
 });
 
 test('support branches: admin user listing, thread validation, message validation, and missing thread', async () => {

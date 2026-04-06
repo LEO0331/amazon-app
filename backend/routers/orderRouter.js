@@ -7,6 +7,19 @@ import { isAdmin, isAdminOrSeller, isAuth } from '../utils.js';
 
 const orderRouter = express.Router();
 
+function canAccessOrder(user, orderRow) {
+  if (user?.isAdmin) {
+    return true;
+  }
+  if (orderRow.user_id === user?._id) {
+    return true;
+  }
+  if (user?.isSeller && orderRow.seller_id === user?._id) {
+    return true;
+  }
+  return false;
+}
+
 async function hydrateOrders(rows) {
   const ids = [...new Set(rows.map((row) => row.user_id).filter(Boolean))];
   const usersById = new Map();
@@ -102,6 +115,30 @@ orderRouter.post(
       return;
     }
 
+    const productIds = req.body.orderItems.map((item) => item?.product).filter(Boolean);
+    if (productIds.length !== req.body.orderItems.length) {
+      res.status(400).send({ message: 'Invalid order items' });
+      return;
+    }
+
+    const placeholders = productIds.map(() => '?').join(',');
+    const productsResult = await execute(
+      `SELECT id, seller_id FROM products WHERE id IN (${placeholders})`,
+      productIds
+    );
+    const productById = new Map(productsResult.rows.map((row) => [row.id, row]));
+    if (productById.size !== productIds.length) {
+      res.status(400).send({ message: 'One or more products are invalid' });
+      return;
+    }
+
+    const sellerIds = new Set(productIds.map((id) => productById.get(id)?.seller_id).filter(Boolean));
+    if (sellerIds.size > 1) {
+      res.status(400).send({ message: 'Mixed seller orders are not supported' });
+      return;
+    }
+    const orderSellerId = [...sellerIds][0] || null;
+
     const timestamp = new Date().toISOString();
     const id = randomUUID();
 
@@ -114,7 +151,7 @@ orderRouter.post(
       [
         id,
         req.user._id,
-        req.body.orderItems[0]?.seller?._id || null,
+        orderSellerId,
         JSON.stringify(req.body.orderItems),
         JSON.stringify(req.body.shippingAddress || {}),
         req.body.paymentMethod,
@@ -151,6 +188,10 @@ orderRouter.get(
       res.status(404).send({ message: 'Order Not Found' });
       return;
     }
+    if (!canAccessOrder(req.user, row)) {
+      res.status(403).send({ message: 'Forbidden' });
+      return;
+    }
     res.send(mapOrder(row));
   })
 );
@@ -162,6 +203,10 @@ orderRouter.put(
     const row = (await execute('SELECT * FROM orders WHERE id = ?', [req.params.id])).rows[0];
     if (!row) {
       res.status(404).send({ message: 'Order Not Found' });
+      return;
+    }
+    if (!req.user?.isAdmin && row.user_id !== req.user?._id) {
+      res.status(403).send({ message: 'Forbidden' });
       return;
     }
 

@@ -135,6 +135,8 @@ productRouter.get(
 
 productRouter.get(
   '/seed',
+  isAuth,
+  isAdmin,
   expressAsyncHandler(async (_req, res) => {
     await resetDatabase();
     const users = await seedUsers();
@@ -211,6 +213,10 @@ productRouter.put(
     const row = (await execute('SELECT * FROM products WHERE id = ?', [req.params.id])).rows[0];
     if (!row) {
       res.status(404).send({ message: 'Product Not Found' });
+      return;
+    }
+    if (!req.user?.isAdmin && row.seller_id !== req.user?._id) {
+      res.status(403).send({ message: 'Forbidden' });
       return;
     }
 
