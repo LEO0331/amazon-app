@@ -829,6 +829,46 @@ test('products security: seed route requires admin auth and sellers cannot updat
   assert.equal(forbiddenUpdate.status, 403);
 });
 
+test('products query branches: advanced filters, numeric coercion, empty seller map, and admin seed success', async () => {
+  await seed();
+
+  const admin = new Session(baseUrl);
+  const adminSignin = await admin.post('/api/users/signin', { email: 'admin@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(adminSignin.status, 200);
+  await admin.getCsrfToken();
+
+  const usersResponse = await admin.request('/api/users');
+  assert.equal(usersResponse.status, 200);
+  const users = await usersResponse.json();
+  const seller = users.find((entry) => entry.email === 'seller@gmail.com');
+  assert.ok(seller?._id);
+
+  const filtered = await fetch(
+    `${baseUrl}/api/products?seller=${seller._id}&name=sample&category=sample%20category&min=1&max=99999&rating=1&order=highest&pageNumber=1&pageSize=999`
+  );
+  assert.equal(filtered.status, 200);
+  const filteredBody = await filtered.json();
+  assert.equal(filteredBody.page, 1);
+  assert.ok(filteredBody.products.length <= 30);
+
+  const coercedNumbers = await fetch(
+    `${baseUrl}/api/products?min=abc&max=100&rating=2.5&order=toprated&pageNumber=1&pageSize=12`
+  );
+  assert.equal(coercedNumbers.status, 200);
+
+  const emptySellerSet = await fetch(
+    `${baseUrl}/api/products?seller=00000000-0000-0000-0000-000000000000&name=none&category=none&min=1&max=2&rating=5&order=lowest&pageNumber=1&pageSize=5`
+  );
+  assert.equal(emptySellerSet.status, 200);
+  const emptyBody = await emptySellerSet.json();
+  assert.deepEqual(emptyBody.products, []);
+
+  const adminSeed = await admin.request('/api/products/seed');
+  assert.equal(adminSeed.status, 200);
+  const seedBody = await adminSeed.json();
+  assert.equal(seedBody.productCount, 500);
+});
+
 test('orders security: seller_id is derived from product records, not trusted from client payload', async () => {
   await seed();
 
