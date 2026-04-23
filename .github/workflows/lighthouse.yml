@@ -35,14 +35,30 @@ jobs:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           VITE_BASE_PATH: /
 
+      - name: Start preview server
+        run: |
+          npm --prefix frontend run preview -- --host 127.0.0.1 --port 4173 > /tmp/vite-preview.log 2>&1 &
+          echo $! > /tmp/vite-preview.pid
+
+      - name: Wait for preview server
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sSf http://127.0.0.1:4173/ > /dev/null; then
+              echo "Preview server is ready."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Preview server did not become ready in time."
+          cat /tmp/vite-preview.log || true
+          exit 1
+
       - name: Run Lighthouse CI
         id: lighthouse
         uses: treosh/lighthouse-ci-action@v11
         with:
           urls: |
             http://127.0.0.1:4173/
-          startServerCommand: npm --prefix frontend run preview -- --host 127.0.0.1 --port 4173
-          startServerReadyPattern: Local
           runs: 3
           uploadArtifacts: true
           temporaryPublicStorage: true
@@ -52,3 +68,9 @@ jobs:
           echo "## Lighthouse Temporary Public Reports" >> "$GITHUB_STEP_SUMMARY"
           echo "${{ steps.lighthouse.outputs.links }}" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Stop preview server
+        if: always()
+        run: |
+          if [ -f /tmp/vite-preview.pid ]; then
+            kill "$(cat /tmp/vite-preview.pid)" || true
+          fi
