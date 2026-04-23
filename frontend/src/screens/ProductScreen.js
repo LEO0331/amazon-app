@@ -68,7 +68,7 @@ function ProductScreen(props) { //props: path="/product/:id" in <Route>
                             width="1200"
                             height="1200"
                             loading="eager"
-                            fetchPriority="high"
+                            fetchpriority="high"
                             decoding="async"
                         />
                     </div>

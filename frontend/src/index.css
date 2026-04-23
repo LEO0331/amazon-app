@@ -404,6 +404,36 @@ img.large {
   position: relative;
 }
 
+.menu-trigger {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--color-text);
+  font-size: 1.6rem;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.menu-trigger:hover {
+  color: var(--color-primary);
+  transform: none;
+}
+
+.menu-item-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--color-text);
+  font-size: 1.6rem;
+  font-family: inherit;
+  text-align: left;
+}
+
+.menu-item-btn:hover {
+  color: var(--color-primary);
+  transform: none;
+}
+
 .dropdown-content {
   position: absolute;
   display: none;

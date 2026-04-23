@@ -83,15 +83,15 @@ function ChatBox(props) {
   return (
     <div className="chatbox">
       {!isOpen ? (
-        <button type="button" onClick={() => setIsOpen(true)}>
-          <i className="fa fa-support" />
+        <button type="button" onClick={() => setIsOpen(true)} aria-label="Open support inbox">
+          <i className="fa fa-support" aria-hidden="true" />
         </button>
       ) : (
         <div className="card card-body">
           <div className="row">
             <strong>Support Inbox</strong>
-            <button type="button" onClick={() => setIsOpen(false)}>
-              <i className="fa fa-close" />
+            <button type="button" onClick={() => setIsOpen(false)} aria-label="Close support inbox">
+              <i className="fa fa-close" aria-hidden="true" />
             </button>
           </div>
           <ul ref={uiMessagesRef}>
@@ -108,6 +108,7 @@ function ChatBox(props) {
               onChange={(event) => setMessageBody(event.target.value)}
               type="text"
               placeholder="Please type message"
+              aria-label="Type support message"
             />
             <button type="submit">Send</button>
           </form>

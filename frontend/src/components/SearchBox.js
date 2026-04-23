@@ -9,8 +9,17 @@ function SearchBox(props) {
     return ( 
         <form className="search" onSubmit={submitHandler}>
             <div className="search-wrap">
-                <input type="text" name="qy" id="qy" placeholder="Search products..." onChange={e => setName(e.target.value)} />
-                <button className="primary" type="submit"><i className="fa fa-search"></i></button>
+                <input
+                    type="text"
+                    name="qy"
+                    id="qy"
+                    placeholder="Search products..."
+                    aria-label="Search products"
+                    onChange={e => setName(e.target.value)}
+                />
+                <button className="primary" type="submit" aria-label="Submit search">
+                    <i className="fa fa-search" aria-hidden="true"></i>
+                </button>
             </div>
         </form>
     );

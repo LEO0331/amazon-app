@@ -60,7 +60,7 @@ function HomeScreen() {
                 width="1600"
                 height="900"
                 loading={index === 0 ? 'eager' : 'lazy'}
-                fetchPriority={index === 0 ? 'high' : 'auto'}
+                fetchpriority={index === 0 ? 'high' : 'auto'}
                 decoding="async"
               />
               <p className="legend">{slide.title}</p>

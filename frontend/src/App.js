@@ -90,7 +90,9 @@ function App() {
             {
               userInfo ? (
                 <div className="dropdown">
-                  <Link to="#">{userInfo.name} <i className="fa fa-caret-down"></i>{' '}</Link>
+                  <button type="button" className="menu-trigger" aria-label="User menu">
+                    {userInfo.name} <i className="fa fa-caret-down" aria-hidden="true"></i>{' '}
+                  </button>
                   <ul className="dropdown-content">
                     <li>
                       <Link to="/profile">User Profile</Link>
@@ -99,7 +101,7 @@ function App() {
                       <Link to="/orderhistory">Order History</Link>
                     </li>
                     <li>
-                      <Link to="#signout" onClick={signoutHandler}>Sign Out</Link>
+                      <button type="button" className="menu-item-btn" onClick={signoutHandler}>Sign Out</button>
                     </li>
                   </ul>
                 </div>
@@ -109,7 +111,9 @@ function App() {
             }
             {userInfo && userInfo.isSeller && (
               <div className="dropdown">
-                <Link to="#admin">Seller <i className="fa fa-caret-down"></i>{' '}</Link>
+                <button type="button" className="menu-trigger" aria-label="Seller menu">
+                  Seller <i className="fa fa-caret-down" aria-hidden="true"></i>{' '}
+                </button>
                 <ul className="dropdown-content">
                   <li>
                     <Link to="/productlist/seller">Products</Link>
@@ -122,7 +126,9 @@ function App() {
             )}
             {userInfo && userInfo.isAdmin && (
               <div className="dropdown">
-                <Link to="#admin">Admin <i className="fa fa-caret-down"></i>{' '}</Link>
+                <button type="button" className="menu-trigger" aria-label="Admin menu">
+                  Admin <i className="fa fa-caret-down" aria-hidden="true"></i>{' '}
+                </button>
                 <ul className="dropdown-content">
                   <li>
                     <Link to="/dashboard">Dashboard</Link>
