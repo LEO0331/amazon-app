@@ -61,7 +61,16 @@ function ProductScreen(props) { //props: path="/product/:id" in <Route>
                 <Link to="/">Back</Link>
                 <div className="row top">
                     <div className="col-2">
-                        <img className="large" src={resolveAssetUrl(product.image)} alt={product.name}/>
+                        <img
+                            className="large"
+                            src={resolveAssetUrl(product.image)}
+                            alt={product.name}
+                            width="1200"
+                            height="1200"
+                            loading="eager"
+                            fetchPriority="high"
+                            decoding="async"
+                        />
                     </div>
                     <div className="col-1">
                         <ul>

@@ -52,9 +52,17 @@ function HomeScreen() {
     <div>
       <section className="hero-gallery">
         <Carousel showArrows autoPlay infiniteLoop interval={3200} showThumbs={false} showStatus={false}>
-          {heroSlides.map((slide) => (
+          {heroSlides.map((slide, index) => (
             <div key={slide.image}>
-              <img src={slide.image} alt={slide.title} />
+              <img
+                src={slide.image}
+                alt={slide.title}
+                width="1600"
+                height="900"
+                loading={index === 0 ? 'eager' : 'lazy'}
+                fetchPriority={index === 0 ? 'high' : 'auto'}
+                decoding="async"
+              />
               <p className="legend">{slide.title}</p>
             </div>
           ))}
@@ -71,7 +79,14 @@ function HomeScreen() {
           <Carousel className="seller-showcase-carousel" showArrows autoPlay infiniteLoop interval={3000} showThumbs={false} showStatus={false}>
             {topSellerShowcase.map((image, index) => (
               <div key={image}>
-                <img src={image} alt={`Top Seller Showcase ${index + 1}`} />
+                <img
+                  src={image}
+                  alt={`Top Seller Showcase ${index + 1}`}
+                  width="1400"
+                  height="900"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
             ))}
           </Carousel>
@@ -79,7 +94,14 @@ function HomeScreen() {
             {sellers.map(seller => (
               <div key={seller._id}>
                 <Link to={`/seller/${seller._id}`}>
-                  <img src={resolveAssetUrl(seller.seller.logo)} alt={seller.seller.name} />
+                  <img
+                    src={resolveAssetUrl(seller.seller.logo)}
+                    alt={seller.seller.name}
+                    width="280"
+                    height="280"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <p className="legend">{seller.seller.name}</p>
                 </Link>
               </div>

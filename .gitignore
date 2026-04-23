@@ -30,3 +30,4 @@ yarn-error.log*
 /backend/dev.db
 /test-api.db
 /uploads/*.jpg
+.omx

@@ -40,7 +40,15 @@ function CartScreen(props) { //path="/cart/:id?"
                                 <li key={item.product} className="cart-item">
                                     <div className="row cart-item-row">
                                         <div>
-                                            <img src={resolveAssetUrl(item.image)} alt={item.name} className="small" />
+                                            <img
+                                                src={resolveAssetUrl(item.image)}
+                                                alt={item.name}
+                                                className="small"
+                                                width="50"
+                                                height="50"
+                                                loading="lazy"
+                                                decoding="async"
+                                            />
                                         </div>
                                         <div className="min-30">
                                             <Link to={`/product/${item.product}`}>{item.name}</Link>
