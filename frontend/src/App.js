@@ -164,9 +164,9 @@ function App() {
               </button>
             </li>
             {loadingCategories ? (
-              <LoadingBox />
+              <li><LoadingBox /></li>
             ) : errorCategories ? (
-              <MessageBox variant="danger">{errorCategories}</MessageBox>
+              <li><MessageBox variant="danger">{errorCategories}</MessageBox></li>
             ) : (
               categories.map(c => (
                 <li key={c}>

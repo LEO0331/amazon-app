@@ -51,12 +51,12 @@ function HomeScreen() {
   return (
     <div>
       <section className="hero-gallery">
-        <Carousel showArrows autoPlay infiniteLoop interval={3200} showThumbs={false} showStatus={false}>
+        <Carousel showArrows autoPlay infiniteLoop interval={3200} showThumbs={false} showStatus={false} showIndicators={false}>
           {heroSlides.map((slide, index) => (
             <div key={slide.image}>
               <img
                 src={slide.image}
-                alt={slide.title}
+                alt=""
                 width="1600"
                 height="900"
                 loading={index === 0 ? 'eager' : 'lazy'}
@@ -76,12 +76,12 @@ function HomeScreen() {
       ) : (
         <>
           {sellers.length === 0 && <MessageBox>No Seller Found</MessageBox>}
-          <Carousel className="seller-showcase-carousel" showArrows autoPlay infiniteLoop interval={3000} showThumbs={false} showStatus={false}>
+          <Carousel className="seller-showcase-carousel" showArrows autoPlay infiniteLoop interval={3000} showThumbs={false} showStatus={false} showIndicators={false}>
             {topSellerShowcase.map((image, index) => (
               <div key={image}>
                 <img
                   src={image}
-                  alt={`Top Seller Showcase ${index + 1}`}
+                  alt=""
                   width="1400"
                   height="900"
                   loading="lazy"
@@ -90,13 +90,13 @@ function HomeScreen() {
               </div>
             ))}
           </Carousel>
-          <Carousel className="seller-carousel" showArrows autoPlay showThumbs={false} showStatus={false}>
+          <Carousel className="seller-carousel" showArrows autoPlay showThumbs={false} showStatus={false} showIndicators={false}>
             {sellers.map(seller => (
               <div key={seller._id}>
                 <Link to={`/seller/${seller._id}`}>
                   <img
                     src={resolveAssetUrl(seller.seller.logo)}
-                    alt={seller.seller.name}
+                    alt=""
                     width="280"
                     height="280"
                     loading="lazy"
