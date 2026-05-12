@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { prices, ratings, resolveAssetUrl } from './utils';
+import { getErrorMessage, prices, ratings, resolveAssetUrl } from './utils';
 
 describe('resolveAssetUrl', () => {
   it('returns same path for external URLs', () => {
@@ -23,5 +23,17 @@ describe('catalog filter constants', () => {
     expect(ratings[0]).toEqual({ name: '5stars & up', rating: 5 });
     expect(ratings.map((entry) => entry.rating)).toEqual([5, 4, 3, 2, 1]);
     expect(prices[0]).toEqual({ name: 'Any', min: 0, max: 0 });
+  });
+});
+
+describe('getErrorMessage', () => {
+  it('prefers API message when available', () => {
+    expect(getErrorMessage({ response: { data: { message: 'api error' } }, message: 'fallback' })).toBe(
+      'api error'
+    );
+  });
+
+  it('falls back to generic error message', () => {
+    expect(getErrorMessage({ message: 'network error' })).toBe('network error');
   });
 });

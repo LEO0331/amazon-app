@@ -14,14 +14,14 @@ const sellerLogos = [
 ];
 
 const productImages = [
-  'https://opengameart.org/sites/default/files/items.png',
-  'https://opengameart.org/sites/default/files/items_31.png',
-  'https://opengameart.org/sites/default/files/preview_47.png',
-  'https://opengameart.org/sites/default/files/preview_79.png',
-  'https://opengameart.org/sites/default/files/preview_102.png',
-  'https://opengameart.org/sites/default/files/preview_138.png',
-  'https://opengameart.org/sites/default/files/preview_187.png',
-  'https://opengameart.org/sites/default/files/preview_214.png',
+  '/images/pixel-01.svg',
+  '/images/pixel-02.svg',
+  '/images/pixel-03.svg',
+  '/images/pixel-04.svg',
+  '/images/pixel-05.svg',
+  '/images/pixel-06.svg',
+  '/images/pixel-07.svg',
+  '/images/pixel-08.svg',
 ];
 
 export async function resetDatabase() {

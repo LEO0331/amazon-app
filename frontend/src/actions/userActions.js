@@ -1,4 +1,5 @@
 import apiClient from '../apiClient';
+import { getErrorMessage } from '../utils';
 import {
     USER_SIGNIN_REQUEST,
     USER_SIGNIN_SUCCESS,
@@ -37,9 +38,7 @@ export const register = (name, email, password) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: USER_REGISTER_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -53,9 +52,7 @@ export const signin = (email, password) => async (dispatch) => {
     } catch (error) {
         dispatch({ //same format as detailsProduct in productActions.js
             type: USER_SIGNIN_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 }
@@ -68,9 +65,7 @@ export const detailsUser = (userId) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: USER_DETAILS_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 }
@@ -85,9 +80,7 @@ export const updateUserProfile = (user) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: USER_UPDATE_PROFILE_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 }
@@ -100,9 +93,7 @@ export const updateUser = (user) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: USER_UPDATE_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 }
@@ -115,9 +106,7 @@ export const listUsers = () => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: USER_LIST_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 } 
@@ -130,9 +119,7 @@ export const listTopSellers = () => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: USER_TOPSELLERS_LIST_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 }
@@ -145,9 +132,7 @@ export const deleteUser = (userId) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: USER_DELETE_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 }
@@ -162,9 +147,6 @@ export const signout = () => async (dispatch) => { //remove localstorage in stor
     localStorage.removeItem('cartItems');
     localStorage.removeItem('shippingAddress');
     dispatch({type: USER_SIGNOUT});
-    //document.location.href = '/signin';
 };
-
-
 
 

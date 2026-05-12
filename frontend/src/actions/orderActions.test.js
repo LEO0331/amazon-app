@@ -34,6 +34,7 @@ import {
   ORDER_PAY_REQUEST,
   ORDER_PAY_SUCCESS,
   ORDER_SUMMARY_REQUEST,
+  ORDER_SUMMARY_FAIL,
   ORDER_SUMMARY_SUCCESS,
 } from '../constants/orderConstants';
 
@@ -220,7 +221,7 @@ describe('orderActions', () => {
     await summaryOrder()(dispatch);
     expect(dispatch).toHaveBeenNthCalledWith(1, { type: ORDER_SUMMARY_REQUEST });
     expect(dispatch).toHaveBeenNthCalledWith(2, {
-      type: ORDER_CREATE_FAIL,
+      type: ORDER_SUMMARY_FAIL,
       payload: 'summary error',
     });
   });

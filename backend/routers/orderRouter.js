@@ -6,6 +6,22 @@ import { mapOrder } from '../db/mappers.js';
 import { isAdmin, isAdminOrSeller, isAuth } from '../utils.js';
 
 const orderRouter = express.Router();
+const MAX_ORDER_QTY = 99;
+
+function toAmount(value, fallback = null) {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return null;
+  }
+  return Number(parsed.toFixed(2));
+}
+
+function normalizePaymentMethod(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
 
 function canAccessOrder(user, orderRow) {
   if (user?.isAdmin) {
@@ -115,24 +131,90 @@ orderRouter.post(
       return;
     }
 
+    if (!req.body.shippingAddress || typeof req.body.shippingAddress !== 'object' || Array.isArray(req.body.shippingAddress)) {
+      res.status(400).send({ message: 'Invalid shipping address' });
+      return;
+    }
+
+    const paymentMethod = normalizePaymentMethod(req.body.paymentMethod);
+    if (!paymentMethod) {
+      res.status(400).send({ message: 'Invalid payment method' });
+      return;
+    }
+
     const productIds = req.body.orderItems.map((item) => item?.product).filter(Boolean);
     if (productIds.length !== req.body.orderItems.length) {
       res.status(400).send({ message: 'Invalid order items' });
       return;
     }
 
-    const placeholders = productIds.map(() => '?').join(',');
+    const uniqueProductIds = [...new Set(productIds)];
+    const placeholders = uniqueProductIds.map(() => '?').join(',');
     const productsResult = await execute(
-      `SELECT id, seller_id FROM products WHERE id IN (${placeholders})`,
-      productIds
+      `SELECT id, seller_id, name, image, price, count_in_stock FROM products WHERE id IN (${placeholders})`,
+      uniqueProductIds
     );
     const productById = new Map(productsResult.rows.map((row) => [row.id, row]));
-    if (productById.size !== productIds.length) {
+    if (productById.size !== uniqueProductIds.length) {
       res.status(400).send({ message: 'One or more products are invalid' });
       return;
     }
 
-    const sellerIds = new Set(productIds.map((id) => productById.get(id)?.seller_id).filter(Boolean));
+    const normalizedItems = [];
+    let itemsPrice = 0;
+    for (const item of req.body.orderItems) {
+      const productId = item?.product;
+      const qty = Number(item?.qty);
+      if (!Number.isInteger(qty) || qty < 1 || qty > MAX_ORDER_QTY) {
+        res.status(400).send({ message: 'Invalid item quantity' });
+        return;
+      }
+
+      const product = productById.get(productId);
+      if (!product) {
+        res.status(400).send({ message: 'One or more products are invalid' });
+        return;
+      }
+
+      const stock = Number(product.count_in_stock);
+      if (Number.isFinite(stock) && qty > stock) {
+        res.status(400).send({ message: `Insufficient stock for ${product.name}` });
+        return;
+      }
+
+      const unitPrice = Number(product.price);
+      if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+        res.status(400).send({ message: 'Invalid product pricing' });
+        return;
+      }
+
+      normalizedItems.push({
+        name: product.name,
+        qty,
+        image: product.image,
+        price: unitPrice,
+        product: product.id,
+        seller: { _id: product.seller_id || null },
+      });
+      itemsPrice += unitPrice * qty;
+    }
+    itemsPrice = Number(itemsPrice.toFixed(2));
+
+    const shippingPrice = toAmount(req.body.shippingPrice, 0);
+    const taxPrice = toAmount(req.body.taxPrice, 0);
+    if (shippingPrice === null || taxPrice === null) {
+      res.status(400).send({ message: 'Invalid order pricing' });
+      return;
+    }
+    const totalPrice = Number((itemsPrice + shippingPrice + taxPrice).toFixed(2));
+
+    const clientTotal = toAmount(req.body.totalPrice);
+    if (clientTotal !== null && Math.abs(clientTotal - totalPrice) > 0.01) {
+      res.status(400).send({ message: 'Order total mismatch' });
+      return;
+    }
+
+    const sellerIds = new Set(normalizedItems.map((item) => item.seller?._id).filter(Boolean));
     if (sellerIds.size > 1) {
       res.status(400).send({ message: 'Mixed seller orders are not supported' });
       return;
@@ -152,14 +234,14 @@ orderRouter.post(
         id,
         req.user._id,
         orderSellerId,
-        JSON.stringify(req.body.orderItems),
-        JSON.stringify(req.body.shippingAddress || {}),
-        req.body.paymentMethod,
+        JSON.stringify(normalizedItems),
+        JSON.stringify(req.body.shippingAddress),
+        paymentMethod,
         null,
-        Number(req.body.itemsPrice || 0),
-        Number(req.body.shippingPrice || 0),
-        Number(req.body.taxPrice || 0),
-        Number(req.body.totalPrice || 0),
+        itemsPrice,
+        shippingPrice,
+        taxPrice,
+        totalPrice,
         timestamp,
         timestamp,
       ]
@@ -248,7 +330,7 @@ orderRouter.delete(
     }
 
     await execute('DELETE FROM orders WHERE id = ?', [req.params.id]);
-    res.send({ message: 'Order Deleted', product: mapOrder(row) });
+    res.send({ message: 'Order Deleted', order: mapOrder(row) });
   })
 );
 

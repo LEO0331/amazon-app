@@ -1,0 +1,19 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 3,
+      "url": [
+        "http://127.0.0.1:4173/"
+      ],
+      "startServerCommand": "npm --prefix frontend run preview -- --host 127.0.0.1 --port 4173 --strictPort",
+      "startServerReadyPattern": "http://127.0.0.1:4173/",
+      "startServerReadyTimeout": 120000,
+      "settings": {
+        "chromeFlags": "--no-sandbox --disable-dev-shm-usage"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

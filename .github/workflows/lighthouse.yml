@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,42 +34,30 @@ jobs:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           VITE_BASE_PATH: /
 
-      - name: Start preview server
-        run: |
-          npm --prefix frontend run preview -- --host 127.0.0.1 --port 4173 > /tmp/vite-preview.log 2>&1 &
-          echo $! > /tmp/vite-preview.pid
-
-      - name: Wait for preview server
-        run: |
-          for i in $(seq 1 60); do
-            if curl -sSf http://127.0.0.1:4173/ > /dev/null; then
-              echo "Preview server is ready."
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "Preview server did not become ready in time."
-          cat /tmp/vite-preview.log || true
-          exit 1
-
       - name: Run Lighthouse CI
         id: lighthouse
-        uses: treosh/lighthouse-ci-action@v11
-        with:
-          urls: |
-            http://127.0.0.1:4173/
-          runs: 3
-          uploadArtifacts: true
-          temporaryPublicStorage: true
+        run: |
+          npx @lhci/cli@0.13.x autorun --config=.lighthouserc.json | tee /tmp/lhci.log
+          grep -Eo 'https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/[[:alnum:]-]+\.report\.html' /tmp/lhci.log | sort -u > /tmp/lhci-links.txt
+          if [ ! -s /tmp/lhci-links.txt ]; then
+            echo "Failed to find temporary public report links in LHCI output."
+            exit 1
+          fi
+          {
+            echo "links<<EOF"
+            cat /tmp/lhci-links.txt
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Add Lighthouse URLs to job summary
         run: |
           echo "## Lighthouse Temporary Public Reports" >> "$GITHUB_STEP_SUMMARY"
           echo "${{ steps.lighthouse.outputs.links }}" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Stop preview server
+      - name: Upload Lighthouse artifacts
         if: always()
-        run: |
-          if [ -f /tmp/vite-preview.pid ]; then
-            kill "$(cat /tmp/vite-preview.pid)" || true
-          fi
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouseci-artifacts
+          path: .lighthouseci
+          if-no-files-found: warn

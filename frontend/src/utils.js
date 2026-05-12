@@ -61,3 +61,6 @@ export const resolveAssetUrl = (assetPath) => {
 
     return assetPath;
 };
+
+export const getErrorMessage = (error) =>
+    error?.response?.data?.message ? error.response.data.message : error?.message;

@@ -1,4 +1,5 @@
 import apiClient from '../apiClient';
+import { getErrorMessage } from '../utils';
 import {
     PRODUCT_LIST_REQUEST,
     PRODUCT_LIST_SUCCESS,
@@ -29,7 +30,7 @@ export const listProducts = ({pageNumber = '', seller = '', name = '', category 
         const {data} = await apiClient.get(`/api/products?pageNumber=${pageNumber}&seller=${seller}&name=${name}&category=${category}&min=${min}&max=${max}&rating=${rating}&order=${order}`); //get products from backend through db
         dispatch({type: PRODUCT_LIST_SUCCESS, payload: data}) //dispatch actions: change the state of redux and update homescreen showing products
     } catch (error) {
-        dispatch({type: PRODUCT_LIST_FAIL, payload: error.message});
+        dispatch({type: PRODUCT_LIST_FAIL, payload: getErrorMessage(error)});
     }
 };
 
@@ -39,7 +40,7 @@ export const listProductCategories = () => async (dispatch) => {
         const {data} = await apiClient.get(`/api/products/categories`); //get products from backend through db
         dispatch({type: PRODUCT_CATEGORY_LIST_SUCCESS, payload: data}) //dispatch actions: change the state of redux and update homescreen showing products
     } catch (error) {
-        dispatch({type: PRODUCT_CATEGORY_LIST_FAIL, payload: error.message});
+        dispatch({type: PRODUCT_CATEGORY_LIST_FAIL, payload: getErrorMessage(error)});
     }
 };
 
@@ -51,9 +52,7 @@ export const detailsProduct = (productId) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: PRODUCT_DETAILS_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -66,9 +65,7 @@ export const createProduct = () => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: PRODUCT_CREATE_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -81,9 +78,7 @@ export const updateProduct = (product) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: PRODUCT_UPDATE_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -96,9 +91,7 @@ export const deleteProduct = (productId) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: PRODUCT_DELETE_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -111,10 +104,7 @@ export const createReview = (productId, review) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: PRODUCT_REVIEW_CREATE_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
-

@@ -84,6 +84,14 @@ supportRouter.post(
       return;
     }
 
+    if (req.user.isAdmin) {
+      const user = (await execute('SELECT id FROM users WHERE id = ?', [userId])).rows[0];
+      if (!user) {
+        res.status(404).send({ message: 'User not found' });
+        return;
+      }
+    }
+
     let thread = (
       await execute('SELECT * FROM support_threads WHERE user_id = ? ORDER BY created_at ASC LIMIT 1', [userId])
     ).rows[0];

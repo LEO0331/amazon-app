@@ -30,6 +30,10 @@ function parsePositiveInteger(value, fallback) {
   return parsed;
 }
 
+function normalizeText(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
 async function loadSellerMap(rows) {
   const ids = [...new Set(rows.map((row) => row.seller_id).filter(Boolean))];
   if (ids.length === 0) {
@@ -186,7 +190,7 @@ productRouter.post(
         id,
         req.user._id,
         `sample name ${Date.now()}`,
-        'https://opengameart.org/sites/default/files/items.png',
+        '/images/pixel-01.svg',
         'sample brand',
         'sample category',
         'sample description',
@@ -220,6 +224,23 @@ productRouter.put(
       return;
     }
 
+    const name = normalizeText(req.body.name);
+    const image = normalizeText(req.body.image);
+    const category = normalizeText(req.body.category);
+    const brand = normalizeText(req.body.brand);
+    const description = normalizeText(req.body.description);
+    const price = Number(req.body.price);
+    const countInStock = Number(req.body.countInStock);
+
+    if (!name || !image || !category || !brand || !description) {
+      res.status(400).send({ message: 'Invalid product data' });
+      return;
+    }
+    if (!Number.isFinite(price) || price < 0 || !Number.isInteger(countInStock) || countInStock < 0) {
+      res.status(400).send({ message: 'Invalid product inventory or pricing' });
+      return;
+    }
+
     await execute(
       `UPDATE products SET
         name = ?,
@@ -232,13 +253,13 @@ productRouter.put(
         updated_at = ?
       WHERE id = ?`,
       [
-        req.body.name,
-        req.body.price,
-        req.body.image,
-        req.body.category,
-        req.body.brand,
-        req.body.countInStock,
-        req.body.description,
+        name,
+        price,
+        image,
+        category,
+        brand,
+        countInStock,
+        description,
         new Date().toISOString(),
         req.params.id,
       ]
@@ -281,10 +302,17 @@ productRouter.post(
       return;
     }
 
+    const reviewRating = Number(req.body.rating);
+    const comment = normalizeText(req.body.comment);
+    if (!Number.isFinite(reviewRating) || reviewRating < 1 || reviewRating > 5 || !comment) {
+      res.status(400).send({ message: 'Invalid review data' });
+      return;
+    }
+
     const review = {
       name: req.user.name,
-      rating: Number(req.body.rating),
-      comment: req.body.comment,
+      rating: reviewRating,
+      comment,
       createdAt: new Date().toISOString(),
     };
 

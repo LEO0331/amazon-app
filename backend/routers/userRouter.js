@@ -28,8 +28,20 @@ function sanitizeUser(user) {
   };
 }
 
-function authPayload(user) {
-  return sanitizeUser(user);
+function normalizeEmail(email) {
+  return typeof email === 'string' ? email.trim().toLowerCase() : '';
+}
+
+function normalizeName(name) {
+  return typeof name === 'string' ? name.trim() : '';
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isValidPassword(password) {
+  return typeof password === 'string' && password.length >= 4;
 }
 
 async function getUserByEmail(email) {
@@ -81,8 +93,15 @@ userRouter.get(
 userRouter.post(
   '/signin',
   expressAsyncHandler(async (req, res) => {
-    const userRow = await getUserByEmail(req.body.email);
-    if (!userRow || !bcrypt.compareSync(req.body.password, userRow.password_hash)) {
+    const email = normalizeEmail(req.body.email);
+    const password = typeof req.body.password === 'string' ? req.body.password : '';
+    if (!isValidEmail(email) || !password) {
+      res.status(400).send({ message: 'Invalid email or password' });
+      return;
+    }
+
+    const userRow = await getUserByEmail(email);
+    if (!userRow || !bcrypt.compareSync(password, userRow.password_hash)) {
       res.status(401).send({ message: 'Invalid email or password' });
       return;
     }
@@ -92,14 +111,23 @@ userRouter.post(
     setAuthCookie(res, token);
     issueCsrfToken(res);
 
-    res.send(authPayload(user));
+    res.send(sanitizeUser(user));
   })
 );
 
 userRouter.post(
   '/register',
   expressAsyncHandler(async (req, res) => {
-    const existing = await getUserByEmail(req.body.email);
+    const name = normalizeName(req.body.name);
+    const email = normalizeEmail(req.body.email);
+    const password = typeof req.body.password === 'string' ? req.body.password : '';
+
+    if (!name || !isValidEmail(email) || !isValidPassword(password)) {
+      res.status(400).send({ message: 'Invalid registration data' });
+      return;
+    }
+
+    const existing = await getUserByEmail(email);
     if (existing) {
       res.status(400).send({ message: 'Email already exists' });
       return;
@@ -113,14 +141,14 @@ userRouter.post(
         seller_name, seller_logo, seller_description, seller_rating, seller_num_reviews,
         created_at, updated_at
       ) VALUES (?, ?, ?, ?, 0, 0, NULL, NULL, NULL, 0, 0, ?, ?)`,
-      [id, req.body.name, req.body.email, bcrypt.hashSync(req.body.password, 10), timestamp, timestamp]
+      [id, name, email, bcrypt.hashSync(password, 10), timestamp, timestamp]
     );
 
     const created = mapUser((await getUserById(id)));
     const token = generateToken(created);
     setAuthCookie(res, token);
     issueCsrfToken(res);
-    res.send(authPayload(created));
+    res.send(sanitizeUser(created));
   })
 );
 
@@ -140,11 +168,27 @@ userRouter.put(
       return;
     }
 
-    const nextName = req.body.name || userRow.name;
-    const nextEmail = req.body.email || userRow.email;
-    const nextPassword = req.body.password
-      ? bcrypt.hashSync(req.body.password, 10)
-      : userRow.password_hash;
+    const nextName = normalizeName(req.body.name) || userRow.name;
+    const nextEmail = normalizeEmail(req.body.email) || userRow.email;
+    if (!nextName || !isValidEmail(nextEmail)) {
+      res.status(400).send({ message: 'Invalid profile data' });
+      return;
+    }
+
+    if (nextEmail !== userRow.email) {
+      const existing = await getUserByEmail(nextEmail);
+      if (existing && existing.id !== req.user._id) {
+        res.status(400).send({ message: 'Email already exists' });
+        return;
+      }
+    }
+
+    if (req.body.password && !isValidPassword(req.body.password)) {
+      res.status(400).send({ message: 'Password must be at least 4 characters' });
+      return;
+    }
+
+    const nextPassword = req.body.password ? bcrypt.hashSync(req.body.password, 10) : userRow.password_hash;
 
     await execute(
       `UPDATE users SET
@@ -160,9 +204,9 @@ userRouter.put(
         nextName,
         nextEmail,
         nextPassword,
-        req.body.sellerName || userRow.seller_name,
-        req.body.sellerLogo || userRow.seller_logo,
-        req.body.sellerDescription || userRow.seller_description,
+        normalizeName(req.body.sellerName) || userRow.seller_name,
+        typeof req.body.sellerLogo === 'string' ? req.body.sellerLogo.trim() : userRow.seller_logo,
+        typeof req.body.sellerDescription === 'string' ? req.body.sellerDescription.trim() : userRow.seller_description,
         new Date().toISOString(),
         req.user._id,
       ]
@@ -172,7 +216,7 @@ userRouter.put(
     const token = generateToken(updated);
     setAuthCookie(res, token);
 
-    res.send(authPayload(updated));
+    res.send(sanitizeUser(updated));
   })
 );
 
@@ -228,6 +272,20 @@ userRouter.put(
       return;
     }
 
+    const nextName = normalizeName(req.body.name) || userRow.name;
+    const nextEmail = normalizeEmail(req.body.email) || userRow.email;
+    if (!nextName || !isValidEmail(nextEmail)) {
+      res.status(400).send({ message: 'Invalid user data' });
+      return;
+    }
+    if (nextEmail !== userRow.email) {
+      const existing = await getUserByEmail(nextEmail);
+      if (existing && existing.id !== req.params.id) {
+        res.status(400).send({ message: 'Email already exists' });
+        return;
+      }
+    }
+
     await execute(
       `UPDATE users SET
         name = ?,
@@ -237,8 +295,8 @@ userRouter.put(
         updated_at = ?
       WHERE id = ?`,
       [
-        req.body.name || userRow.name,
-        req.body.email || userRow.email,
+        nextName,
+        nextEmail,
         req.body.isSeller ? 1 : 0,
         req.body.isAdmin ? 1 : 0,
         new Date().toISOString(),

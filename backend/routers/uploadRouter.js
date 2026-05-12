@@ -22,8 +22,7 @@ const storage = multer.diskStorage({ //full control on storing files to disk
         cb(null, 'uploads/'); //(err, folder to save the file)
     },
     filename(req, file, cb) {
-        //const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-        cb(null, `${Date.now()}.jpg`); //`${uniqueSuffix}.jpg`
+        cb(null, `${Date.now()}.jpg`);
     },
 });
   

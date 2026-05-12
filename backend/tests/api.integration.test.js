@@ -246,6 +246,46 @@ test('orders endpoints: create + mine + pay + summary', async () => {
   assert.ok(Array.isArray(summaryBody.orders));
 });
 
+test('orders validation: rejects mismatched client total', async () => {
+  await seed();
+
+  const user = new Session(baseUrl);
+  const signin = await user.post('/api/users/signin', { email: 'user@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(signin.status, 200);
+  await user.getCsrfToken();
+
+  const listResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
+  const listBody = await listResponse.json();
+  const product = listBody.products[0];
+
+  const createOrder = await user.post('/api/orders', {
+    orderItems: [
+      {
+        name: product.name,
+        qty: 1,
+        image: product.image,
+        price: product.price,
+        product: product._id,
+      },
+    ],
+    shippingAddress: {
+      fullName: 'Customer User',
+      address: '1 Demo Street',
+      city: 'Taipei',
+      postalCode: '100',
+      country: 'Taiwan',
+    },
+    paymentMethod: 'PayPal',
+    shippingPrice: 0,
+    taxPrice: 0,
+    totalPrice: 0.01,
+  });
+
+  assert.equal(createOrder.status, 400);
+  const payload = await createOrder.json();
+  assert.equal(payload.message, 'Order total mismatch');
+});
+
 test('support endpoints: create thread + send and list messages', async () => {
   await seed();
 
@@ -275,6 +315,18 @@ test('support endpoints: create thread + send and list messages', async () => {
   assert.equal(threads.status, 200);
   const threadList = await threads.json();
   assert.ok(threadList.length >= 1);
+});
+
+test('users validation: register rejects invalid payload', async () => {
+  await seed();
+
+  const response = await fetch(`${baseUrl}/api/users/register`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name: ' ', email: 'bad-email', password: '123' }),
+  });
+
+  assert.equal(response.status, 400);
 });
 
 test('security: protected route requires auth cookie', async () => {

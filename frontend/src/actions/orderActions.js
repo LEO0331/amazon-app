@@ -1,5 +1,6 @@
 import apiClient from '../apiClient';
 import { CART_EMPTY } from '../constants/cartConstants';
+import { getErrorMessage } from '../utils';
 import {
     ORDER_CREATE_REQUEST,
     ORDER_CREATE_SUCCESS,
@@ -23,7 +24,8 @@ import {
     ORDER_DELIVER_SUCCESS,
     ORDER_DELIVER_FAIL,
     ORDER_SUMMARY_REQUEST,
-    ORDER_SUMMARY_SUCCESS
+    ORDER_SUMMARY_SUCCESS,
+    ORDER_SUMMARY_FAIL
 } from '../constants/orderConstants';
 
 export const createOrder = (order) => async (dispatch) => {
@@ -36,9 +38,7 @@ export const createOrder = (order) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: ORDER_CREATE_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -51,9 +51,7 @@ export const detailsOrder = (orderId) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: ORDER_DETAILS_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -66,9 +64,7 @@ export const payOrder = (order, paymentResult) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: ORDER_PAY_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -81,9 +77,7 @@ export const listOrderMine = () => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: ORDER_MINE_LIST_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -92,14 +86,11 @@ export const listOrders = ({seller = ''}) => async (dispatch) => {
     dispatch({ type: ORDER_LIST_REQUEST });
     try {
         const { data } = await apiClient.get(`/api/orders?seller=${seller}`);
-        //console.log(data);
         dispatch({ type: ORDER_LIST_SUCCESS, payload: data }); //order array from backend
     } catch (error) {
         dispatch({
             type: ORDER_LIST_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -112,9 +103,7 @@ export const deleteOrder = (orderId) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: ORDER_DELETE_FAIL,
-            payload: error.response && error.response.data.message //from backend delete('/:id') {message:Order not found}
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -127,9 +116,7 @@ export const deliverOrder = (orderId) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: ORDER_DELIVER_FAIL,
-            payload: error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message,
+            payload: getErrorMessage(error),
         });
     }
 };
@@ -141,12 +128,8 @@ export const summaryOrder = () => async (dispatch) => {
         dispatch({ type: ORDER_SUMMARY_SUCCESS, payload: data });
     } catch (error) {
         dispatch({
-            type: ORDER_CREATE_FAIL,
-            payload:
-                error.response && error.response.data.message
-                    ? error.response.data.message
-                    : error.message,
+            type: ORDER_SUMMARY_FAIL,
+            payload: getErrorMessage(error),
         });
     }
 };
-
