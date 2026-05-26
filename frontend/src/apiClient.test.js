@@ -89,8 +89,13 @@ describe('apiClient', () => {
     const putConfig = await requestHandler({ method: 'put', headers: {} });
     expect(putConfig.headers['x-csrf-token']).toBe('cached-token');
 
+    document.cookie = 'csrf_token=rotated-cookie-token';
+    const deleteConfig = await requestHandler({ method: 'delete', headers: {} });
+    expect(deleteConfig.headers['x-csrf-token']).toBe('rotated-cookie-token');
+
     client.get.mockResolvedValueOnce({ data: { csrfToken: 'init-token' } });
     await mod.initializeCsrfToken();
+    document.cookie = '';
     const patchConfig = await requestHandler({ method: 'patch', headers: {} });
     expect(patchConfig.headers['x-csrf-token']).toBe('init-token');
   });

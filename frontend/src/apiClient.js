@@ -33,7 +33,7 @@ function readCookie(name) {
 apiClient.interceptors.request.use((config) => {
   const method = (config.method || 'get').toLowerCase();
   if (!['get', 'head', 'options'].includes(method)) {
-    const csrfToken = csrfTokenCache || readCookie('csrf_token');
+    const csrfToken = readCookie('csrf_token') || csrfTokenCache;
     if (csrfToken) {
       config.headers['x-csrf-token'] = csrfToken;
     }

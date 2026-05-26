@@ -11,6 +11,7 @@
     "frontend:build": "npm --prefix frontend run build",
     "build": "npm run frontend:build",
     "test": "node backend/tests/seed.test.js && node backend/tests/api.integration.test.js && npm --prefix frontend run test",
+    "test:e2e": "playwright test",
     "test:backend:coverage": "node --test --experimental-test-coverage backend/tests/*.test.js",
     "test:coverage": "npm run test:backend:coverage && npm --prefix frontend run test:coverage"
   },
@@ -34,6 +35,7 @@
     "multer-s3": "^2.9.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "eslint": "^7.32.0",
     "eslint-plugin-react": "^7.25.1",
     "nodemon": "^2.0.12"
