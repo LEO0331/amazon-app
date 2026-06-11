@@ -1,12 +1,14 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { execute } from '../db/client.js';
 import { mapOrder } from '../db/mappers.js';
 import { isAdmin, isAdminOrSeller, isAuth } from '../utils.js';
 
 const orderRouter = express.Router();
 const MAX_ORDER_QTY = 99;
+const MAX_IDEMPOTENCY_KEY_LENGTH = 255;
+const IDEMPOTENCY_RETENTION_MS = 24 * 60 * 60 * 1000;
 
 function toAmount(value, fallback = null) {
   if (value === undefined || value === null || value === '') {
@@ -21,6 +23,65 @@ function toAmount(value, fallback = null) {
 
 function normalizePaymentMethod(value) {
   return typeof value === 'string' ? value.trim() : '';
+}
+
+function getRequestHash(body) {
+  return createHash('sha256').update(JSON.stringify(body || {})).digest('hex');
+}
+
+function getIdempotencyKey(req) {
+  const key = req.get('Idempotency-Key');
+  return typeof key === 'string' ? key.trim() : '';
+}
+
+function sendIdempotencyError(res, status, code, message) {
+  res.status(status).send({
+    message,
+    error: {
+      type: 'idempotency_error',
+      code,
+      message,
+      request_id: res.locals.requestId,
+    },
+  });
+}
+
+async function findIdempotencyRecord(key) {
+  return (await execute('SELECT * FROM idempotency_keys WHERE key = ?', [key])).rows[0] || null;
+}
+
+function idempotencyScopeMatches(record, req) {
+  return (
+    record.method === req.method &&
+    record.path === req.baseUrl + req.path &&
+    (record.user_id || '') === (req.user?._id || '')
+  );
+}
+
+async function reserveIdempotencyKey({ key, req, requestHash, timestamp }) {
+  if (!key) {
+    return { reserved: false };
+  }
+
+  const expiresAt = new Date(new Date(timestamp).getTime() + IDEMPOTENCY_RETENTION_MS).toISOString();
+  await execute(
+    `INSERT INTO idempotency_keys (
+      key, method, path, user_id, request_hash, response_status, response_body_json, created_at, updated_at, expires_at
+    ) VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?)`,
+    [key, req.method, req.baseUrl + req.path, req.user?._id || null, requestHash, timestamp, timestamp, expiresAt]
+  );
+  return { reserved: true };
+}
+
+async function persistIdempotencyResponse({ key, status, body, timestamp }) {
+  if (!key) {
+    return;
+  }
+
+  await execute(
+    'UPDATE idempotency_keys SET response_status = ?, response_body_json = ?, updated_at = ? WHERE key = ?',
+    [status, JSON.stringify(body), timestamp, key]
+  );
 }
 
 function canAccessOrder(user, orderRow) {
@@ -126,6 +187,46 @@ orderRouter.post(
   '/',
   isAuth,
   expressAsyncHandler(async (req, res) => {
+    const idempotencyKey = getIdempotencyKey(req);
+    const requestHash = idempotencyKey ? getRequestHash(req.body) : '';
+
+    if (idempotencyKey.length > MAX_IDEMPOTENCY_KEY_LENGTH) {
+      sendIdempotencyError(
+        res,
+        400,
+        'idempotency_key_too_long',
+        `Idempotency-Key must be ${MAX_IDEMPOTENCY_KEY_LENGTH} characters or fewer`
+      );
+      return;
+    }
+
+    if (idempotencyKey) {
+      const existing = await findIdempotencyRecord(idempotencyKey);
+      if (existing) {
+        if (!idempotencyScopeMatches(existing, req) || existing.request_hash !== requestHash) {
+          sendIdempotencyError(
+            res,
+            409,
+            'idempotency_key_reused_with_different_params',
+            'The provided Idempotency-Key was already used with different request parameters.'
+          );
+          return;
+        }
+        if (!existing.response_body_json) {
+          sendIdempotencyError(
+            res,
+            409,
+            'idempotency_key_in_use',
+            'The provided Idempotency-Key is already processing.'
+          );
+          return;
+        }
+
+        res.status(Number(existing.response_status || 200)).send(JSON.parse(existing.response_body_json));
+        return;
+      }
+    }
+
     if (!Array.isArray(req.body.orderItems) || req.body.orderItems.length === 0) {
       res.status(400).send({ message: 'Cart is empty' });
       return;
@@ -223,6 +324,33 @@ orderRouter.post(
 
     const timestamp = new Date().toISOString();
     const id = randomUUID();
+    if (idempotencyKey) {
+      try {
+        await reserveIdempotencyKey({ key: idempotencyKey, req, requestHash, timestamp });
+      } catch {
+        const existing = await findIdempotencyRecord(idempotencyKey);
+        if (existing && (!idempotencyScopeMatches(existing, req) || existing.request_hash !== requestHash)) {
+          sendIdempotencyError(
+            res,
+            409,
+            'idempotency_key_reused_with_different_params',
+            'The provided Idempotency-Key was already used with different request parameters.'
+          );
+          return;
+        }
+        if (existing?.response_body_json) {
+          res.status(Number(existing.response_status || 200)).send(JSON.parse(existing.response_body_json));
+          return;
+        }
+        sendIdempotencyError(
+          res,
+          409,
+          'idempotency_key_in_use',
+          'The provided Idempotency-Key is already processing.'
+        );
+        return;
+      }
+    }
 
     await execute(
       `INSERT INTO orders (
@@ -248,7 +376,9 @@ orderRouter.post(
     );
 
     const created = (await execute('SELECT * FROM orders WHERE id = ?', [id])).rows[0];
-    res.status(201).send({ message: 'New Order Created', order: mapOrder(created) });
+    const responseBody = { message: 'New Order Created', order: mapOrder(created) };
+    await persistIdempotencyResponse({ key: idempotencyKey, status: 201, body: responseBody, timestamp });
+    res.status(201).send(responseBody);
   })
 );
 

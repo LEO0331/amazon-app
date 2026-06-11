@@ -11,7 +11,7 @@ import orderRouter from './routers/orderRouter.js';
 import uploadRouter from './routers/uploadRouter.js';
 import supportRouter from './routers/supportRouter.js';
 import seedRouter from './routers/seedRouter.js';
-import { csrfProtection, issueCsrfToken } from './utils.js';
+import { attachRequestId, csrfProtection, issueCsrfToken } from './utils.js';
 import { initDatabase } from './db/schema.js';
 
 dotenv.config();
@@ -41,6 +41,7 @@ const authRateLimit = rateLimit({
 
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
+app.use(attachRequestId);
 app.use(helmet());
 app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
@@ -107,10 +108,10 @@ if (process.env.NODE_ENV === 'production') {
 app.use((err, _req, res, _next) => {
   const message = err?.message || 'Server Error';
   if (message.includes('CORS')) {
-    res.status(403).send({ message });
+    res.status(403).send({ message, request_id: res.locals.requestId });
     return;
   }
-  res.status(500).send({ message });
+  res.status(500).send({ message, request_id: res.locals.requestId });
 });
 
 export default app;

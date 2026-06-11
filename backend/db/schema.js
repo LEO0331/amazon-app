@@ -54,6 +54,18 @@ const statements = [
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (seller_id) REFERENCES users(id)
   )`,
+  `CREATE TABLE IF NOT EXISTS idempotency_keys (
+    key TEXT PRIMARY KEY,
+    method TEXT NOT NULL,
+    path TEXT NOT NULL,
+    user_id TEXT,
+    request_hash TEXT NOT NULL,
+    response_status INTEGER,
+    response_body_json TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+  )`,
   `CREATE TABLE IF NOT EXISTS support_threads (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
@@ -82,6 +94,7 @@ const statements = [
   'CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id)',
   'CREATE INDEX IF NOT EXISTS idx_orders_seller ON orders(seller_id)',
   'CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)',
+  'CREATE INDEX IF NOT EXISTS idx_idempotency_keys_created_at ON idempotency_keys(created_at)',
   'CREATE INDEX IF NOT EXISTS idx_support_threads_user ON support_threads(user_id)',
   'CREATE INDEX IF NOT EXISTS idx_support_threads_last_message_at ON support_threads(last_message_at)',
   'CREATE INDEX IF NOT EXISTS idx_support_messages_thread ON support_messages(thread_id)',

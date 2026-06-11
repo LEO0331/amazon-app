@@ -6,8 +6,8 @@ import { resetDatabase, seedOrders, seedProducts, seedUsers } from '../services/
 
 test('database schema initializes required tables', async () => {
   await initDatabase();
-  const result = await execute("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('users', 'products', 'orders', 'support_threads', 'support_messages')");
-  assert.equal(result.rows.length, 5);
+  const result = await execute("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('users', 'products', 'orders', 'idempotency_keys', 'support_threads', 'support_messages')");
+  assert.equal(result.rows.length, 6);
 });
 
 test('seed pipeline generates 500 products', async () => {

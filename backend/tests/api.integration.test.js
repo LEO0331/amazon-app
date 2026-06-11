@@ -44,8 +44,8 @@ class Session {
     return this.csrfToken;
   }
 
-  async post(path, body, { withCsrf = true } = {}) {
-    const headers = { 'content-type': 'application/json' };
+  async post(path, body, { withCsrf = true, headers: extraHeaders = {} } = {}) {
+    const headers = { 'content-type': 'application/json', ...extraHeaders };
     if (withCsrf) {
       if (!this.csrfToken) {
         await this.getCsrfToken();
@@ -114,6 +114,7 @@ test('users endpoints: seed + signin + list', async () => {
 
   const listResponse = await admin.request('/api/users');
   assert.equal(listResponse.status, 200);
+  assert.match(listResponse.headers.get('request-id'), /^req_/);
   const users = await listResponse.json();
   assert.ok(Array.isArray(users));
   assert.ok(users.length >= 3);
@@ -284,6 +285,64 @@ test('orders validation: rejects mismatched client total', async () => {
   assert.equal(createOrder.status, 400);
   const payload = await createOrder.json();
   assert.equal(payload.message, 'Order total mismatch');
+});
+
+test('orders idempotency: duplicate create returns original order and changed params are rejected', async () => {
+  await seed();
+
+  const user = new Session(baseUrl);
+  const signin = await user.post('/api/users/signin', { email: 'user@gmail.com', password: '1234' }, { withCsrf: false });
+  assert.equal(signin.status, 200);
+  await user.getCsrfToken();
+
+  const listResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
+  const listBody = await listResponse.json();
+  const product = listBody.products[0];
+  const orderBody = {
+    orderItems: [
+      {
+        name: product.name,
+        qty: 1,
+        image: product.image,
+        price: product.price,
+        product: product._id,
+      },
+    ],
+    shippingAddress: {
+      fullName: 'Customer User',
+      address: '1 Demo Street',
+      city: 'Taipei',
+      postalCode: '100',
+      country: 'Taiwan',
+    },
+    paymentMethod: 'PayPal',
+    shippingPrice: 0,
+    taxPrice: 0,
+    totalPrice: product.price,
+  };
+
+  const idempotencyKey = `order-create-${Date.now()}`;
+  const first = await user.post('/api/orders', orderBody, {
+    headers: { 'Idempotency-Key': idempotencyKey },
+  });
+  assert.equal(first.status, 201);
+  const firstPayload = await first.json();
+
+  const retry = await user.post('/api/orders', orderBody, {
+    headers: { 'Idempotency-Key': idempotencyKey },
+  });
+  assert.equal(retry.status, 201);
+  const retryPayload = await retry.json();
+  assert.equal(retryPayload.order._id, firstPayload.order._id);
+
+  const conflict = await user.post('/api/orders', { ...orderBody, taxPrice: 1, totalPrice: product.price + 1 }, {
+    headers: { 'Idempotency-Key': idempotencyKey },
+  });
+  assert.equal(conflict.status, 409);
+  const conflictPayload = await conflict.json();
+  assert.equal(conflictPayload.error.type, 'idempotency_error');
+  assert.equal(conflictPayload.error.code, 'idempotency_key_reused_with_different_params');
+  assert.match(conflictPayload.error.request_id, /^req_/);
 });
 
 test('support endpoints: create thread + send and list messages', async () => {

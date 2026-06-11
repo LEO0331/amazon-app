@@ -25,6 +25,7 @@ const productImages = [
 ];
 
 export async function resetDatabase() {
+  await execute('DELETE FROM idempotency_keys');
   await execute('DELETE FROM support_messages');
   await execute('DELETE FROM support_threads');
   await execute('DELETE FROM orders');

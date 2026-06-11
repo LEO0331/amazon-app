@@ -4,6 +4,7 @@ import crypto from 'crypto';
 const COOKIE_NAME = 'auth_token';
 const CSRF_COOKIE = 'csrf_token';
 const TOKEN_EXPIRES = '7d';
+const REQUEST_ID_HEADER = 'Request-Id';
 
 function isProduction() {
   return process.env.NODE_ENV === 'production';
@@ -21,6 +22,18 @@ function cookieSecurityOptions() {
     secure: false,
     sameSite: 'lax',
   };
+}
+
+export function attachRequestId(req, res, next) {
+  const incomingRequestId = req.get?.(REQUEST_ID_HEADER) || req.get?.(REQUEST_ID_HEADER.toLowerCase());
+  const requestId = incomingRequestId && incomingRequestId.length <= 128
+    ? incomingRequestId
+    : `req_${crypto.randomUUID()}`;
+
+  req.requestId = requestId;
+  res.locals.requestId = requestId;
+  res.set(REQUEST_ID_HEADER, requestId);
+  return next();
 }
 
 export function generateToken(user) {
