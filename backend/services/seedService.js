@@ -13,16 +13,11 @@ const sellerLogos = [
   'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=600&q=80',
 ];
 
-const productImages = [
-  '/images/pixel-01.svg',
-  '/images/pixel-02.svg',
-  '/images/pixel-03.svg',
-  '/images/pixel-04.svg',
-  '/images/pixel-05.svg',
-  '/images/pixel-06.svg',
-  '/images/pixel-07.svg',
-  '/images/pixel-08.svg',
-];
+const PIXEL_IMAGE_COUNT = 20;
+const productImages = Array.from(
+  { length: PIXEL_IMAGE_COUNT },
+  (_, index) => `/images/pixel-${String(index + 1).padStart(2, '0')}.svg`
+);
 
 export async function resetDatabase() {
   await execute('DELETE FROM idempotency_keys');

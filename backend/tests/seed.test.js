@@ -4,10 +4,15 @@ import { initDatabase } from '../db/schema.js';
 import { execute } from '../db/client.js';
 import { resetDatabase, seedOrders, seedProducts, seedUsers } from '../services/seedService.js';
 
+const EXPECTED_PIXEL_IMAGE_COUNT = 20;
+
 test('database schema initializes required tables', async () => {
   await initDatabase();
   const result = await execute("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('users', 'products', 'orders', 'idempotency_keys', 'support_threads', 'support_messages')");
   assert.equal(result.rows.length, 6);
+
+  const idempotencyColumns = await execute('PRAGMA table_info(idempotency_keys)');
+  assert.ok(idempotencyColumns.rows.some((column) => column.name === 'expires_at'));
 });
 
 test('seed pipeline generates 500 products', async () => {
@@ -20,7 +25,7 @@ test('seed pipeline generates 500 products', async () => {
   assert.equal(Number(productCount.rows[0].count), 500);
 
   const imageRows = await execute('SELECT image FROM products GROUP BY image');
-  assert.ok(imageRows.rows.length >= 6);
+  assert.equal(imageRows.rows.length, EXPECTED_PIXEL_IMAGE_COUNT);
 });
 
 test('seedOrders no-op when userId is missing or no products exist', async () => {

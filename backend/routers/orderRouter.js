@@ -327,28 +327,31 @@ orderRouter.post(
     if (idempotencyKey) {
       try {
         await reserveIdempotencyKey({ key: idempotencyKey, req, requestHash, timestamp });
-      } catch {
+      } catch (error) {
         const existing = await findIdempotencyRecord(idempotencyKey);
-        if (existing && (!idempotencyScopeMatches(existing, req) || existing.request_hash !== requestHash)) {
+        if (existing) {
+          if (!idempotencyScopeMatches(existing, req) || existing.request_hash !== requestHash) {
+            sendIdempotencyError(
+              res,
+              409,
+              'idempotency_key_reused_with_different_params',
+              'The provided Idempotency-Key was already used with different request parameters.'
+            );
+            return;
+          }
+          if (existing.response_body_json) {
+            res.status(Number(existing.response_status || 200)).send(JSON.parse(existing.response_body_json));
+            return;
+          }
           sendIdempotencyError(
             res,
             409,
-            'idempotency_key_reused_with_different_params',
-            'The provided Idempotency-Key was already used with different request parameters.'
+            'idempotency_key_in_use',
+            'The provided Idempotency-Key is already processing.'
           );
           return;
         }
-        if (existing?.response_body_json) {
-          res.status(Number(existing.response_status || 200)).send(JSON.parse(existing.response_body_json));
-          return;
-        }
-        sendIdempotencyError(
-          res,
-          409,
-          'idempotency_key_in_use',
-          'The provided Idempotency-Key is already processing.'
-        );
-        return;
+        throw error;
       }
     }
 

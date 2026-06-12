@@ -85,6 +85,20 @@ async function seed() {
   assert.equal(response.status, 200);
 }
 
+async function listProducts(query = '') {
+  const separator = query ? '&' : '';
+  const response = await fetch(`${baseUrl}/api/products?pageNumber=1&pageSize=30${separator}${query}`);
+  assert.equal(response.status, 200);
+  return (await response.json()).products;
+}
+
+async function getOrderableProduct(predicate = () => true) {
+  const products = await listProducts();
+  const product = products.find((entry) => entry.countInStock > 0 && predicate(entry));
+  assert.ok(product?._id);
+  return product;
+}
+
 test.before(async () => {
   const { default: app } = await import('../app.js');
   server = await new Promise((resolve) => {
@@ -191,9 +205,7 @@ test('orders endpoints: create + mine + pay + summary', async () => {
   assert.equal(signin.status, 200);
   await user.getCsrfToken();
 
-  const listResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
-  const listBody = await listResponse.json();
-  const product = listBody.products[0];
+  const product = await getOrderableProduct();
 
   const createOrder = await user.post('/api/orders', {
     orderItems: [
@@ -255,9 +267,7 @@ test('orders validation: rejects mismatched client total', async () => {
   assert.equal(signin.status, 200);
   await user.getCsrfToken();
 
-  const listResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
-  const listBody = await listResponse.json();
-  const product = listBody.products[0];
+  const product = await getOrderableProduct();
 
   const createOrder = await user.post('/api/orders', {
     orderItems: [
@@ -295,9 +305,7 @@ test('orders idempotency: duplicate create returns original order and changed pa
   assert.equal(signin.status, 200);
   await user.getCsrfToken();
 
-  const listResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
-  const listBody = await listResponse.json();
-  const product = listBody.products[0];
+  const product = await getOrderableProduct();
   const orderBody = {
     orderItems: [
       {
@@ -769,9 +777,7 @@ test('orders branches: empty cart rejection, order detail/missing, seller listin
   });
   assert.equal(emptyCart.status, 400);
 
-  const productsResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
-  const products = (await productsResponse.json()).products;
-  const item = products[0];
+  const item = await getOrderableProduct();
 
   const createOrder = await user.post('/api/orders', {
     orderItems: [
@@ -844,8 +850,7 @@ test('orders security: non-owner cannot read or pay another user order', async (
   assert.equal(buyerSignin.status, 200);
   await buyer.getCsrfToken();
 
-  const productsResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
-  const product = (await productsResponse.json()).products[0];
+  const product = await getOrderableProduct();
 
   const createOrder = await buyer.post('/api/orders', {
     orderItems: [
@@ -924,8 +929,7 @@ test('products security: seed route requires admin auth and sellers cannot updat
   assert.equal(promotedSignin.status, 200);
   await buyerAsSeller.getCsrfToken();
 
-  const productsResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
-  const targetProduct = (await productsResponse.json()).products.find((item) => item.seller?._id);
+  const targetProduct = (await listProducts()).find((item) => item.seller?._id);
   assert.ok(targetProduct?._id);
 
   const forbiddenUpdate = await buyerAsSeller.put(`/api/products/${targetProduct._id}`, {
@@ -988,9 +992,7 @@ test('orders security: seller_id is derived from product records, not trusted fr
   assert.equal(buyerSignin.status, 200);
   await buyer.getCsrfToken();
 
-  const productsResponse = await fetch(`${baseUrl}/api/products?pageNumber=1`);
-  const product = (await productsResponse.json()).products.find((entry) => entry.seller?._id);
-  assert.ok(product?._id);
+  const product = await getOrderableProduct((entry) => entry.seller?._id);
   const forgedSellerId = '00000000-0000-0000-0000-000000000000';
 
   const createOrder = await buyer.post('/api/orders', {

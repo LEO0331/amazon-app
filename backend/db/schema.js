@@ -102,6 +102,15 @@ const statements = [
 
 let initialized = false;
 
+async function ensureColumn(tableName, columnName, definition) {
+  const columns = await execute(`PRAGMA table_info(${tableName})`);
+  if (columns.rows.some((column) => column.name === columnName)) {
+    return;
+  }
+
+  await execute(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${definition}`);
+}
+
 export async function initDatabase() {
   if (initialized) {
     return;
@@ -110,6 +119,8 @@ export async function initDatabase() {
   for (const sql of statements) {
     await execute(sql);
   }
+
+  await ensureColumn('idempotency_keys', 'expires_at', 'TEXT');
 
   initialized = true;
 }
