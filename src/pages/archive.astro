@@ -9,7 +9,8 @@ const { locale = 'en' } = Astro.props;
 const t = ui[locale].archive;
 const objects = newestFirst(await getPublicObjects());
 const views = objects.map((object) => ({ object, view: localizedObject(object, locale) }));
-const values = (field: 'type' | 'status') => [...new Set(objects.map((object) => object.data[field]))].sort();
+const types = [...new Set(objects.map((object) => object.data.type))].sort();
+const statuses = [...new Set(objects.map((object) => object.data.status))].sort();
 const categories = [...new Set(views.map(({ view }) => view.category))].sort();
 const tags = [...new Set(views.flatMap(({ view }) => view.tags))].sort();
 const humanize = (value: string) => value.replaceAll('-', ' ').replace(/^./, (letter) => letter.toUpperCase());
@@ -21,9 +22,9 @@ const statusLabel = (value: (typeof objects)[number]['data']['status']) => local
   <section class="wrap" aria-label={t.filtersLabel}>
     <form id="archive-filters" class="archive-controls" role="search">
       <div class="field"><label for="archive-query">{t.search}</label><input id="archive-query" name="query" type="search" placeholder={t.searchPlaceholder} autocomplete="off" /></div>
-      <div class="field"><label for="archive-type">{t.type}</label><select id="archive-type" name="type"><option value="">{t.allTypes}</option>{values('type').map((value) => <option value={value}>{typeLabel(value)}</option>)}</select></div>
+      <div class="field"><label for="archive-type">{t.type}</label><select id="archive-type" name="type"><option value="">{t.allTypes}</option>{types.map((value) => <option value={value}>{typeLabel(value)}</option>)}</select></div>
       <div class="field"><label for="archive-category">{t.category}</label><select id="archive-category" name="category"><option value="">{t.allCategories}</option>{categories.map((value) => <option value={value}>{value}</option>)}</select></div>
-      <div class="field"><label for="archive-status">{t.status}</label><select id="archive-status" name="status"><option value="">{t.allStatuses}</option>{values('status').map((value) => <option value={value}>{statusLabel(value)}</option>)}</select></div>
+      <div class="field"><label for="archive-status">{t.status}</label><select id="archive-status" name="status"><option value="">{t.allStatuses}</option>{statuses.map((value) => <option value={value}>{statusLabel(value)}</option>)}</select></div>
       <div class="field"><label for="archive-tag">{t.tag}</label><select id="archive-tag" name="tag"><option value="">{t.allTags}</option>{tags.map((tag) => <option value={tag}>{tag}</option>)}</select></div>
       <div class="field"><label for="archive-sort">{t.sort}</label><select id="archive-sort" name="sort"><option value="added-desc">{t.recent}</option><option value="year-desc">{t.yearNewest}</option><option value="year-asc">{t.yearOldest}</option></select></div>
     </form>

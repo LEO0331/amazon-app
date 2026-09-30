@@ -2,76 +2,73 @@
 
 **A living digital archive of things a family makes, keeps and collects—documenting each object's story, history and place in the collection rather than trying to sell it.**
 
-Family Cabinet presents handmade pieces and collected objects as records in a small, evolving archive. Each record can describe an object's origin, materials, maker or creator, current status, and the reason it is kept. This repository contains fictional demonstration content; it is a public portfolio project.
+[Explore Family Cabinet](https://leo0331.github.io/amazon-app/) · [閱讀繁體中文版](https://leo0331.github.io/amazon-app/zh/)
+
+A handmade wallet, a well-used camera, a book kept for years: each has a place in the cabinet. Browse the objects, see how they were made or found, and read why they have stayed—or where they went next. The current collection uses clearly fictional demonstration objects and illustrations.
 
 ## Screenshots
 
-Screenshots are not committed yet. The site can be previewed locally with `npm run dev`.
+Home, archive, and object-record screenshots will be added after the demo illustrations are replaced. The live cabinet shows the current design.
 
-## What you can explore
+## Explore the cabinet
 
-- Editorial home page with selected made and collected objects and recent additions.
-- Dedicated Made and Collected views, plus a searchable and filterable archive.
-- Object records with stories, metadata, and image galleries.
-- One validated Astro content model for made objects, collected objects, and future memories.
-- Static pages generated only for records marked `public`.
+- **Made by us:** handmade pieces with notes on materials, making, and use.
+- **Collected over time:** books, cameras, figures, and small keepsakes gathered along the way.
+- **The archive:** search stories and browse by type, category, status, tag, or year.
+- **Object records:** photographs or illustrations, a short history, current status, and related pieces.
 
-## Information architecture
+The site is available in English and Traditional Chinese. Switch languages from the navigation on any page; the switch opens the same object or section in the other language.
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Introduces the cabinet and highlights selected and recent objects. |
-| `/made` | Objects made by the family. |
-| `/collected` | Objects collected or kept over time. |
-| `/archive` | Search, filters, and sorting across public objects. |
-| `/about` | The project's purpose and its evolution from an ecommerce demo. |
-| `/item/[slug]` | The story, images, and details of one public object. |
+## Why keep a record?
 
-All routes are served under `/amazon-app/` on this repository's GitHub Pages site. The content model already accepts `memory` as a type so a future `/memories` section can be added without changing the object model.
+An object can matter long after its practical use changes. Family Cabinet records what it is, where it came from, who made or collected it, and why it remains part of the story. Some objects are in use, some are archived, and some have been gifted away. None are presented for sale.
 
-## Content model
+## Privacy and demonstration content
 
-Object entries live in `src/content/objects/` and are validated by `src/content/config.ts`. The shared record includes a title, type, category, summary, story, year, archive status, date added, image references, and visibility. Optional fields such as maker, creator, materials, tags, quantity, and featured status let each record describe the object without forcing irrelevant fields on it.
+All current records and artwork are fictional. This is a public site, so real private family stories, addresses, locations, and photographs do not belong in this repository. The publishing build accepts only records marked `public`; records marked `family` or `private` stop the build before their images can be processed.
 
-Types are `made`, `collected`, and `memory`. Archive statuses include `at-home`, `in-use`, `gifted`, `archived`, and `no-longer-with-us`. These describe an object's place in the collection rather than a sales state.
+## What may come next
 
-## Privacy model
+These are small, no-account ideas for the existing static archive, not features available today:
 
-Visibility can be `public`, `family`, or `private`. The V1 site has no sign-in system. Its build rejects any `family` or `private` record before Astro processes content images, so only `public` records can enter generated pages, search data, client-side scripts, or assets. The other values reserve a future privacy boundary; they do not grant access to anything in this static version.
+- **Shareable archive views:** keep search and filter choices in the page URL so a particular view can be bookmarked or sent to someone.
+- **A view through time:** browse the existing object years and archive dates as a simple chronology.
+- **Stronger connections between objects:** use shared tags and materials to make related records more useful.
+- **Photo captions:** add a short note for each image when real photographs replace the illustrations.
+- **Print-friendly records:** make an object story easy to save or print from the browser.
+- **Public memory notes:** when there is a story beyond a single object, add a public memory record using the content model already in place.
 
-**Do not commit actual private family content to this public repository.** Source files and Git history are public even if the build excludes them. Review photos before adding them, remove location and other sensitive metadata, and do not include addresses, geolocation, or personal details in public records. The current entries and artwork are fictional placeholders.
+These ideas can use the current content files and browser features without a database, account system, or paid service.
 
-## Technical stack
+## For contributors
 
-- Astro and TypeScript
-- Astro Content Collections for structured object records
-- Standard CSS
-- Local image assets
-- Static GitHub Pages hosting, with no backend, database, or authentication in V1
+### Site structure
 
-## Local development
+The site uses Astro, TypeScript, Content Collections, standard CSS, local images, and GitHub Pages. English pages live at `/amazon-app/`; Traditional Chinese pages live at `/amazon-app/zh/`. The main routes in each language are Home, Made, Collected, Archive, About, and `/item/[slug]/`.
 
-Install Node.js 20 or newer, then run:
+Object source files are in `src/content/objects/`, validated by `src/content/config.ts`. Each record has a type (`made`, `collected`, or the reserved `memory` type), category, summary, story, year, archive status, images, and visibility. Maker, creator, materials, tags, quantity, edition, and featured status are optional. The Chinese wording for public records is in `src/i18n/zh-objects.ts`; interface text is in `src/i18n/ui.ts`.
+
+### Add an object
+
+1. Copy a Markdown record in `src/content/objects/` to a new filename such as `canvas-tote.md`. Give it a fictional or publishable story and set `visibility: public` only when every detail is safe to share.
+2. Put its images in `src/assets/items/<slug>/`. List them in the record's `images` field with accurate alt text, using the existing relative paths as examples.
+3. Add the matching Traditional Chinese title, summary, full story, metadata, and image descriptions to `src/i18n/zh-objects.ts`. A missing translation will stop the bilingual build.
+4. Run the checks below. A successful build creates the English and Chinese item pages and includes the record in both archives.
+
+### Replace placeholder images
+
+Replace files in `src/assets/items/<slug>/` with photographs of the same object, then update the image paths and alt text in the Markdown record and Chinese translation. Multiple images appear in the item gallery. Keep a consistent 4:3 or 3:4 crop, optimize the files, and remove sensitive metadata before committing public photographs. No image host or storage service is required.
+
+### Run locally
+
+Use Node.js 20 or newer:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the local URL printed by Astro. The project is configured for the `/amazon-app/` project-page base path; use that path when following local links.
-
-## Add an object
-
-1. Copy a representative Markdown entry in `src/content/objects/` to a new file named for the object's slug, such as `canvas-tote.md`.
-2. Edit its frontmatter and story. Use one of the schema's supported `type`, `status`, and `visibility` values. Keep demonstration entries fictional and set `visibility: public` only when the content is safe to publish.
-3. Put the object's image files in `src/assets/items/<slug>/` and reference them in the entry's `images` field using relative paths, as the existing examples do. Provide useful alt text for each image.
-4. Run `npm run check` and `npm run build` to validate the entry and its image paths. A public entry will then appear in the appropriate collection view and at `/item/<slug>/` (under the configured base path).
-
-## Replace placeholder images
-
-Each object's local artwork is in `src/assets/items/<slug>/`. Replace those files with photographs of the same object and update the matching Markdown entry's `images` references and alt text. Keep several images in that folder if the gallery should show multiple views. Use a consistent editorial crop, preferably 4:3 or 3:4, and optimized image files. Check that any photograph is intended for public display and strip sensitive metadata before committing it. No remote image host is needed.
-
-## Quality checks
+Open the URL Astro prints, including `/amazon-app/`. Before publishing, run:
 
 ```bash
 npm run check
@@ -80,20 +77,8 @@ npm run build
 npm run verify:build
 ```
 
-The build output is in `dist/`. The final command checks generated routes, local links and assets, and the public-content boundary. These checks also run in the GitHub Actions workflow.
+The final command checks generated routes, local links and assets, language pages, and the public-content boundary. Build output is in `dist/`.
 
-## GitHub Pages deployment
+### Publish
 
-`.github/workflows/deploy.yml` installs dependencies with `npm ci`, checks and tests the site, builds Astro, and uploads `dist/` as a Pages artifact. Pull requests run the quality checks and build. Pushes to `master`, or manual workflow runs selected on `master`, deploy the static site through GitHub Pages. In the repository's **Settings → Pages**, select **GitHub Actions** as the build and deployment source.
-
-The Astro `site` and `base` settings must match this project page, `https://leo0331.github.io/amazon-app/` and `/amazon-app/`. Keep base-aware links and local image references when adding pages or assets. No deployment secrets or backend service are required.
-
-## Roadmap
-
-**V2 — Family administration.** A possible private administration layer could use Supabase Auth, Postgres, Storage, and Row Level Security. Authenticated family members could add and edit objects, upload photos, update statuses, manage tags, and access family-only content. This is a future direction, not part of the public static site.
-
-**V3 — Memory layer.** Family photographs, timelines, provenance, related memories, and links between objects and memories could turn the catalogue into a fuller family archive. The existing `memory` type is an initial content-model allowance, not a published memory section.
-
-## Repository name
-
-The GitHub repository remains `amazon-app` for now. A future rename to `family-cabinet` or a similar name would better describe the project. A suggested GitHub About description is: **A living digital archive of things a family makes, keeps and collects, documenting their stories, history and place in the collection.**
+The workflow in `.github/workflows/deploy.yml` installs dependencies, checks, tests, builds, and uploads only `dist/` to GitHub Pages. In **Settings → Pages**, choose **GitHub Actions** as the source. The repository's default branch is currently `master`, which is the branch the workflow deploys. Astro's `site` and `base` settings target `https://leo0331.github.io/amazon-app/`; no deployment secrets or backend service are needed.

@@ -1,6 +1,6 @@
 ---
-import ItemRecord from '../../components/ItemRecord.astro';
-import { getPublicObjects, type PublicObject } from '../../lib/content';
+import ItemRecord from '../../../components/ItemRecord.astro';
+import { getPublicObjects, type PublicObject } from '../../../lib/content';
 
 export async function getStaticPaths() {
   const objects = await getPublicObjects();
@@ -16,4 +16,4 @@ export async function getStaticPaths() {
 interface Props { object: PublicObject; related: PublicObject[]; }
 const { object, related } = Astro.props;
 ---
-<ItemRecord object={object} related={related} locale="en" />
+<ItemRecord object={object} related={related} locale="zh" />
