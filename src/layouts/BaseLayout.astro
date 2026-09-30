@@ -1,0 +1,60 @@
+---
+import '../styles/global.css';
+import { sitePath } from '../lib/urls';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+}
+
+const { title, description, image } = Astro.props;
+const pageTitle = title === 'Family Cabinet' ? title : `${title} | Family Cabinet`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const nav = [
+  { label: 'Made', path: 'made/' },
+  { label: 'Collected', path: 'collected/' },
+  { label: 'Archive', path: 'archive/' },
+  { label: 'About', path: 'about/' },
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f2eb" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={sitePath('favicon.svg')} type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Family Cabinet" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {image && <meta property="og:image" content={new URL(image, Astro.site)} />}
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="header-inner wrap">
+        <a class="wordmark" href={sitePath()} aria-label="Family Cabinet home">Family <em>Cabinet</em><span class="wordmark-dot" aria-hidden="true">.</span></a>
+        <nav class="desktop-nav" aria-label="Main navigation">
+          {nav.map((item) => <a href={sitePath(item.path)} aria-current={Astro.url.pathname === sitePath(item.path) ? 'page' : undefined}>{item.label}</a>)}
+        </nav>
+        <details class="mobile-nav">
+          <summary aria-label="Open menu"><span>Menu</span><span class="menu-lines" aria-hidden="true"></span></summary>
+          <nav aria-label="Mobile navigation">{nav.map((item) => <a href={sitePath(item.path)}>{item.label}</a>)}</nav>
+        </details>
+      </div>
+    </header>
+    <main id="main"><slot /></main>
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <div><a class="wordmark footer-mark" href={sitePath()}>Family <em>Cabinet</em><span class="wordmark-dot">.</span></a><p>A living archive of things made and kept.</p></div>
+        <p class="footer-note">An evolving family collection<br />Documented with care.</p>
+      </div>
+    </footer>
+  </body>
+</html>

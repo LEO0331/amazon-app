@@ -1,0 +1,51 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ObjectSection from '../../components/ObjectSection.astro';
+import { getPublicObjects, statusLabel, type PublicObject } from '../../lib/content';
+import { sitePath } from '../../lib/urls';
+
+export async function getStaticPaths() {
+  const objects = await getPublicObjects();
+  return objects.map((object) => ({ params: { slug: object.id.replace(/\.md$/, '') }, props: { object, related: objects.filter((candidate) => candidate.id !== object.id && candidate.data.type === object.data.type).slice(0, 4) } }));
+}
+
+interface Props { object: PublicObject; related: PublicObject[]; }
+const { object, related } = Astro.props;
+const { data } = object;
+const { Content } = await render(object);
+const isMade = data.type === 'made';
+const date = data.dateAdded.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const imageUrl = data.images[0].src.src;
+---
+<BaseLayout title={data.title} description={data.summary} image={imageUrl}>
+  <div class="detail-breadcrumbs wrap"><a href={sitePath()}>Home</a> / <a href={sitePath(data.type === 'made' ? 'made/' : 'collected/')}>{isMade ? 'Made' : 'Collected'}</a> / {data.title}</div>
+  <header class="detail-header wrap">
+    <div><p class="eyebrow">{isMade ? 'Handmade object' : 'Collected object'} · {data.category} · {data.year}</p><h1>{data.title}</h1><p class="detail-deck">{data.summary}</p></div>
+    <dl class="detail-facts">
+      <div class="detail-fact"><dt>Collection</dt><dd>{isMade ? 'Made by us' : 'Collected over time'}</dd></div>
+      <div class="detail-fact"><dt>Year</dt><dd>{data.year}</dd></div>
+      <div class="detail-fact"><dt>Status</dt><dd>{statusLabel(data.status)}{data.quantity && data.status === 'at-home' ? ` · ${data.quantity} currently at home` : ''}</dd></div>
+      <div class="detail-fact"><dt>Added to archive</dt><dd>{date}</dd></div>
+    </dl>
+  </header>
+  <section class="wrap" aria-label="Object photographs">
+    <Image src={data.images[0].src} alt={data.images[0].alt} class="gallery-main" />
+    {data.images.length > 1 && <div class="gallery-thumbs">{data.images.slice(1).map((image) => <Image src={image.src} alt={image.alt} loading="lazy" />)}</div>}
+  </section>
+  <section class="detail-body wrap">
+    <div><p class="eyebrow">The archive record</p><h2>{isMade ? 'About this piece' : 'Why we keep it'}</h2></div>
+    <div><div class="story"><Content /></div>
+      <div class="detail-list">
+        {data.materials && data.materials.length > 0 && <div><h3>{isMade ? 'Made from' : 'Materials'}</h3><p>{data.materials.join(' · ')}</p></div>}
+        {data.maker && <div><h3>Maker</h3><p>{data.maker}</p></div>}
+        {data.creator && <div><h3>Creator</h3><p>{data.creator}</p></div>}
+        {data.edition && <div><h3>Edition</h3><p>{data.edition}</p></div>}
+        {data.quantity && <div><h3>In the cabinet</h3><p>{data.quantity} {data.quantity === 1 ? 'piece' : 'pieces'} documented</p></div>}
+      </div>
+      {data.tags && data.tags.length > 0 && <div class="tag-list" aria-label="Tags">{data.tags.map((tag) => <span>{tag}</span>)}</div>}
+    </div>
+  </section>
+  <ObjectSection eyebrow="Keep exploring" title="Related objects" description="Other records from this part of the cabinet." objects={related} link={isMade ? 'made/' : 'collected/'} linkLabel="View the collection" />
+</BaseLayout>

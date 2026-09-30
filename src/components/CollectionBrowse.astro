@@ -1,0 +1,50 @@
+---
+import ObjectCard from './ObjectCard.astro';
+import type { PublicObject } from '../lib/content';
+
+interface Props { objects: PublicObject[]; label: string; }
+const { objects, label } = Astro.props;
+const categories = [...new Set(objects.map((object) => object.data.category))].sort();
+const statuses = [...new Set(objects.map((object) => object.data.status))].sort();
+const materials = [...new Set(objects.flatMap((object) => object.data.materials ?? []))].sort();
+const years = [...new Set(objects.map((object) => object.data.year))].sort((a, b) => b - a);
+const humanize = (value: string) => value.replaceAll('-', ' ').replace(/^./, (letter) => letter.toUpperCase());
+---
+<section class="wrap" aria-label={`${label} filters`}>
+  <form class="archive-controls collection-controls" role="search">
+    <div class="field"><label for="collection-category">Category</label><select id="collection-category" name="category"><option value="">All categories</option>{categories.map((value) => <option value={value}>{humanize(value)}</option>)}</select></div>
+    {materials.length > 0 && <div class="field"><label for="collection-material">Material</label><select id="collection-material" name="material"><option value="">All materials</option>{materials.map((value) => <option value={value}>{value}</option>)}</select></div>}
+    <div class="field"><label for="collection-status">Status</label><select id="collection-status" name="status"><option value="">All statuses</option>{statuses.map((value) => <option value={value}>{humanize(value)}</option>)}</select></div>
+    <div class="field"><label for="collection-year">Year</label><select id="collection-year" name="year"><option value="">Any year</option>{years.map((value) => <option value={value}>{value}</option>)}</select></div>
+  </form>
+  <div class="filter-footer"><span class="collection-count" aria-live="polite">{objects.length} objects</span><button class="collection-clear" type="button">Clear filters</button></div>
+  <div class="object-grid catalog-grid collection-grid">
+    {objects.map((object, index) => <div class="collection-entry" data-category={object.data.category} data-status={object.data.status} data-year={object.data.year} data-materials={(object.data.materials ?? []).join('|')}><ObjectCard object={object} index={index} headingLevel={2} /></div>)}
+  </div>
+  <p class="empty-state collection-empty" hidden>No objects match these filters.</p>
+</section>
+<script>
+  const form = document.querySelector<HTMLFormElement>('.collection-controls');
+  const items = [...document.querySelectorAll<HTMLElement>('.collection-entry')];
+  const count = document.querySelector<HTMLElement>('.collection-count');
+  const empty = document.querySelector<HTMLElement>('.collection-empty');
+  const clear = document.querySelector<HTMLButtonElement>('.collection-clear');
+  if (form && count && empty && clear) {
+    const update = () => {
+      const filters = Object.fromEntries(new FormData(form).entries());
+      let total = 0;
+      for (const item of items) {
+        const shown = (!filters.category || item.dataset.category === filters.category)
+          && (!filters.status || item.dataset.status === filters.status)
+          && (!filters.year || item.dataset.year === filters.year)
+          && (!filters.material || (item.dataset.materials ?? '').split('|').includes(String(filters.material)));
+        item.hidden = !shown;
+        if (shown) total++;
+      }
+      count.textContent = `${total} ${total === 1 ? 'object' : 'objects'}`;
+      empty.hidden = total > 0;
+    };
+    form.addEventListener('change', update);
+    clear.addEventListener('click', () => { form.reset(); update(); });
+  }
+</script>

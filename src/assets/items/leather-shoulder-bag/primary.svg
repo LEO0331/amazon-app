@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Leather Shoulder Bag placeholder illustration">
+<rect width="1200" height="900" fill="#e6dfd3"/>
+<rect x="42" y="42" width="1116" height="816" fill="#eee9df" stroke="#d1c6b3" stroke-width="2"/>
+<path d="M89 113h1022M89 740h1022" stroke="#c8bda9" stroke-width="2"/>
+<circle cx="600" cy="415" r="308" fill="#e2dacc"/>
+<g stroke-linejoin="round" stroke-linecap="round"><path d='M410 315q-25-190 190-190t190 190' fill='none' stroke='#644a3c' stroke-width='26'/><rect x='340' y='300' width='520' height='320' rx='45' fill='#77543e'/><path d='M350 335q250 180 500 0v88q-250 175-500 0z' fill='#916a4b'/><rect x='567' y='435' width='66' height='65' rx='8' fill='#c1a778'/></g>
+</svg>

@@ -1,0 +1,31 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ObjectSection from '../components/ObjectSection.astro';
+import { getPublicObjects, newestFirst } from '../lib/content';
+import { sitePath } from '../lib/urls';
+
+const objects = newestFirst(await getPublicObjects());
+const made = objects.filter((object) => object.data.type === 'made');
+const collected = objects.filter((object) => object.data.type === 'collected');
+---
+<BaseLayout title="Family Cabinet" description="A living archive of things our family makes, keeps and collects. Made with care. Kept with stories.">
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <p class="eyebrow">A collection in progress · Est. 2026</p>
+      <h1 id="hero-title">Family<br /><em>Cabinet</em></h1>
+      <p class="hero-subtitle">Made with care.<br />Kept with stories.</p>
+      <p class="hero-description">A living archive of things our family makes, keeps and collects.</p>
+      <a class="button-link" href={sitePath('archive/')}>Explore the archive <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="hero-visual" aria-label="Selected objects from the cabinet">
+      {made[0] && <Image src={made[0].data.images[0].src} alt={made[0].data.images[0].alt} loading="eager" />}
+      {collected[0] && <Image src={collected[0].data.images[0].src} alt={collected[0].data.images[0].alt} loading="eager" />}
+      <span class="hero-caption">A catalogue of ordinary treasures</span>
+    </div>
+  </section>
+  <ObjectSection eyebrow="01 / The work of hands" title="Made by us" description="Objects shaped through making, mending and learning." objects={made.slice(0, 4)} link="made/" linkLabel="View all made objects" />
+  <ObjectSection eyebrow="02 / Gathered along the way" title="Collected over time" description="Books, cameras and small finds that stayed with us." objects={collected.slice(0, 4)} link="collected/" linkLabel="View the collection" />
+  <section class="philosophy"><div class="philosophy-inner wrap"><p class="eyebrow">A note on keeping</p><div><blockquote>Objects hold more than their shape. This cabinet keeps a record of how they came to be, where they have been and why they remain.</blockquote><p>These pieces are documented for their stories, not for sale.</p></div></div></section>
+  <ObjectSection eyebrow="03 / New records" title="Recently added" description="The latest entries across the whole cabinet." objects={objects.slice(0, 4)} link="archive/" linkLabel="Browse the archive" />
+</BaseLayout>

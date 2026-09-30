@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CollectionBrowse from '../components/CollectionBrowse.astro';
+import { getPublicObjects, newestFirst } from '../lib/content';
+const objects = newestFirst((await getPublicObjects()).filter((object) => object.data.type === 'made'));
+---
+<BaseLayout title="Made by us" description="Handmade pieces in the Family Cabinet: objects shaped through making, mending and learning.">
+  <header class="page-heading wrap"><p class="eyebrow">01 / The work of hands</p><h1>Made by us</h1><p class="page-intro">A record of handmade pieces, from leather and canvas to small experiments in craft. Each one has a place and a story.</p></header>
+  <CollectionBrowse objects={objects} label="Made objects" />
+</BaseLayout>

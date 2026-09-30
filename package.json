@@ -1,43 +1,20 @@
 {
-  "name": "ecommerce",
+  "name": "family-cabinet",
+  "private": true,
+  "version": "1.0.0",
   "type": "module",
-  "version": "2.0.0",
-  "description": "Ecommerce website",
-  "main": "backend/server.js",
+  "engines": { "node": ">=20.3.0" },
   "scripts": {
-    "start": "nodemon --watch backend backend/server.js",
-    "backend:start": "node backend/server.js",
-    "frontend:dev": "npm --prefix frontend run dev",
-    "frontend:build": "npm --prefix frontend run build",
-    "build": "npm run frontend:build",
-    "test": "node backend/tests/seed.test.js && node backend/tests/api.integration.test.js && npm --prefix frontend run test",
-    "test:e2e": "playwright test",
-    "test:backend:coverage": "node --test --experimental-test-coverage backend/tests/*.test.js",
-    "test:coverage": "npm run test:backend:coverage && npm --prefix frontend run test:coverage"
+    "dev": "astro dev",
+    "check": "astro check",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "node --test tests/*.test.mjs",
+    "verify:build": "node scripts/verify-build.mjs"
   },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@faker-js/faker": "^9.7.0",
-    "@libsql/client": "^0.15.15",
-    "aws-sdk": "^2.989.0",
-    "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^10.0.0",
-    "express": "^4.21.2",
-    "express-async-handler": "^1.2.0",
-    "express-rate-limit": "^7.5.1",
-    "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "mailgun-js": "^0.22.0",
-    "multer": "^1.4.3",
-    "multer-s3": "^2.9.0"
-  },
+  "dependencies": { "astro": "^5.18.1" },
   "devDependencies": {
-    "@playwright/test": "^1.60.0",
-    "eslint": "^7.32.0",
-    "eslint-plugin-react": "^7.25.1",
-    "nodemon": "^2.0.12"
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^5.9.3"
   }
 }

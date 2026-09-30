@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Small Leather Pouch placeholder illustration">
+<rect width="1200" height="900" fill="#e6dfd3"/>
+<rect x="42" y="42" width="1116" height="816" fill="#eee9df" stroke="#d1c6b3" stroke-width="2"/>
+<path d="M89 113h1022M89 740h1022" stroke="#c8bda9" stroke-width="2"/>
+<circle cx="600" cy="415" r="308" fill="#e2dacc"/>
+<g stroke-linejoin="round" stroke-linecap="round"><path d='M350 340q25-75 110-75h280q85 0 110 75l-40 270H390z' fill='#9c6d4f' stroke='#573c2c' stroke-width='12'/><path d='M360 350h480' stroke='#37332e' stroke-width='18'/><rect x='555' y='333' width='90' height='45' rx='8' fill='#c5ae89'/></g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Blue Painted Figure placeholder illustration">
+<rect width="1200" height="900" fill="#e6dfd3"/>
+<rect x="42" y="42" width="1116" height="816" fill="#eee9df" stroke="#d1c6b3" stroke-width="2"/>
+<path d="M89 113h1022M89 740h1022" stroke="#c8bda9" stroke-width="2"/>
+<circle cx="600" cy="415" r="308" fill="#e2dacc"/>
+<g stroke-linejoin="round" stroke-linecap="round"><rect x='410' y='600' width='380' height='42' fill='#918e82'/><path d='M530 590l-15-130-85-45 45-90 83 45h85l83-45 45 90-85 45-15 130z' fill='#597c8b' stroke='#365563' stroke-width='12'/><circle cx='600' cy='272' r='80' fill='#7497a3' stroke='#365563' stroke-width='12'/></g>
+</svg>

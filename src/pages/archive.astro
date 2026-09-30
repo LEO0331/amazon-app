@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ObjectCard from '../components/ObjectCard.astro';
+import { getPublicObjects, newestFirst } from '../lib/content';
+
+const objects = newestFirst(await getPublicObjects());
+const values = (field: 'type' | 'category' | 'status') => [...new Set(objects.map((object) => object.data[field]))].sort();
+const tags = [...new Set(objects.flatMap((object) => object.data.tags ?? []))].sort();
+const humanize = (value: string) => value.replaceAll('-', ' ').replace(/^./, (letter) => letter.toUpperCase());
+---
+<BaseLayout title="Archive" description="Search and explore the Family Cabinet by type, category, status and story.">
+  <header class="page-heading wrap"><p class="eyebrow">03 / The full cabinet</p><h1>Explore the archive</h1><p class="page-intro">An index of objects made and kept. Follow a material, a category or a small detail that catches your eye.</p></header>
+  <section class="wrap" aria-label="Archive filters">
+    <form id="archive-filters" class="archive-controls" role="search">
+      <div class="field"><label for="archive-query">Search the cabinet</label><input id="archive-query" name="query" type="search" placeholder="Title, material or story…" autocomplete="off" /></div>
+      <div class="field"><label for="archive-type">Type</label><select id="archive-type" name="type"><option value="">All types</option>{values('type').map((value) => <option value={value}>{humanize(value)}</option>)}</select></div>
+      <div class="field"><label for="archive-category">Category</label><select id="archive-category" name="category"><option value="">All categories</option>{values('category').map((value) => <option value={value}>{humanize(value)}</option>)}</select></div>
+      <div class="field"><label for="archive-status">Status</label><select id="archive-status" name="status"><option value="">All statuses</option>{values('status').map((value) => <option value={value}>{humanize(value)}</option>)}</select></div>
+      <div class="field"><label for="archive-tag">Tag</label><select id="archive-tag" name="tag"><option value="">All tags</option>{tags.map((tag) => <option value={tag}>{humanize(tag)}</option>)}</select></div>
+      <div class="field"><label for="archive-sort">Sort</label><select id="archive-sort" name="sort"><option value="added-desc">Recently added</option><option value="year-desc">Object year: newest</option><option value="year-asc">Object year: oldest</option></select></div>
+    </form>
+    <div class="filter-footer"><span id="result-count" aria-live="polite">{objects.length} objects</span><button id="clear-filters" type="button">Clear filters</button></div>
+  </section>
+  <section class="wrap" aria-label="Archive objects">
+    <div id="archive-grid" class="object-grid catalog-grid">
+      {objects.map((object, index) => <div class="archive-entry" data-id={object.id} data-title={object.data.title} data-summary={object.data.summary} data-type={object.data.type} data-category={object.data.category} data-status={object.data.status} data-year={object.data.year} data-date-added={object.data.dateAdded.toISOString()} data-maker={object.data.maker ?? ''} data-creator={object.data.creator ?? ''} data-tags={(object.data.tags ?? []).join('|')} data-materials={(object.data.materials ?? []).join('|')}><ObjectCard object={object} index={index} headingLevel={2} /></div>)}
+    </div>
+    <p id="empty-state" class="empty-state" hidden>No objects match these filters.</p>
+  </section>
+</BaseLayout>
+<script>
+  import { filterObjects } from '../lib/archive.mjs';
+
+  const form = document.querySelector<HTMLFormElement>('#archive-filters');
+  const grid = document.querySelector<HTMLElement>('#archive-grid');
+  const count = document.querySelector<HTMLElement>('#result-count');
+  const empty = document.querySelector<HTMLElement>('#empty-state');
+  const clear = document.querySelector<HTMLButtonElement>('#clear-filters');
+
+  if (form && grid && count && empty && clear) {
+    const entries = [...grid.querySelectorAll<HTMLElement>('.archive-entry')].map((element) => ({
+      element,
+      data: {
+        title: element.dataset.title ?? '', summary: element.dataset.summary ?? '',
+        type: element.dataset.type ?? '', category: element.dataset.category ?? '', status: element.dataset.status ?? '',
+        year: Number(element.dataset.year), dateAdded: element.dataset.dateAdded ?? '',
+        maker: element.dataset.maker ?? '', creator: element.dataset.creator ?? '',
+        tags: (element.dataset.tags ?? '').split('|').filter(Boolean),
+        materials: (element.dataset.materials ?? '').split('|').filter(Boolean),
+      },
+    }));
+    const update = () => {
+      const values = Object.fromEntries(new FormData(form).entries());
+      const matching = filterObjects(entries, values) as typeof entries;
+      const ids = new Set(matching.map((entry) => entry.element));
+      for (const entry of entries) entry.element.hidden = !ids.has(entry.element);
+      for (const entry of matching) grid.append(entry.element);
+      count.textContent = `${matching.length} ${matching.length === 1 ? 'object' : 'objects'}`;
+      empty.hidden = matching.length !== 0;
+    };
+    form.addEventListener('input', update);
+    form.addEventListener('change', update);
+    clear.addEventListener('click', () => { form.reset(); update(); form.querySelector<HTMLInputElement>('input')?.focus(); });
+    update();
+  }
+</script>

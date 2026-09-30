@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Folding Film Camera placeholder illustration">
+<rect width="1200" height="900" fill="#e6dfd3"/>
+<rect x="42" y="42" width="1116" height="816" fill="#eee9df" stroke="#d1c6b3" stroke-width="2"/>
+<path d="M89 113h1022M89 740h1022" stroke="#c8bda9" stroke-width="2"/>
+<circle cx="600" cy="415" r="308" fill="#e2dacc"/>
+<g stroke-linejoin="round" stroke-linecap="round"><g transform='translate(-120 -90) scale(1.2)'><rect x='320' y='300' width='490' height='275' rx='28' fill='#4e5758' stroke='#2d3839' stroke-width='12'/><path d='M620 345l210-65v300l-210-65z' fill='#737b79' stroke='#364042' stroke-width='10'/><rect x='790' y='325' width='105' height='215' rx='16' fill='#303d3f'/><circle cx='843' cy='432' r='55' fill='#7e908e' stroke='#27363a' stroke-width='18'/></g></g>
+</svg>

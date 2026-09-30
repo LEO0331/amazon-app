@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Photography Book placeholder illustration">
+<rect width="1200" height="900" fill="#e6dfd3"/>
+<rect x="42" y="42" width="1116" height="816" fill="#eee9df" stroke="#d1c6b3" stroke-width="2"/>
+<path d="M89 113h1022M89 740h1022" stroke="#c8bda9" stroke-width="2"/>
+<circle cx="600" cy="415" r="308" fill="#e2dacc"/>
+<g stroke-linejoin="round" stroke-linecap="round"><g transform='translate(-120 -90) scale(1.2)'><rect x='345' y='155' width='510' height='505' fill='#e8e2d3' stroke='#aca493' stroke-width='11'/><path d='M385 155v505' stroke='#c6bcaa' stroke-width='18'/><rect x='425' y='260' width='350' height='255' fill='#a6bbb0'/><path d='M425 465q95-115 180-58t170-55v163H425z' fill='#6c8a7c'/><circle cx='695' cy='335' r='35' fill='#efe7d1'/></g></g>
+</svg>

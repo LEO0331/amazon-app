@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Jazz Record Sleeve placeholder illustration">
+<rect width="1200" height="900" fill="#e6dfd3"/>
+<rect x="42" y="42" width="1116" height="816" fill="#eee9df" stroke="#d1c6b3" stroke-width="2"/>
+<path d="M89 113h1022M89 740h1022" stroke="#c8bda9" stroke-width="2"/>
+<circle cx="600" cy="415" r="308" fill="#e2dacc"/>
+<g stroke-linejoin="round" stroke-linecap="round"><g transform='translate(-120 -90) scale(1.2)'><rect x='340' y='160' width='520' height='520' fill='#3f6078' stroke='#273f52' stroke-width='12'/><circle cx='645' cy='420' r='170' fill='none' stroke='#b4c0ba' stroke-width='10'/><circle cx='645' cy='420' r='105' fill='none' stroke='#b4c0ba' stroke-width='8'/><path d='M420 570q95-130 190-35t175-60' fill='none' stroke='#e2d09f' stroke-width='22'/></g></g>
+</svg>

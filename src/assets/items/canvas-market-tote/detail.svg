@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Canvas Market Tote placeholder illustration">
+<rect width="1200" height="900" fill="#e6dfd3"/>
+<rect x="42" y="42" width="1116" height="816" fill="#eee9df" stroke="#d1c6b3" stroke-width="2"/>
+<path d="M89 113h1022M89 740h1022" stroke="#c8bda9" stroke-width="2"/>
+<circle cx="600" cy="415" r="308" fill="#e2dacc"/>
+<g stroke-linejoin="round" stroke-linecap="round"><g transform='translate(-120 -90) scale(1.2)'><path d='M370 290h460l-45 340H415z' fill='#ddd0af' stroke='#77705e' stroke-width='12'/><path d='M475 320V225q0-80 75-80t75 80v95M575 320V225q0-80 75-80t75 80v95' fill='none' stroke='#8b836f' stroke-width='22'/></g></g>
+</svg>

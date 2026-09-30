@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Vintage Grid Notebook placeholder illustration">
+<rect width="1200" height="900" fill="#e6dfd3"/>
+<rect x="42" y="42" width="1116" height="816" fill="#eee9df" stroke="#d1c6b3" stroke-width="2"/>
+<path d="M89 113h1022M89 740h1022" stroke="#c8bda9" stroke-width="2"/>
+<circle cx="600" cy="415" r="308" fill="#e2dacc"/>
+<g stroke-linejoin="round" stroke-linecap="round"><rect x='370' y='155' width='460' height='505' rx='12' fill='#748a77' stroke='#4f6656' stroke-width='12'/><path d='M425 160v495' stroke='#4d6352' stroke-width='34'/><rect x='500' y='260' width='245' height='190' fill='#d8d6bb'/><path d='M525 300h195M525 335h195M525 370h195M525 405h195M565 280v150M605 280v150M645 280v150M685 280v150' stroke='#acbaad' stroke-width='4'/></g>
+</svg>

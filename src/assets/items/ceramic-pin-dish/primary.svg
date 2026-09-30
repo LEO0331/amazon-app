@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Ceramic Pin Dish placeholder illustration">
+<rect width="1200" height="900" fill="#e6dfd3"/>
+<rect x="42" y="42" width="1116" height="816" fill="#eee9df" stroke="#d1c6b3" stroke-width="2"/>
+<path d="M89 113h1022M89 740h1022" stroke="#c8bda9" stroke-width="2"/>
+<circle cx="600" cy="415" r="308" fill="#e2dacc"/>
+<g stroke-linejoin="round" stroke-linecap="round"><ellipse cx='600' cy='485' rx='310' ry='145' fill='#b7b3a6' stroke='#77776c' stroke-width='11'/><ellipse cx='600' cy='415' rx='310' ry='120' fill='#e3decf' stroke='#8e8b7b' stroke-width='11'/><ellipse cx='600' cy='415' rx='255' ry='78' fill='#cbc5b5'/><circle cx='475' cy='412' r='9' fill='#999483'/><circle cx='670' cy='440' r='8' fill='#999483'/></g>
+</svg>
