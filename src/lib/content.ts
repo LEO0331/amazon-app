@@ -1,8 +1,11 @@
 import { getCollection } from 'astro:content';
 import { isPublic } from './archive.mjs';
+import { validateRelatedReferences } from './relationships.mjs';
 
 export async function getPublicObjects() {
-  return getCollection('objects', isPublic);
+  const objects = await getCollection('objects', isPublic);
+  validateRelatedReferences(objects);
+  return objects;
 }
 
 export type PublicObject = Awaited<ReturnType<typeof getPublicObjects>>[number];

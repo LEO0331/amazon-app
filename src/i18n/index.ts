@@ -27,6 +27,7 @@ export function localizedObject(object: PublicObject, locale: Locale) {
       maker: data.maker, creator: data.creator, materials: data.materials ?? [],
       tags: data.tags ?? [], edition: data.edition,
       imageAlts: data.images.map((image) => image.alt),
+      imageCaptions: data.images.map((image) => image.caption ?? null),
     };
   }
 
@@ -39,10 +40,16 @@ export function localizedObject(object: PublicObject, locale: Locale) {
       (data.edition && !translated.edition)) {
     throw new Error(`Incomplete zh translation for ${object.id}`);
   }
+  const captions = data.images.map((image) => Boolean(image.caption));
+  if (translated.imageCaptions && translated.imageCaptions.length !== data.images.length ||
+      captions.some((hasCaption, index) => hasCaption !== Boolean(translated.imageCaptions?.[index]?.trim()))) {
+    throw new Error(`Inconsistent zh image captions for ${object.id}`);
+  }
   return {
     title: translated.title, category: translated.category, summary: translated.summary,
     story: translated.story, maker: translated.maker, creator: translated.creator,
     materials: translated.materials ?? [], tags: translated.tags ?? [],
     edition: translated.edition, imageAlts: translated.imageAlts,
+    imageCaptions: translated.imageCaptions ?? data.images.map(() => null),
   };
 }

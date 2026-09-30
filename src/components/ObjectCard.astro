@@ -19,5 +19,5 @@ const href = localePath(locale, itemPath(object.id));
     ? <h2><a href={href}>{view.title}</a></h2>
     : <h3><a href={href}>{view.title}</a></h3>}
   <p class="object-summary">{view.summary}</p>
-  <p class="object-status">{locale === 'en' ? statusLabel(data.status) : ui.zh.status[data.status]}</p>
+  <p class="object-status">{data.type === 'memory' ? ui[locale].item.memory : locale === 'en' ? statusLabel(data.status) : ui.zh.status[data.status]}</p>
 </article>

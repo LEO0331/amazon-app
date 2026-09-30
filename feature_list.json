@@ -1,0 +1,29 @@
+{
+  "policy": "Track only user-authorized work. The README roadmap is informational and is not an implementation queue. Keep at most one active feature unless ownership is explicitly split.",
+  "features": [
+    {
+      "id": "baseline-archive",
+      "name": "Public bilingual archive",
+      "description": "Existing Astro site with English and Traditional Chinese public routes, object records, local images, archive filters, and GitHub Pages base paths.",
+      "dependencies": [],
+      "status": "complete",
+      "evidence": "Verified on 2026-09-30: npm run check had 0 diagnostics, npm test passed 9 tests, npm run build generated 46 pages, and npm run verify:build passed."
+    },
+    {
+      "id": "harness-001",
+      "name": "Project agent harness",
+      "description": "Add concise startup instructions, feature state, a restartable progress log, and cross-platform full-verification scripts without changing site behavior.",
+      "dependencies": ["baseline-archive"],
+      "status": "complete",
+      "evidence": "Harness validator improved from 20/100 to 100/100. init.ps1 completed npm ci, check, 9 tests, 46-page build, and generated-site audit on 2026-09-30."
+    },
+    {
+      "id": "archive-depth-001",
+      "name": "Deeper static archive",
+      "description": "Implement shareable archive filters, bilingual timeline, deterministic related records, optional bilingual image captions, print-friendly records, and fictional public memories without adding services or accounts.",
+      "dependencies": ["baseline-archive"],
+      "status": "in-progress",
+      "evidence": "Baseline init.ps1 passed before edits: 0 Astro diagnostics, 9 tests, 46 pages, and generated-site audit."
+    }
+  ]
+}

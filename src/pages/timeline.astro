@@ -1,0 +1,33 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPublicObjects, itemPath } from '../lib/content';
+import { groupByYear } from '../lib/timeline.mjs';
+import { localePath, localizedObject, ui, type Locale } from '../i18n';
+
+interface Props { locale?: Locale; }
+const { locale = 'en' } = Astro.props;
+const t = ui[locale].timeline;
+const groups = groupByYear(await getPublicObjects());
+const kindLabel = (type: string) => type === 'made' ? t.made : type === 'collected' ? t.collected : t.memory;
+const archiveMonth = (date: Date) => date.toLocaleDateString(locale === 'zh' ? 'zh-TW' : 'en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+<BaseLayout title={t.title} description={t.description} locale={locale}>
+  <header class="page-heading wrap"><p class="eyebrow">{t.eyebrow}</p><h1>{t.heading}</h1><p class="page-intro">{t.intro}</p></header>
+  <div class="timeline wrap">
+    {groups.map(({ year, records }) => <section class="timeline-year" aria-labelledby={`year-${year}`}>
+      <h2 id={`year-${year}`}>{year}</h2>
+      <ol class="timeline-list">
+        {records.map((object) => {
+          const view = localizedObject(object, locale);
+          const href = localePath(locale, itemPath(object.id));
+          return <li class="timeline-entry">
+            <a class="timeline-image-link" href={href} aria-label={`${ui[locale].item.view} ${view.title}`}><Image src={object.data.images[0].src} alt={view.imageAlts[0]} loading="lazy" /></a>
+            <div><p class="eyebrow">{kindLabel(object.data.type)} · {view.category}</p><h3><a href={href}>{view.title}</a></h3><p>{view.summary}</p><p class="timeline-added">{t.added} {archiveMonth(object.data.dateAdded)}</p></div>
+          </li>;
+        })}
+      </ol>
+    </section>)}
+    <a class="text-link" href={localePath(locale, 'archive/')}>{t.back}<span aria-hidden="true"> ↗</span></a>
+  </div>
+</BaseLayout>

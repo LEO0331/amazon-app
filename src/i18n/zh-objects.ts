@@ -9,9 +9,18 @@ export interface ZhObjectTranslation {
   tags?: string[];
   edition?: string;
   imageAlts: string[];
+  imageCaptions?: (string | null)[];
 }
 
 export const zhObjects: Record<string, ZhObjectTranslation> = {
+  'before-the-shelf-changed': {
+    title: '架上陳設改變之前',
+    category: '典藏筆記',
+    summary: '一則虛構的架上片刻：攝影集、底片相機與明信片曾並排放在一起。',
+    story: '這是一則完全虛構的示範記憶，沒有真實的家族經歷作為背景。在想像中的陳設裡，攝影集立在用舊的底片相機旁，一張明信片斜靠著書架。三件物品暫時共用一個位置，各自也有獨立的典藏紀錄。\n\n書架會隨著閱讀、移動或轉贈而改變。這則筆記保存一種可能的擺放方式，並不主張它有精確日期或特定主人。',
+    tags: ['書架', '陳設', '示範'],
+    imageAlts: ['書架上擺著攝影集、底片相機與海岸明信片的插畫'],
+  },
   'blue-painted-figure': {
     title: '藍色彩繪人偶',
     category: '人偶',
@@ -42,6 +51,7 @@ export const zhObjects: Record<string, ZhObjectTranslation> = {
     materials: ['植鞣皮革', '上蠟縫線'],
     tags: ['皮革', '日常', '示範'],
     imageAlts: ['奶油色背景上摺起的棕色皮夾插畫', '呈現皮夾縫線與摺邊細節的插畫'],
+    imageCaptions: [null, '第二個視角呈現這只示範皮夾沿著摺邊外露的縫線。'],
   },
   'canvas-market-tote': {
     title: '帆布購物袋',
@@ -52,6 +62,7 @@ export const zhObjects: Record<string, ZhObjectTranslation> = {
     materials: ['棉帆布', '棉織帶'],
     tags: ['織品', '日常', '示範'],
     imageAlts: ['附有長提把的原色帆布袋插畫', '呈現提把接縫與帆布織紋的插畫'],
+    imageCaptions: [null, '在這則虛構的原型故事裡，較窄的提把後來改成加固織帶。'],
   },
   'cedar-soap-batch': {
     title: '雪松香皂小批次',
@@ -90,6 +101,7 @@ export const zhObjects: Record<string, ZhObjectTranslation> = {
     materials: ['金屬', '仿皮革', '玻璃'],
     tags: ['相機', '機械', '示範'],
     imageAlts: ['鏡頭伸出的黑色折疊式底片相機插畫', '呈現相機折疊皮腔與鏡頭的插畫'],
+    imageCaptions: [null, '插畫中的伸縮皮腔在相機收起時會摺入機身。'],
   },
   'illustrated-comic-volume': {
     title: '插畫漫畫單行本',
@@ -164,6 +176,14 @@ export const zhObjects: Record<string, ZhObjectTranslation> = {
     materials: ['棉布', '卡紙', '棉線'],
     tags: ['織品', '文具', '示範'],
     imageAlts: ['可見縫線的藍色布質筆記本封套插畫'],
+  },
+  'summer-worktable': {
+    title: '夏日工作桌',
+    category: '典藏筆記',
+    summary: '一則虛構筆記，記下共用工作桌周圍的日常工具與物品。',
+    story: '這是一則虛構的示範記憶，並非真實家庭的夏日紀錄。想像中的工作桌上，摺起的皮夾、帆布購物袋和小皮革收納包處於不同的使用階段。它們的外形與使用痕跡放在一起，比單獨觀看任何一件物品更能說明那段平凡的日常。\n\n桌面清空後，這則筆記仍將共同的場景留在典藏中，也示範了公開記憶可以如何描述一個地方或習慣，而不必指定確切的某一天。',
+    tags: ['工作桌', '製作', '示範'],
+    imageAlts: ['淺色工作桌上放著帆布袋、皮革收納包與摺起的皮夾的插畫'],
   },
   'travel-postcard': {
     title: '旅行明信片',

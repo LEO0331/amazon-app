@@ -13,36 +13,42 @@ const view = localizedObject(object, locale);
 const t = ui[locale].item;
 const { Content } = await render(object);
 const isMade = data.type === 'made';
+const isMemory = data.type === 'memory';
+const sectionPath = isMade ? 'made/' : isMemory ? 'archive/' : 'collected/';
+const sectionLabel = isMade ? t.made : isMemory ? ui[locale].nav.archive : t.collected;
 const date = data.dateAdded.toLocaleDateString(locale === 'zh' ? 'zh-TW' : 'en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 const imageUrl = data.images[0].src.src;
 ---
 <BaseLayout title={view.title} description={view.summary} image={imageUrl} locale={locale}>
-  <div class="detail-breadcrumbs wrap"><a href={localePath(locale)}>{t.home}</a> / <a href={localePath(locale, isMade ? 'made/' : 'collected/')}>{isMade ? t.made : t.collected}</a> / {view.title}</div>
+  <div class="detail-breadcrumbs wrap"><a href={localePath(locale)}>{t.home}</a> / <a href={localePath(locale, sectionPath)}>{sectionLabel}</a> / {view.title}</div>
   <header class="detail-header wrap">
-    <div><p class="eyebrow">{isMade ? t.handmade : t.collectedObject} · {view.category} · {data.year}</p><h1>{view.title}</h1><p class="detail-deck">{view.summary}</p></div>
+    <div><p class="eyebrow">{isMade ? t.handmade : isMemory ? t.memoryRecord : t.collectedObject} · {view.category} · {data.year}</p><h1>{view.title}</h1><p class="detail-deck">{view.summary}</p></div>
     <dl class="detail-facts">
-      <div class="detail-fact"><dt>{t.collection}</dt><dd>{isMade ? t.madeCollection : t.collectedCollection}</dd></div>
+      <div class="detail-fact"><dt>{isMemory ? t.record : t.collection}</dt><dd>{isMade ? t.madeCollection : isMemory ? t.memory : t.collectedCollection}</dd></div>
       <div class="detail-fact"><dt>{t.year}</dt><dd>{data.year}</dd></div>
-      <div class="detail-fact"><dt>{t.status}</dt><dd>{ui[locale].status[data.status]}{data.quantity && data.status === 'at-home' ? ` · ${data.quantity} ${t.atHomeQuantity}` : ''}</dd></div>
+      {!isMemory && <div class="detail-fact"><dt>{t.status}</dt><dd>{ui[locale].status[data.status]}{data.quantity && data.status === 'at-home' ? ` · ${data.quantity} ${t.atHomeQuantity}` : ''}</dd></div>}
       <div class="detail-fact"><dt>{t.added}</dt><dd>{date}</dd></div>
     </dl>
   </header>
   <section class="wrap" aria-label={t.photos}>
-    <Image src={data.images[0].src} alt={view.imageAlts[0]} class="gallery-main" />
-    {data.images.length > 1 && <div class="gallery-thumbs">{data.images.slice(1).map((image, index) => <Image src={image.src} alt={view.imageAlts[index + 1]} loading="lazy" />)}</div>}
+    <figure class="gallery-feature">
+      <Image src={data.images[0].src} alt={view.imageAlts[0]} class="gallery-main" />
+      {view.imageCaptions[0] && <figcaption class="image-caption">{view.imageCaptions[0]}</figcaption>}
+    </figure>
+    {data.images.length > 1 && <div class="gallery-thumbs">{data.images.slice(1).map((image, index) => <figure><Image src={image.src} alt={view.imageAlts[index + 1]} loading="lazy" />{view.imageCaptions[index + 1] && <figcaption class="image-caption">{view.imageCaptions[index + 1]}</figcaption>}</figure>)}</div>}
   </section>
   <section class="detail-body wrap">
-    <div><p class="eyebrow">{t.record}</p><h2>{isMade ? t.aboutPiece : t.whyKeep}</h2></div>
+    <div><p class="eyebrow">{t.record}</p><h2>{isMade ? t.aboutPiece : isMemory ? t.memoryStory : t.whyKeep}</h2></div>
     <div><div class="story">{locale === 'en' ? <Content /> : view.story.split(/\n\s*\n/).map((paragraph) => <p>{paragraph}</p>)}</div>
       <div class="detail-list">
         {view.materials.length > 0 && <div><h3>{isMade ? t.madeFrom : t.materials}</h3><p>{view.materials.join(' · ')}</p></div>}
         {view.maker && <div><h3>{t.maker}</h3><p>{view.maker}</p></div>}
         {view.creator && <div><h3>{t.creator}</h3><p>{view.creator}</p></div>}
         {view.edition && <div><h3>{t.edition}</h3><p>{view.edition}</p></div>}
-        {data.quantity && <div><h3>{t.inCabinet}</h3><p>{data.quantity} {data.quantity === 1 ? t.piece : t.pieces}</p></div>}
+        {!isMemory && data.quantity && <div><h3>{t.inCabinet}</h3><p>{data.quantity} {data.quantity === 1 ? t.piece : t.pieces}</p></div>}
       </div>
       {view.tags.length > 0 && <div class="tag-list" aria-label={t.tags}>{view.tags.map((tag) => <span>{tag}</span>)}</div>}
     </div>
   </section>
-  <ObjectSection eyebrow={t.relatedEyebrow} title={t.relatedTitle} description={t.relatedDescription} objects={related} link={isMade ? 'made/' : 'collected/'} linkLabel={t.relatedLink} locale={locale} />
+  {related.length > 0 && <ObjectSection eyebrow={t.relatedEyebrow} title={t.relatedTitle} description={t.relatedDescription} objects={related} link="archive/" linkLabel={t.relatedLink} locale={locale} />}
 </BaseLayout>

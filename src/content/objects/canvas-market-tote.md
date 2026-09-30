@@ -12,6 +12,7 @@ images:
     alt: Illustration of an unbleached canvas tote with long handles
   - src: ../../assets/items/canvas-market-tote/detail.svg
     alt: Illustration of the tote's handle seam and canvas weave
+    caption: The reinforced webbing follows a narrower handle in this fictional prototype.
 maker: Demo workshop
 materials: [Cotton canvas, Cotton webbing]
 tags: [textile, everyday, demo]

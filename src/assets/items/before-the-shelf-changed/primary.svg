@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Fictional shelf arrangement placeholder illustration">
+<rect width="1200" height="900" fill="#e6dfd3"/>
+<rect x="42" y="42" width="1116" height="816" fill="#eee9df" stroke="#d1c6b3" stroke-width="2"/>
+<path d="M89 113h1022M89 740h1022" stroke="#c8bda9" stroke-width="2"/>
+<rect x="154" y="615" width="892" height="40" rx="5" fill="#8b7158"/>
+<rect x="209" y="254" width="277" height="362" fill="#e0d8c7" stroke="#a89d8b" stroke-width="10"/>
+<path d="M244 254v362" stroke="#c5baa8" stroke-width="15"/>
+<rect x="280" y="355" width="145" height="145" fill="#a6bbb0"/>
+<path d="M280 466q43-57 78-29t67-26v89H280z" fill="#6c8a7c"/>
+<rect x="538" y="410" width="262" height="170" rx="22" fill="#3e4241" stroke="#74716a" stroke-width="12"/>
+<rect x="555" y="391" width="98" height="35" fill="#8e918c"/>
+<circle cx="669" cy="495" r="74" fill="#9b9f9a" stroke="#242b2b" stroke-width="12"/>
+<circle cx="669" cy="495" r="48" fill="#566b6b" stroke="#232b2b" stroke-width="10"/>
+<rect x="829" y="324" width="154" height="218" transform="rotate(8 906 433)" fill="#eee4d0" stroke="#b9aa91" stroke-width="7"/>
+<path d="M846 449q47-69 120-47l-19 102H839z" fill="#94aaa1"/>
+<circle cx="922" cy="384" r="16" fill="#ecd9a4"/>
+</svg>

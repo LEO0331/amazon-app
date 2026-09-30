@@ -12,6 +12,7 @@ images:
     alt: Illustration of a black folding film camera with an extended lens
   - src: ../../assets/items/folding-film-camera/detail.svg
     alt: Illustration of the camera's folding bellows and lens
+    caption: The illustrated bellows fold into the body when the camera is closed.
 materials: [Metal, Leatherette, Glass]
 tags: [camera, mechanics, demo]
 featured: true

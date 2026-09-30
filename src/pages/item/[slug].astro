@@ -1,6 +1,7 @@
 ---
 import ItemRecord from '../../components/ItemRecord.astro';
 import { getPublicObjects, type PublicObject } from '../../lib/content';
+import { rankRelated } from '../../lib/relationships.mjs';
 
 export async function getStaticPaths() {
   const objects = await getPublicObjects();
@@ -8,7 +9,7 @@ export async function getStaticPaths() {
     params: { slug: object.id.replace(/\.md$/, '') },
     props: {
       object,
-      related: objects.filter((candidate) => candidate.id !== object.id && candidate.data.type === object.data.type).slice(0, 4),
+      related: rankRelated(object, objects),
     },
   }));
 }

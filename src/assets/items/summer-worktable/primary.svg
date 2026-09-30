@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Fictional summer worktable placeholder illustration">
+<rect width="1200" height="900" fill="#e6dfd3"/>
+<rect x="42" y="42" width="1116" height="816" fill="#eee9df" stroke="#d1c6b3" stroke-width="2"/>
+<path d="M89 113h1022M89 740h1022" stroke="#c8bda9" stroke-width="2"/>
+<rect x="126" y="215" width="948" height="480" rx="16" fill="#d6be9d" stroke="#9b8062" stroke-width="12"/>
+<path d="M145 598h910" stroke="#b09574" stroke-width="7"/>
+<g stroke-linecap="round" stroke-linejoin="round">
+<path d="M238 340h273l-24 235H263z" fill="#ddd0af" stroke="#827866" stroke-width="9"/>
+<path d="M298 352v-72q0-55 58-55t58 55v72" fill="none" stroke="#8b836f" stroke-width="15"/>
+<rect x="606" y="345" width="296" height="202" rx="26" fill="#9b6848" stroke="#684832" stroke-width="10"/>
+<path d="M750 352v187" stroke="#724b35" stroke-width="9"/>
+<path d="M535 560h249q48 0 48 37v27H535z" fill="#a87553" stroke="#684832" stroke-width="9"/>
+<path d="M559 574h226" stroke="#d3a985" stroke-width="7"/>
+</g>
+</svg>

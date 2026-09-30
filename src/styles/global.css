@@ -5,4 +5,21 @@
 @media(min-width:1001px){.archive-controls:not(.collection-controls){grid-template-columns:2fr repeat(5,minmax(0,1fr))}}
 .eyebrow,.object-status{color:#80573e}
 .hero-caption,.object-meta,.footer-inner p,.catalog-intro,.field label,.filter-footer,.detail-fact dt,.detail-list h3,.tag-list span,.philosophy p:last-child,.about-small{color:#566157}
+.gallery-feature,.gallery-thumbs figure{margin:0;min-width:0}
+.image-caption{max-width:42rem;margin-top:10px;color:#566157;font-size:12px;line-height:1.55}
+.archive-time-link{display:flex;justify-content:flex-end;padding-top:24px}
+.timeline{padding-block:70px}
+.timeline-year{display:grid;grid-template-columns:180px minmax(0,1fr);gap:5%;border-top:1px solid #d9d7ce;padding-block:32px 50px}
+.timeline-year h2{font-size:clamp(48px,5vw,72px);line-height:1;margin:0}
+.timeline-list{list-style:none;padding:0;margin:0}
+.timeline-entry{display:grid;grid-template-columns:140px minmax(0,1fr);gap:28px;padding:20px 0 28px;border-bottom:1px solid #dedbd3}
+.timeline-image-link{display:block;aspect-ratio:4/3;background:#e5e0d6;overflow:hidden}
+.timeline-image-link img{width:100%;height:100%;object-fit:cover}
+.timeline-entry .eyebrow{margin-bottom:9px}
+.timeline-entry h3{font-family:Georgia,serif;font-size:27px;margin:0 0 9px}
+.timeline-entry h3 a:hover{text-decoration:underline;text-underline-offset:4px}
+.timeline-entry p{color:#566157;font-size:13px;margin:0 0 10px}
+.timeline-entry .timeline-added{font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-top:15px}
+.timeline>.text-link{display:inline-block;margin-top:38px}
+@media(max-width:650px){.timeline{padding-block:48px}.timeline-year{display:block;padding-block:28px 40px}.timeline-year h2{margin-bottom:12px}.timeline-entry{grid-template-columns:100px minmax(0,1fr);gap:16px}.timeline-entry h3{font-size:21px}.timeline-entry p{font-size:12px}}
 

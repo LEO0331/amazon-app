@@ -19,8 +19,9 @@ const objects = defineCollection({
       visibility: z.enum(['public', 'family', 'private']),
       dateAdded: z.coerce.date(),
       images: z
-        .array(z.object({ src: image(), alt: z.string().min(1) }))
+        .array(z.object({ src: image(), alt: z.string().min(1), caption: z.string().min(1).optional() }))
         .min(1),
+      related: z.array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)).optional(),
       maker: z.string().optional(),
       creator: z.string().optional(),
       materials: z.array(z.string()).optional(),
