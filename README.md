@@ -6,7 +6,7 @@ Family Cabinet presents handmade pieces and collected objects as records in a sm
 
 ## Screenshots
 
-Screenshots of the home page, archive, and object records will be added after the first visual release.
+Screenshots are not committed yet. The site can be previewed locally with `npm run dev`.
 
 ## What you can explore
 
@@ -37,7 +37,7 @@ Types are `made`, `collected`, and `memory`. Archive statuses include `at-home`,
 
 ## Privacy model
 
-Visibility can be `public`, `family`, or `private`. The V1 site has no sign-in system: only `public` records are included in generated pages, search data, and client-side scripts. The other values reserve a future privacy boundary; they do not grant access to anything in this static version.
+Visibility can be `public`, `family`, or `private`. The V1 site has no sign-in system. Its build rejects any `family` or `private` record before Astro processes content images, so only `public` records can enter generated pages, search data, client-side scripts, or assets. The other values reserve a future privacy boundary; they do not grant access to anything in this static version.
 
 **Do not commit actual private family content to this public repository.** Source files and Git history are public even if the build excludes them. Review photos before adding them, remove location and other sensitive metadata, and do not include addresses, geolocation, or personal details in public records. The current entries and artwork are fictional placeholders.
 

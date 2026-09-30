@@ -2,9 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CollectionBrowse from '../components/CollectionBrowse.astro';
 import { getPublicObjects, newestFirst } from '../lib/content';
+import { ui, type Locale } from '../i18n';
+interface Props { locale?: Locale; }
+const { locale = 'en' } = Astro.props;
+const t = ui[locale].collected;
 const objects = newestFirst((await getPublicObjects()).filter((object) => object.data.type === 'collected'));
 ---
-<BaseLayout title="Collected over time" description="Books, cameras, figures and keepsakes gathered over time in the Family Cabinet.">
-  <header class="page-heading wrap"><p class="eyebrow">02 / Gathered along the way</p><h1>Collected over time</h1><p class="page-intro">Things we found, used or chose to keep. They belong here for their history and meaning, not for exchange.</p></header>
-  <CollectionBrowse objects={objects} label="Collected objects" />
+<BaseLayout title={t.title} description={t.description} locale={locale}>
+  <header class="page-heading wrap"><p class="eyebrow">{t.eyebrow}</p><h1>{t.title}</h1><p class="page-intro">{t.intro}</p></header>
+  <CollectionBrowse objects={objects} label={t.filterLabel} locale={locale} />
 </BaseLayout>

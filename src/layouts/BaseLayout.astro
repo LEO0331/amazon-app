@@ -1,34 +1,43 @@
 ---
 import '../styles/global.css';
 import { sitePath } from '../lib/urls';
+import { languagePaths, localePath, ui, type Locale } from '../i18n';
 
 interface Props {
   title: string;
   description: string;
   image?: string;
+  locale?: Locale;
 }
 
-const { title, description, image } = Astro.props;
+const { title, description, image, locale = 'en' } = Astro.props;
+const t = ui[locale];
 const pageTitle = title === 'Family Cabinet' ? title : `${title} | Family Cabinet`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const paths = languagePaths(Astro.url.pathname);
+const alternate = locale === 'en' ? paths.zh : paths.en;
 const nav = [
-  { label: 'Made', path: 'made/' },
-  { label: 'Collected', path: 'collected/' },
-  { label: 'Archive', path: 'archive/' },
-  { label: 'About', path: 'about/' },
+  { label: t.nav.made, path: 'made/' },
+  { label: t.nav.collected, path: 'collected/' },
+  { label: t.nav.archive, path: 'archive/' },
+  { label: t.nav.about, path: 'about/' },
 ];
 ---
 <!doctype html>
-<html lang="en">
+<html lang={locale === 'zh' ? 'zh-TW' : 'en'}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f5f2eb" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={new URL(paths.en, Astro.site)} />
+    <link rel="alternate" hreflang="zh-TW" href={new URL(paths.zh, Astro.site)} />
+    <link rel="alternate" hreflang="x-default" href={new URL(paths.en, Astro.site)} />
     <link rel="icon" href={sitePath('favicon.svg')} type="image/svg+xml" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Family Cabinet" />
+    <meta property="og:locale" content={locale === 'zh' ? 'zh_TW' : 'en_US'} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
@@ -36,24 +45,25 @@ const nav = [
     <title>{pageTitle}</title>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">{t.skip}</a>
     <header class="site-header">
       <div class="header-inner wrap">
-        <a class="wordmark" href={sitePath()} aria-label="Family Cabinet home">Family <em>Cabinet</em><span class="wordmark-dot" aria-hidden="true">.</span></a>
+        <a class="wordmark" href={localePath(locale)} aria-label={t.homeLabel}>Family <em>Cabinet</em><span class="wordmark-dot" aria-hidden="true">.</span></a>
         <nav class="desktop-nav" aria-label="Main navigation">
-          {nav.map((item) => <a href={sitePath(item.path)} aria-current={Astro.url.pathname === sitePath(item.path) ? 'page' : undefined}>{item.label}</a>)}
+          {nav.map((item) => <a href={localePath(locale, item.path)} aria-current={Astro.url.pathname === localePath(locale, item.path) ? 'page' : undefined}>{item.label}</a>)}
+          <a class="language-switch" href={alternate} hreflang={locale === 'en' ? 'zh-TW' : 'en'} lang={locale === 'en' ? 'zh-TW' : 'en'} aria-label={`${t.language}: ${locale === 'en' ? t.chinese : t.english}`}>{locale === 'en' ? t.chinese : t.english}</a>
         </nav>
         <details class="mobile-nav">
-          <summary aria-label="Open menu"><span>Menu</span><span class="menu-lines" aria-hidden="true"></span></summary>
-          <nav aria-label="Mobile navigation">{nav.map((item) => <a href={sitePath(item.path)}>{item.label}</a>)}</nav>
+          <summary aria-label={t.openMenu}><span>{t.menu}</span><span class="menu-lines" aria-hidden="true"></span></summary>
+          <nav aria-label="Mobile navigation">{nav.map((item) => <a href={localePath(locale, item.path)}>{item.label}</a>)}<a href={alternate} hreflang={locale === 'en' ? 'zh-TW' : 'en'} lang={locale === 'en' ? 'zh-TW' : 'en'}>{locale === 'en' ? t.chinese : t.english}</a></nav>
         </details>
       </div>
     </header>
     <main id="main"><slot /></main>
     <footer class="site-footer">
       <div class="wrap footer-inner">
-        <div><a class="wordmark footer-mark" href={sitePath()}>Family <em>Cabinet</em><span class="wordmark-dot">.</span></a><p>A living archive of things made and kept.</p></div>
-        <p class="footer-note">An evolving family collection<br />Documented with care.</p>
+        <div><a class="wordmark footer-mark" href={localePath(locale)}>Family <em>Cabinet</em><span class="wordmark-dot">.</span></a><p>{t.footerLine}</p></div>
+        <p class="footer-note">{t.footerNote}<br />{t.footerCare}</p>
       </div>
     </footer>
   </body>

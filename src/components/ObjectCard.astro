@@ -2,20 +2,22 @@
 import { Image } from 'astro:assets';
 import type { PublicObject } from '../lib/content';
 import { itemPath, statusLabel } from '../lib/content';
-import { sitePath } from '../lib/urls';
+import { localePath, localizedObject, ui, type Locale } from '../i18n';
 
-interface Props { object: PublicObject; index?: number; headingLevel?: 2 | 3; }
-const { object, index = 0, headingLevel = 3 } = Astro.props;
+interface Props { object: PublicObject; headingLevel?: 2 | 3; locale?: Locale; }
+const { object, headingLevel = 3, locale = 'en' } = Astro.props;
 const { data } = object;
+const view = localizedObject(object, locale);
+const href = localePath(locale, itemPath(object.id));
 ---
 <article class="object-card">
-  <a class="object-image-link" href={sitePath(itemPath(object.id))} aria-label={`View ${data.title}`}>
-    <Image src={data.images[0].src} alt={data.images[0].alt} loading={index < 2 ? 'eager' : 'lazy'} class="object-image" />
+  <a class="object-image-link" href={href} aria-label={`${ui[locale].item.view} ${view.title}`}>
+    <Image src={data.images[0].src} alt={view.imageAlts[0]} loading="lazy" class="object-image" />
   </a>
-  <div class="object-meta"><span>{data.category}</span><span>{data.year}</span></div>
+  <div class="object-meta"><span>{view.category}</span><span>{data.year}</span></div>
   {headingLevel === 2
-    ? <h2><a href={sitePath(itemPath(object.id))}>{data.title}</a></h2>
-    : <h3><a href={sitePath(itemPath(object.id))}>{data.title}</a></h3>}
-  <p class="object-summary">{data.summary}</p>
-  <p class="object-status">{statusLabel(data.status)}</p>
+    ? <h2><a href={href}>{view.title}</a></h2>
+    : <h3><a href={href}>{view.title}</a></h3>}
+  <p class="object-summary">{view.summary}</p>
+  <p class="object-status">{locale === 'en' ? statusLabel(data.status) : ui.zh.status[data.status]}</p>
 </article>

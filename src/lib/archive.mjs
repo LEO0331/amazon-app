@@ -1,9 +1,5 @@
 export const isPublic = (entry) => entry.data.visibility === 'public';
 
-export function publicObjects(entries) {
-  return entries.filter(isPublic);
-}
-
 export function filterObjects(entries, filters = {}) {
   const query = (filters.query ?? '').trim().toLocaleLowerCase();
   const { type = '', category = '', status = '', tag = '', material = '', sort = 'added-desc' } = filters;
@@ -15,7 +11,7 @@ export function filterObjects(entries, filters = {}) {
     if (tag && !(data.tags ?? []).includes(tag)) return false;
     if (material && !(data.materials ?? []).includes(material)) return false;
     if (!query) return true;
-    return [data.title, data.summary, data.category, data.maker, data.creator, ...(data.tags ?? []), ...(data.materials ?? [])]
+    return [data.title, data.summary, data.story, data.category, data.maker, data.creator, ...(data.tags ?? []), ...(data.materials ?? [])]
       .filter(Boolean).join(' ').toLocaleLowerCase().includes(query);
   });
   return filtered.sort((a, b) => {

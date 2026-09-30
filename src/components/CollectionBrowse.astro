@@ -1,27 +1,29 @@
 ---
 import ObjectCard from './ObjectCard.astro';
 import type { PublicObject } from '../lib/content';
+import { localizedObject, ui, type Locale } from '../i18n';
 
-interface Props { objects: PublicObject[]; label: string; }
-const { objects, label } = Astro.props;
-const categories = [...new Set(objects.map((object) => object.data.category))].sort();
+interface Props { objects: PublicObject[]; label: string; locale?: Locale; }
+const { objects, label, locale = 'en' } = Astro.props;
+const t = ui[locale].collection;
+const categories = [...new Set(objects.map((object) => localizedObject(object, locale).category))].sort();
 const statuses = [...new Set(objects.map((object) => object.data.status))].sort();
-const materials = [...new Set(objects.flatMap((object) => object.data.materials ?? []))].sort();
+const materials = [...new Set(objects.flatMap((object) => localizedObject(object, locale).materials))].sort();
 const years = [...new Set(objects.map((object) => object.data.year))].sort((a, b) => b - a);
 const humanize = (value: string) => value.replaceAll('-', ' ').replace(/^./, (letter) => letter.toUpperCase());
 ---
-<section class="wrap" aria-label={`${label} filters`}>
+<section class="wrap" aria-label={label}>
   <form class="archive-controls collection-controls" role="search">
-    <div class="field"><label for="collection-category">Category</label><select id="collection-category" name="category"><option value="">All categories</option>{categories.map((value) => <option value={value}>{humanize(value)}</option>)}</select></div>
-    {materials.length > 0 && <div class="field"><label for="collection-material">Material</label><select id="collection-material" name="material"><option value="">All materials</option>{materials.map((value) => <option value={value}>{value}</option>)}</select></div>}
-    <div class="field"><label for="collection-status">Status</label><select id="collection-status" name="status"><option value="">All statuses</option>{statuses.map((value) => <option value={value}>{humanize(value)}</option>)}</select></div>
-    <div class="field"><label for="collection-year">Year</label><select id="collection-year" name="year"><option value="">Any year</option>{years.map((value) => <option value={value}>{value}</option>)}</select></div>
+    <div class="field"><label for="collection-category">{t.category}</label><select id="collection-category" name="category"><option value="">{t.allCategories}</option>{categories.map((value) => <option value={value}>{value}</option>)}</select></div>
+    {materials.length > 0 && <div class="field"><label for="collection-material">{t.material}</label><select id="collection-material" name="material"><option value="">{t.allMaterials}</option>{materials.map((value) => <option value={value}>{value}</option>)}</select></div>}
+    <div class="field"><label for="collection-status">{t.status}</label><select id="collection-status" name="status"><option value="">{t.allStatuses}</option>{statuses.map((value) => <option value={value}>{locale === 'en' ? humanize(value) : ui.zh.status[value]}</option>)}</select></div>
+    <div class="field"><label for="collection-year">{t.year}</label><select id="collection-year" name="year"><option value="">{t.anyYear}</option>{years.map((value) => <option value={value}>{value}</option>)}</select></div>
   </form>
-  <div class="filter-footer"><span class="collection-count" aria-live="polite">{objects.length} objects</span><button class="collection-clear" type="button">Clear filters</button></div>
+  <div class="filter-footer"><span class="collection-count" aria-live="polite" data-object-label={t.object} data-objects-label={t.objects}>{objects.length} {t.objects}</span><button class="collection-clear" type="button">{t.clear}</button></div>
   <div class="object-grid catalog-grid collection-grid">
-    {objects.map((object, index) => <div class="collection-entry" data-category={object.data.category} data-status={object.data.status} data-year={object.data.year} data-materials={(object.data.materials ?? []).join('|')}><ObjectCard object={object} index={index} headingLevel={2} /></div>)}
+    {objects.map((object) => <div class="collection-entry" data-category={localizedObject(object, locale).category} data-status={object.data.status} data-year={object.data.year} data-materials={localizedObject(object, locale).materials.join('|')}><ObjectCard object={object} headingLevel={2} locale={locale} /></div>)}
   </div>
-  <p class="empty-state collection-empty" hidden>No objects match these filters.</p>
+  <p class="empty-state collection-empty" hidden>{t.empty}</p>
 </section>
 <script>
   const form = document.querySelector<HTMLFormElement>('.collection-controls');
@@ -41,10 +43,11 @@ const humanize = (value: string) => value.replaceAll('-', ' ').replace(/^./, (le
         item.hidden = !shown;
         if (shown) total++;
       }
-      count.textContent = `${total} ${total === 1 ? 'object' : 'objects'}`;
+      count.textContent = `${total} ${total === 1 ? count.dataset.objectLabel : count.dataset.objectsLabel}`;
       empty.hidden = total > 0;
     };
     form.addEventListener('change', update);
+    form.addEventListener('submit', (event) => event.preventDefault());
     clear.addEventListener('click', () => { form.reset(); update(); });
   }
 </script>
