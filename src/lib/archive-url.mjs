@@ -3,10 +3,11 @@ const sorts = new Set(['added-desc', 'year-desc', 'year-asc']);
 
 export function parseArchiveParams(input, choices) {
   const params = input instanceof URLSearchParams ? input : new URLSearchParams(input);
+  const requestedSort = params.get('sort') ?? 'added-desc';
   const state = {
     query: (params.get('query') ?? '').trim().slice(0, 120),
     type: '', category: '', status: '', tag: '',
-    sort: sorts.has(params.get('sort')) ? params.get('sort') : 'added-desc',
+    sort: sorts.has(requestedSort) ? requestedSort : 'added-desc',
   };
   for (const key of facets) {
     const value = params.get(key) ?? '';

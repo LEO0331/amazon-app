@@ -2,37 +2,32 @@
 
 ## Current Objective
 
-- Goal: Finish six static archive enhancements for Family Cabinet.
-- Current status: Implementation and pure tests are in place; full Astro verification is blocked by the approval system's usage limit.
-- Branch / commit: master; check `git status --short` before continuing.
-
-## Completed This Session
-
-- Optional explicit related slugs and captions, two bilingual fictional memories, relationship ranking, memory presentation, bilingual timeline, shareable archive filter URLs, print action/styles, tests, build audit, and README update.
+- Status: Six archive enhancements and the CI type fix are verified complete locally.
+- Branch: master; inspect `git status --short` before making further changes.
 
 ## Verification Evidence
 
-| Check | Command | Result | Notes |
-| --- | --- | --- | --- |
-| Pre-change baseline | `./init.ps1` | Pass | 9 tests; 46 pages before feature edits |
-| Pure tests after edits | `node --test --test-isolation=none tests/*.test.mjs` | Pass | 19 tests |
-| JavaScript syntax | `node --check` on three new/changed utilities | Pass | No syntax errors |
-| Post-change Astro/site checks | check, test, build, verify:build | Pending | Elevated check rejected by automatic approval review at usage limit |
+- Astro check: 0 diagnostics across 30 files.
+- Standard Node tests: 19 passed.
+- Production build: 52 pages.
+- Generated-site audit: passed for bilingual routes, public-only content, captions, memories, timelines, and local paths.
+- Browser: archive URL restoration, language switching, reset, chronology, captions, and memory presentation passed inspection.
 
 ## Files Changed
 
-- See `git status --short`; keep all application, test, README, and state changes together for verification.
+- `src/lib/archive-url.mjs`, `src/pages/archive.astro`, and the three harness state files.
 
 ## Blockers / Risks
 
-- Automatic approval review stated the account usage limit was reached and suggested retrying at 6:33 PM. This was a review failure, not a safety determination. Do not bypass the gate.
+- None blocking completion. Printer-specific pagination was not inspected because native print preview was unavailable in the in-app browser.
+- No push or deployment was performed.
 
 ## Next Session Startup
 
 1. Read `AGENTS.md`, `feature_list.json`, and `progress.md`.
-2. Review `git status --short` and the diff without reverting work.
-3. Run the full verification sequence when approval is available, then inspect the rendered pages and print layout.
+2. Preserve the current uncommitted changes.
+3. Wait for a new user-authorized task.
 
 ## Recommended Next Step
 
-- Retry `npm run check` after the approval limit resets, fix any issues, and continue through build and generated-site validation.
+- Review/commit the verified CI fix and state update when requested.

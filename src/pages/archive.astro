@@ -49,7 +49,7 @@ const statusLabel = (value: (typeof objects)[number]['data']['status']) => local
   const clear = document.querySelector<HTMLButtonElement>('#clear-filters');
 
   if (form && grid && count && empty && clear) {
-    const keys = ['query', 'type', 'category', 'status', 'tag', 'sort'];
+    const keys = ['query', 'type', 'category', 'status', 'tag', 'sort'] as const;
     const choices = Object.fromEntries(keys.filter((key) => key !== 'query').map((key) => {
       const select = form.elements.namedItem(key);
       return [key, select instanceof HTMLSelectElement ? [...select.options].map((option) => option.value).filter(Boolean) : []];

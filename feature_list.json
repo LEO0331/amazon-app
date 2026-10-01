@@ -22,8 +22,8 @@
       "name": "Deeper static archive",
       "description": "Implement shareable archive filters, bilingual timeline, deterministic related records, optional bilingual image captions, print-friendly records, and fictional public memories without adding services or accounts.",
       "dependencies": ["baseline-archive"],
-      "status": "in-progress",
-      "evidence": "Baseline init.ps1 passed before edits (0 Astro diagnostics, 9 tests, 46 pages). New pure Node suite passes 19/19 with test isolation disabled. Post-change Astro check/build/site audit remain pending because automatic approval review hit the account usage limit."
+      "status": "complete",
+      "evidence": "2026-10-01: npm run check passed 30 files with 0 diagnostics; npm test passed 19 tests; npm run build generated 52 pages; npm run verify:build passed. Browser verified URL restoration, English/Chinese filter switching, reset, chronology, captions, and memory presentation. Print markup/CSS inspected; native print pagination was unavailable in the in-app browser."
     }
   ]
 }
