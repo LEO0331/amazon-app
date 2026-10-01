@@ -1,5 +1,5 @@
 const origin = 'https://leo0331.github.io';
-const base = '/amazon-app/';
+const base = '/family-cabinet/';
 
 function assertSiteUrl(raw, page, exists) {
   if (/^(?:mailto:|tel:|data:)/i.test(raw)) return;

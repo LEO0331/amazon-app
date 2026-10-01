@@ -2,7 +2,7 @@
 
 **A living digital archive of things a family makes, keeps and collects—documenting each object's story, history and place in the collection rather than trying to sell it.**
 
-[Explore Family Cabinet](https://leo0331.github.io/amazon-app/) · [閱讀繁體中文版](https://leo0331.github.io/amazon-app/zh/)
+[Explore Family Cabinet](https://leo0331.github.io/family-cabinet/) · [閱讀繁體中文版](https://leo0331.github.io/family-cabinet/zh/)
 
 A handmade wallet, a well-used camera, a book kept for years: each has a place in the cabinet. Browse the objects, see how they were made or found, and read why they have stayed—or where they went next. The current collection uses clearly fictional demonstration objects and illustrations.
 
@@ -42,7 +42,7 @@ The cabinet remains a curated static site; these ideas do not require accounts o
 
 ### Site structure
 
-The site uses Astro, TypeScript, Content Collections, standard CSS, local images, and GitHub Pages. English pages live at `/amazon-app/`; Traditional Chinese pages live at `/amazon-app/zh/`. The main routes in each language are Home, Made, Collected, Archive, Timeline, About, and `/item/[slug]/`. Memory notes use the same record route as objects.
+The site uses Astro, TypeScript, Content Collections, standard CSS, local images, and GitHub Pages. English pages live at `/family-cabinet/`; Traditional Chinese pages live at `/family-cabinet/zh/`. The main routes in each language are Home, Made, Collected, Archive, Timeline, About, and `/item/[slug]/`. Memory notes use the same record route as objects.
 
 Record source files are in `src/content/objects/`, validated by `src/content/config.ts`. Each record has a type (`made`, `collected`, or `memory`), category, summary, story, year, archive status, images, and visibility. Maker, creator, materials, tags, quantity, edition, and featured status are optional. An image may also have a visible `caption`, distinct from its accessible `alt` text. An optional `related` list names other public records by slug. The Chinese wording for public records is in `src/i18n/zh-objects.ts`; interface text is in `src/i18n/ui.ts`.
 
@@ -70,7 +70,7 @@ npm install
 npm run dev
 ```
 
-Open the URL Astro prints, including `/amazon-app/`. Before publishing, run:
+Open the URL Astro prints, including `/family-cabinet/`. Before publishing, run:
 
 ```bash
 npm run check
@@ -83,4 +83,4 @@ The final command checks generated routes, local links and assets, language page
 
 ### Publish
 
-The workflow in `.github/workflows/deploy.yml` installs dependencies, checks, tests, builds, and uploads only `dist/` to GitHub Pages. In **Settings → Pages**, choose **GitHub Actions** as the source. The repository's default branch is currently `master`, which is the branch the workflow deploys. Astro's `site` and `base` settings target `https://leo0331.github.io/amazon-app/`; no deployment secrets or backend service are needed.
+The workflow in `.github/workflows/deploy.yml` installs dependencies, checks, tests, builds, and uploads only `dist/` to GitHub Pages. In **Settings → Pages**, choose **GitHub Actions** as the source. The repository's default branch is currently `master`, which is the branch the workflow deploys. Astro's `site` and `base` settings target `https://leo0331.github.io/family-cabinet/`; no deployment secrets or backend service are needed.

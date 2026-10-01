@@ -6,7 +6,7 @@ assertPublicContent(fileURLToPath(new URL('./src/content/objects/', import.meta.
 
 export default defineConfig({
   site: 'https://leo0331.github.io',
-  base: '/amazon-app',
+  base: '/family-cabinet',
   output: 'static',
   trailingSlash: 'always',
   i18n: {

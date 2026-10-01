@@ -31,3 +31,7 @@
 ## Recommended Next Step
 
 - Review/commit the verified CI fix and state update when requested.
+
+## Latest rename handoff — 2026-10-01
+
+The `family-cabinet` rename updates are verified locally. `origin` points to the new repository; the workflow remains valid for `master`. Current uncommitted files update the Astro base, audit/tests, README, AGENTS, and state. No push/deployment was performed. New Pages URLs are `/family-cabinet/` and `/family-cabinet/zh/`.

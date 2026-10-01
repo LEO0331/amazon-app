@@ -2,6 +2,14 @@
   "policy": "Track only user-authorized work. The README roadmap is informational and is not an implementation queue. Keep at most one active feature unless ownership is explicitly split.",
   "features": [
     {
+      "id": "repo-rename-001",
+      "name": "Family Cabinet repository rename",
+      "description": "Align the Pages base, documentation, URL audit, and local origin remote with the renamed family-cabinet repository.",
+      "dependencies": ["archive-depth-001"],
+      "status": "complete",
+      "evidence": "2026-10-01: origin updated to LEO0331/family-cabinet; remote master verified; Astro check passed, 19 tests passed, 52-page build and generated-site audit passed under /family-cabinet/. No old base references remain in dist."
+    },
+    {
       "id": "baseline-archive",
       "name": "Public bilingual archive",
       "description": "Existing Astro site with English and Traditional Chinese public routes, object records, local images, archive filters, and GitHub Pages base paths.",

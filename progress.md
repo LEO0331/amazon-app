@@ -43,3 +43,10 @@
 ## Notes for Next Session
 
 - No unresolved compile/build errors remain. Keep the build-time public-content guard and bilingual route parity.
+
+## Repository rename — 2026-10-01
+
+- Completed `repo-rename-001`: Astro base, README links, agent guidance, URL audit, and test fixtures now use `/family-cabinet/` and `/family-cabinet/zh/`.
+- Updated the local origin URL to `https://github.com/LEO0331/family-cabinet.git`; the renamed remote still defaults to `master`.
+- Verification: 0 Astro diagnostics, 19 tests passed, 52 pages built, generated-site audit passed, and no `amazon-app` URLs remain in dist. The old base remains only as a negative regression fixture.
+- No push or deployment performed. The local checkout directory can keep its current name. Publish the updated build to update the Pages assets and links.
