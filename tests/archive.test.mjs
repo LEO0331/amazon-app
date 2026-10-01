@@ -26,3 +26,9 @@ test('archive sorting supports added date and object year', () => {
   assert.deepEqual(filterObjects(publicEntries, { sort: 'year-desc' }).map((entry) => entry.id), ['wallet', 'camera']);
   assert.deepEqual(filterObjects(publicEntries, { sort: 'year-asc' }).map((entry) => entry.id), ['camera', 'wallet']);
 });
+
+test('a public memory is searchable without maker or material fields', () => {
+  const memory = { id: 'worktable', data: { title: 'Worktable memory', summary: 'A fictional archive note', story: 'Objects gathered on a table.', type: 'memory', category: 'Archive note', status: 'archived', year: 2024, dateAdded: '2026-09-30', visibility: 'public' } };
+  assert.deepEqual(filterObjects([memory, ...entries].filter(isPublic), { type: 'memory', query: 'gathered' }).map((entry) => entry.id), ['worktable']);
+  assert.deepEqual(filterObjects([memory, ...entries].filter(isPublic), { type: 'made' }).map((entry) => entry.id), ['wallet']);
+});

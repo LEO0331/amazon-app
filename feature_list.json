@@ -23,7 +23,7 @@
       "description": "Implement shareable archive filters, bilingual timeline, deterministic related records, optional bilingual image captions, print-friendly records, and fictional public memories without adding services or accounts.",
       "dependencies": ["baseline-archive"],
       "status": "in-progress",
-      "evidence": "Baseline init.ps1 passed before edits: 0 Astro diagnostics, 9 tests, 46 pages, and generated-site audit."
+      "evidence": "Baseline init.ps1 passed before edits (0 Astro diagnostics, 9 tests, 46 pages). New pure Node suite passes 19/19 with test isolation disabled. Post-change Astro check/build/site audit remain pending because automatic approval review hit the account usage limit."
     }
   ]
 }

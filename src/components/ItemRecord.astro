@@ -29,6 +29,7 @@ const imageUrl = data.images[0].src.src;
       {!isMemory && <div class="detail-fact"><dt>{t.status}</dt><dd>{ui[locale].status[data.status]}{data.quantity && data.status === 'at-home' ? ` · ${data.quantity} ${t.atHomeQuantity}` : ''}</dd></div>}
       <div class="detail-fact"><dt>{t.added}</dt><dd>{date}</dd></div>
     </dl>
+    <div class="record-actions"><button class="print-record" type="button" data-print-record>{t.print}</button></div>
   </header>
   <section class="wrap" aria-label={t.photos}>
     <figure class="gallery-feature">
@@ -50,5 +51,9 @@ const imageUrl = data.images[0].src.src;
       {view.tags.length > 0 && <div class="tag-list" aria-label={t.tags}>{view.tags.map((tag) => <span>{tag}</span>)}</div>}
     </div>
   </section>
-  {related.length > 0 && <ObjectSection eyebrow={t.relatedEyebrow} title={t.relatedTitle} description={t.relatedDescription} objects={related} link="archive/" linkLabel={t.relatedLink} locale={locale} />}
+  {related.length > 0 && <div class="related-records"><ObjectSection eyebrow={t.relatedEyebrow} title={t.relatedTitle} description={t.relatedDescription} objects={related} link="archive/" linkLabel={t.relatedLink} locale={locale} /></div>}
+  <p class="print-source wrap">{t.printSource} · {new URL(Astro.url.pathname, Astro.site).href}</p>
 </BaseLayout>
+<script>
+  document.querySelector<HTMLButtonElement>('[data-print-record]')?.addEventListener('click', () => window.print());
+</script>

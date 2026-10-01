@@ -55,7 +55,7 @@ const nav = [
         </nav>
         <details class="mobile-nav">
           <summary aria-label={t.openMenu}><span>{t.menu}</span><span class="menu-lines" aria-hidden="true"></span></summary>
-          <nav aria-label="Mobile navigation">{nav.map((item) => <a href={localePath(locale, item.path)}>{item.label}</a>)}<a href={alternate} hreflang={locale === 'en' ? 'zh-TW' : 'en'} lang={locale === 'en' ? 'zh-TW' : 'en'}>{locale === 'en' ? t.chinese : t.english}</a></nav>
+          <nav aria-label="Mobile navigation">{nav.map((item) => <a href={localePath(locale, item.path)}>{item.label}</a>)}<a class="language-switch" href={alternate} hreflang={locale === 'en' ? 'zh-TW' : 'en'} lang={locale === 'en' ? 'zh-TW' : 'en'}>{locale === 'en' ? t.chinese : t.english}</a></nav>
         </details>
       </div>
     </header>

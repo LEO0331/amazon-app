@@ -11,10 +11,10 @@ const objects = newestFirst(await getPublicObjects());
 const views = objects.map((object) => ({ object, view: localizedObject(object, locale) }));
 const types = [...new Set(objects.map((object) => object.data.type))].sort();
 const statuses = [...new Set(objects.map((object) => object.data.status))].sort();
-const categories = [...new Set(views.map(({ view }) => view.category))].sort();
-const tags = [...new Set(views.flatMap(({ view }) => view.tags))].sort();
+const categories = [...new Map(views.map(({ object, view }) => [object.data.category, view.category])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+const tags = [...new Map(views.flatMap(({ object, view }) => (object.data.tags ?? []).map((tag, index) => [tag, view.tags[index]] as const))).entries()].sort((a, b) => a[1].localeCompare(b[1]));
 const humanize = (value: string) => value.replaceAll('-', ' ').replace(/^./, (letter) => letter.toUpperCase());
-const typeLabel = (value: string) => locale === 'zh' ? value === 'made' ? ui.zh.nav.made : value === 'collected' ? ui.zh.nav.collected : '記憶' : humanize(value);
+const typeLabel = (value: string) => locale === 'zh' ? value === 'made' ? ui.zh.nav.made : value === 'collected' ? ui.zh.nav.collected : t.memoryType : humanize(value);
 const statusLabel = (value: (typeof objects)[number]['data']['status']) => locale === 'zh' ? ui.zh.status[value] : humanize(value);
 ---
 <BaseLayout title={t.title} description={t.description} locale={locale}>
@@ -22,24 +22,25 @@ const statusLabel = (value: (typeof objects)[number]['data']['status']) => local
   <div class="archive-time-link wrap"><a class="text-link" href={localePath(locale, 'timeline/')}>{t.viewTime}<span aria-hidden="true"> ↗</span></a></div>
   <section class="wrap" aria-label={t.filtersLabel}>
     <form id="archive-filters" class="archive-controls" role="search">
-      <div class="field"><label for="archive-query">{t.search}</label><input id="archive-query" name="query" type="search" placeholder={t.searchPlaceholder} autocomplete="off" /></div>
+      <div class="field"><label for="archive-query">{t.search}</label><input id="archive-query" name="query" type="search" placeholder={t.searchPlaceholder} maxlength="120" autocomplete="off" /></div>
       <div class="field"><label for="archive-type">{t.type}</label><select id="archive-type" name="type"><option value="">{t.allTypes}</option>{types.map((value) => <option value={value}>{typeLabel(value)}</option>)}</select></div>
-      <div class="field"><label for="archive-category">{t.category}</label><select id="archive-category" name="category"><option value="">{t.allCategories}</option>{categories.map((value) => <option value={value}>{value}</option>)}</select></div>
+      <div class="field"><label for="archive-category">{t.category}</label><select id="archive-category" name="category"><option value="">{t.allCategories}</option>{categories.map(([value, label]) => <option value={value}>{label}</option>)}</select></div>
       <div class="field"><label for="archive-status">{t.status}</label><select id="archive-status" name="status"><option value="">{t.allStatuses}</option>{statuses.map((value) => <option value={value}>{statusLabel(value)}</option>)}</select></div>
-      <div class="field"><label for="archive-tag">{t.tag}</label><select id="archive-tag" name="tag"><option value="">{t.allTags}</option>{tags.map((tag) => <option value={tag}>{tag}</option>)}</select></div>
+      <div class="field"><label for="archive-tag">{t.tag}</label><select id="archive-tag" name="tag"><option value="">{t.allTags}</option>{tags.map(([value, label]) => <option value={value}>{label}</option>)}</select></div>
       <div class="field"><label for="archive-sort">{t.sort}</label><select id="archive-sort" name="sort"><option value="added-desc">{t.recent}</option><option value="year-desc">{t.yearNewest}</option><option value="year-asc">{t.yearOldest}</option></select></div>
     </form>
     <div class="filter-footer"><span id="result-count" aria-live="polite" data-object-label={t.object} data-objects-label={t.objects}>{objects.length} {t.objects}</span><button id="clear-filters" type="button">{t.clear}</button></div>
   </section>
   <section class="wrap" aria-label={t.objectsLabel}>
     <div id="archive-grid" class="object-grid catalog-grid">
-      {views.map(({ object, view }) => <div class="archive-entry" data-id={object.id} data-title={view.title} data-summary={view.summary} data-story={view.story} data-type={object.data.type} data-category={view.category} data-status={object.data.status} data-year={object.data.year} data-date-added={object.data.dateAdded.toISOString()} data-maker={view.maker ?? ''} data-creator={view.creator ?? ''} data-tags={view.tags.join('|')} data-materials={view.materials.join('|')}><ObjectCard object={object} headingLevel={2} locale={locale} /></div>)}
+      {views.map(({ object, view }) => <div class="archive-entry" data-id={object.id} data-title={view.title} data-summary={view.summary} data-story={view.story} data-search-terms={[view.category, ...view.tags, ...view.materials].join(' ')} data-type={object.data.type} data-category={object.data.category} data-status={object.data.status} data-year={object.data.year} data-date-added={object.data.dateAdded.toISOString()} data-maker={view.maker ?? ''} data-creator={view.creator ?? ''} data-tags={(object.data.tags ?? []).join('|')} data-materials={(object.data.materials ?? []).join('|')}><ObjectCard object={object} headingLevel={2} locale={locale} /></div>)}
     </div>
     <p id="empty-state" class="empty-state" hidden>{t.empty}</p>
   </section>
 </BaseLayout>
 <script>
   import { filterObjects } from '../lib/archive.mjs';
+  import { parseArchiveParams, serializeArchiveParams } from '../lib/archive-url.mjs';
 
   const form = document.querySelector<HTMLFormElement>('#archive-filters');
   const grid = document.querySelector<HTMLElement>('#archive-grid');
@@ -48,10 +49,16 @@ const statusLabel = (value: (typeof objects)[number]['data']['status']) => local
   const clear = document.querySelector<HTMLButtonElement>('#clear-filters');
 
   if (form && grid && count && empty && clear) {
+    const keys = ['query', 'type', 'category', 'status', 'tag', 'sort'];
+    const choices = Object.fromEntries(keys.filter((key) => key !== 'query').map((key) => {
+      const select = form.elements.namedItem(key);
+      return [key, select instanceof HTMLSelectElement ? [...select.options].map((option) => option.value).filter(Boolean) : []];
+    }));
+    const languageLinks = [...document.querySelectorAll<HTMLAnchorElement>('.language-switch')];
     const entries = [...grid.querySelectorAll<HTMLElement>('.archive-entry')].map((element) => ({
       element,
       data: {
-        title: element.dataset.title ?? '', summary: element.dataset.summary ?? '', story: element.dataset.story ?? '',
+        title: element.dataset.title ?? '', summary: element.dataset.summary ?? '', story: element.dataset.story ?? '', searchTerms: element.dataset.searchTerms ?? '',
         type: element.dataset.type ?? '', category: element.dataset.category ?? '', status: element.dataset.status ?? '',
         year: Number(element.dataset.year), dateAdded: element.dataset.dateAdded ?? '',
         maker: element.dataset.maker ?? '', creator: element.dataset.creator ?? '',
@@ -59,19 +66,42 @@ const statusLabel = (value: (typeof objects)[number]['data']['status']) => local
         materials: (element.dataset.materials ?? '').split('|').filter(Boolean),
       },
     }));
-    const update = () => {
-      const values = Object.fromEntries(new FormData(form).entries());
-      const matching = filterObjects(entries, values) as typeof entries;
+    const update = (writeUrl = true) => {
+      const state = parseArchiveParams(serializeArchiveParams(Object.fromEntries(new FormData(form).entries())), choices);
+      const matching = filterObjects(entries, state) as typeof entries;
       const ids = new Set(matching.map((entry) => entry.element));
       for (const entry of entries) entry.element.hidden = !ids.has(entry.element);
       for (const entry of matching) grid.append(entry.element);
       count.textContent = `${matching.length} ${matching.length === 1 ? count.dataset.objectLabel : count.dataset.objectsLabel}`;
       empty.hidden = matching.length !== 0;
+      const params = serializeArchiveParams(state);
+      const search = params.toString();
+      for (const link of languageLinks) {
+        const url = new URL(link.href);
+        url.search = search;
+        link.href = url.href;
+      }
+      if (writeUrl && window.location.search.slice(1) !== search) {
+        history.replaceState(null, '', `${location.pathname}${search ? `?${search}` : ''}${location.hash}`);
+      }
     };
-    form.addEventListener('input', update);
-    form.addEventListener('change', update);
+    const restore = () => {
+      const state = parseArchiveParams(window.location.search, choices);
+      for (const key of keys) {
+        const control = form.elements.namedItem(key);
+        if (control instanceof HTMLInputElement || control instanceof HTMLSelectElement) control.value = state[key];
+      }
+      update(false);
+      const search = serializeArchiveParams(state).toString();
+      if (window.location.search.slice(1) !== search) {
+        history.replaceState(null, '', `${location.pathname}${search ? `?${search}` : ''}${location.hash}`);
+      }
+    };
+    form.addEventListener('input', () => update());
+    form.addEventListener('change', () => update());
     form.addEventListener('submit', (event) => event.preventDefault());
     clear.addEventListener('click', () => { form.reset(); update(); form.querySelector<HTMLInputElement>('input')?.focus(); });
-    update();
+    window.addEventListener('popstate', restore);
+    restore();
   }
 </script>

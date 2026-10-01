@@ -22,4 +22,28 @@
 .timeline-entry .timeline-added{font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-top:15px}
 .timeline>.text-link{display:inline-block;margin-top:38px}
 @media(max-width:650px){.timeline{padding-block:48px}.timeline-year{display:block;padding-block:28px 40px}.timeline-year h2{margin-bottom:12px}.timeline-entry{grid-template-columns:100px minmax(0,1fr);gap:16px}.timeline-entry h3{font-size:21px}.timeline-entry p{font-size:12px}}
+.record-actions{margin-top:20px}.print-record{border:0;border-bottom:1px solid #566157;background:transparent;padding:4px 0;color:#26352d;font-size:12px;letter-spacing:.08em;cursor:pointer}.print-record:hover{color:#80573e;border-color:#80573e}.print-source{display:none}
+@media print{
+  @page{margin:17mm}
+  html,body{background:#fff;color:#17231c}
+  .site-header,.site-footer,.skip-link,.detail-breadcrumbs,.record-actions,.related-records{display:none!important}
+  .wrap{width:100%;max-width:none;margin:0}
+  .detail-header{display:block;padding:0 0 8mm}
+  .detail-header h1{font-size:34pt;line-height:1.1;margin:3mm 0}
+  .detail-deck{font-size:13pt;max-width:none}
+  .detail-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 8mm;margin-top:5mm}
+  .detail-fact{padding:2mm 0;break-inside:avoid}
+  .gallery-feature,.gallery-thumbs figure{break-inside:avoid}
+  .gallery-main{width:auto;max-width:100%;max-height:85mm;aspect-ratio:auto;object-fit:contain}
+  .gallery-thumbs{grid-template-columns:repeat(2,minmax(0,1fr));gap:5mm;margin-top:5mm}
+  .gallery-thumbs img{max-height:38mm;aspect-ratio:auto;object-fit:contain}
+  .image-caption{font-size:9pt;color:#39453c}
+  .detail-body{display:block;padding:8mm 0 0;border:0}
+  .detail-body h2{font-size:20pt;margin-bottom:4mm}
+  .story{font-size:11pt;line-height:1.45;max-width:none}
+  .story p{margin-bottom:3mm}
+  .detail-list{padding-top:3mm;gap:4mm 8mm}
+  .tag-list{margin-top:5mm}
+  .print-source{display:block;margin-top:8mm;border-top:1px solid #aaa;padding-top:3mm;color:#39453c;font-size:8pt;overflow-wrap:anywhere}
+}
 

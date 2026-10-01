@@ -2,38 +2,37 @@
 
 ## Current Objective
 
-- Goal: Give Family Cabinet a small, restartable coding-agent harness.
-- Current status: Complete locally; harness files are uncommitted.
-- Branch / commit: master at de8a90a3 when work began.
+- Goal: Finish six static archive enhancements for Family Cabinet.
+- Current status: Implementation and pure tests are in place; full Astro verification is blocked by the approval system's usage limit.
+- Branch / commit: master; check `git status --short` before continuing.
 
 ## Completed This Session
 
-- Tailored `AGENTS.md`, `feature_list.json`, `progress.md`, `init.sh`, and `init.ps1` to the public bilingual Astro archive.
-- Confirmed full PowerShell verification and a 100/100 structural harness score.
+- Optional explicit related slugs and captions, two bilingual fictional memories, relationship ranking, memory presentation, bilingual timeline, shareable archive filter URLs, print action/styles, tests, build audit, and README update.
 
 ## Verification Evidence
 
 | Check | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Clean install and site checks | `./init.ps1` | Pass | 9 tests; 46 static pages; generated-site audit passed |
-| Harness structure | `validate-harness.mjs --target .` | 100/100 | Five subsystems scored 5/5 |
-| Bash file format | Node byte inspection | Pass | LF line endings; no BOM |
+| Pre-change baseline | `./init.ps1` | Pass | 9 tests; 46 pages before feature edits |
+| Pure tests after edits | `node --test --test-isolation=none tests/*.test.mjs` | Pass | 19 tests |
+| JavaScript syntax | `node --check` on three new/changed utilities | Pass | No syntax errors |
+| Post-change Astro/site checks | check, test, build, verify:build | Pending | Elevated check rejected by automatic approval review at usage limit |
 
 ## Files Changed
 
-- `AGENTS.md`, `feature_list.json`, `progress.md`, `session-handoff.md`, `init.sh`, `init.ps1`.
+- See `git status --short`; keep all application, test, README, and state changes together for verification.
 
 ## Blockers / Risks
 
-- Bash execution was unavailable on this Windows host; run `./init.sh` in a Bash-capable environment when needed.
-- `npm ci` printed five dependency advisories; no dependency update was in scope.
+- Automatic approval review stated the account usage limit was reached and suggested retrying at 6:33 PM. This was a review failure, not a safety determination. Do not bypass the gate.
 
 ## Next Session Startup
 
 1. Read `AGENTS.md`, `feature_list.json`, and `progress.md`.
-2. Check `git status --short` and preserve uncommitted harness files.
-3. Run `./init.sh` or `./init.ps1` before claiming a feature done.
+2. Review `git status --short` and the diff without reverting work.
+3. Run the full verification sequence when approval is available, then inspect the rendered pages and print layout.
 
 ## Recommended Next Step
 
-- Wait for a new user-authorized task; do not start README roadmap items automatically.
+- Retry `npm run check` after the approval limit resets, fix any issues, and continue through build and generated-site validation.

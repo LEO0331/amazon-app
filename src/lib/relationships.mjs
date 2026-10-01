@@ -3,7 +3,7 @@ import { isPublic } from './archive.mjs';
 const slug = (entry) => entry.id.replace(/\.md$/, '');
 const sharedCount = (left = [], right = []) => {
   const values = new Set(left);
-  return right.filter((value) => values.has(value)).length;
+  return [...new Set(right)].filter((value) => values.has(value)).length;
 };
 
 export function validateRelatedReferences(entries) {

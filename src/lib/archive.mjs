@@ -11,7 +11,7 @@ export function filterObjects(entries, filters = {}) {
     if (tag && !(data.tags ?? []).includes(tag)) return false;
     if (material && !(data.materials ?? []).includes(material)) return false;
     if (!query) return true;
-    return [data.title, data.summary, data.story, data.category, data.maker, data.creator, ...(data.tags ?? []), ...(data.materials ?? [])]
+    return [data.title, data.summary, data.story, data.category, data.searchTerms, data.maker, data.creator, ...(data.tags ?? []), ...(data.materials ?? [])]
       .filter(Boolean).join(' ').toLocaleLowerCase().includes(query);
   });
   return filtered.sort((a, b) => {

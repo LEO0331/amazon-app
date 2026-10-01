@@ -2,45 +2,46 @@
 
 ## Current State
 
-**Last Updated:** 2026-09-30 14:02 +08:00
-**Active Feature:** `archive-depth-001` — six user-authorized static archive enhancements.
-**Branch / baseline:** master at de8a90a3 when this task started. Harness files are uncommitted in this checkout.
+**Last Updated:** 2026-10-01 (Asia/Taipei)
+**Active Feature:** `archive-depth-001` — implementation in place, full verification pending.
+**Branch / baseline:** master; the preceding harness work is preserved in commit 8cf94ba6.
 
 ## What's Done
 
-- Inspected README, package scripts, GitHub Pages workflow, and repository layout.
-- Created a concise `AGENTS.md`, feature state, progress log, handoff, and Bash/PowerShell verification entry points.
-- Replaced generic scaffold placeholders with Family Cabinet's static architecture, bilingual routes, and privacy boundary.
-- Validated the harness: 20/100 before, 100/100 after, with all five subsystems at 5/5.
+- Extended the one content collection with optional image captions and explicit related slugs.
+- Added two clearly fictional public memory records, local SVGs, and complete Traditional Chinese translations.
+- Added deterministic, public-only relationship ranking with explicit links and backlinks.
+- Rendered memory pages distinctly, added bilingual captions to selected images, and added English/Chinese timeline routes.
+- Added archive URL parsing/serialization, URL restoration, language-switch query preservation, and print-friendly record markup/CSS.
+- Updated focused tests, generated-site checks, and README for the six requested features.
 
 ## What's In Progress
 
-- Implement the newly authorized archive features in the requested order: content model, localization, relationships, memories, captions, timeline, shareable archive URLs, print layout, tests, README.
+- Full post-change Astro diagnostics, production build, generated-site audit, and browser/print preview remain unverified.
 
 ## What's Next
 
-1. Extend the single content collection with optional captions and explicit related slugs.
-2. Add bilingual memory records, chronology, archive URL state, and print presentation.
-3. Run focused tests and the full verification entry point before marking the feature complete.
+1. When automatic approval review is available again, run `npm run check`, `npm test`, `npm run build`, and `npm run verify:build` in order.
+2. Fix any diagnostics or rendering failures. Inspect both timeline routes, memory pages, caption examples, archive share links in both languages, and print preview.
+3. Record actual results, then mark `archive-depth-001` complete only if all acceptance criteria pass.
 
 ## Blockers / Risks
 
-- `init.sh` was inspected for LF line endings and standard Bash syntax, but could not run here because this Windows host's Bash launcher returned access denied. `init.ps1` was executed successfully.
-- `npm ci` reported five dependency advisories (one low, three high, one critical). They were not investigated or changed in this harness-only task.
-- A local build does not prove a future GitHub Pages deployment succeeded.
-- Preserve the six uncommitted harness files from the preceding task while changing application code.
+- Automatic approval review rejected the required elevated Astro check because the account usage limit was reached. It advised retrying at 6:33 PM; the action was not executed. Do not work around that review gate.
+- The previously observed npm dependency advisories were outside this feature's scope.
 
 ## Files Modified This Session
 
-- `AGENTS.md`, `feature_list.json`, `progress.md`, `session-handoff.md`, `init.sh`, `init.ps1` — harness only; no site behavior changed.
+- Content, localization, relationship and timeline utilities, item/archive components, bilingual timeline routes, styles, focused tests, generated-site audit, and README. Use `git status --short` for the current exact list.
 
 ## Verification Evidence
 
-- `init.ps1`: exit 0. Its sequence ran `npm ci`, `npm run check` (0 errors/warnings/hints), `npm test` (9 passed), `npm run build` (46 pages), and `npm run verify:build` (passed).
-- Harness validator: 100/100; instructions, state, verification, scope, and lifecycle each 5/5.
-- `git diff --check`: passed; the new files are untracked and were inspected directly.
+- Before feature edits, `init.ps1` passed: 0 Astro diagnostics, 9 tests, 46 pages, generated-site audit passed.
+- After edits, the pure Node test suite passed 19/19 using `node --test --test-isolation=none tests/*.test.mjs` in the sandbox.
+- `node --check` passed for `archive-url.mjs`, `relationships.mjs`, and `timeline.mjs`; `git diff --check` passed for tracked changes.
+- Post-change Astro check/build/site audit: not run because automatic approval review blocked elevation at the usage limit.
 
 ## Notes for Next Session
 
-- Read `AGENTS.md` and `feature_list.json`; if no feature is active, wait for a new user-authorized request.
-- Keep real private family content out of the public repository and retain the build-time visibility guard.
+- Continue this authorized feature, preserve all current changes, and do not claim completion until the production build and rendered routes are verified.
+- The public-build guard must continue rejecting `family` and `private` records before image processing.
