@@ -44,7 +44,7 @@ The cabinet remains a curated static site; these ideas do not require accounts o
 
 The site uses Astro, TypeScript, Content Collections, standard CSS, local images, and GitHub Pages. English pages live at `/family-cabinet/`; Traditional Chinese pages live at `/family-cabinet/zh/`. The main routes in each language are Home, Made, Collected, Archive, Timeline, About, and `/item/[slug]/`. Memory notes use the same record route as objects.
 
-Record source files are in `src/content/objects/`, validated by `src/content/config.ts`. Each record has a type (`made`, `collected`, or `memory`), category, summary, story, year, archive status, images, and visibility. Maker, creator, materials, tags, quantity, edition, and featured status are optional. An image may also have a visible `caption`, distinct from its accessible `alt` text. An optional `related` list names other public records by slug. The Chinese wording for public records is in `src/i18n/zh-objects.ts`; interface text is in `src/i18n/ui.ts`.
+Record source files are in `src/content/objects/`, validated by `src/content.config.ts`. Each record has a type (`made`, `collected`, or `memory`), category, summary, story, year, archive status, images, and visibility. Maker, creator, materials, tags, quantity, edition, and featured status are optional. An image may also have a visible `caption`, distinct from its accessible `alt` text. An optional `related` list names other public records by slug. The Chinese wording for public records is in `src/i18n/zh-objects.ts`; interface text is in `src/i18n/ui.ts`.
 
 ### Add an object
 
@@ -63,10 +63,10 @@ Replace files in `src/assets/items/<slug>/` with photographs of the same object,
 
 ### Run locally
 
-Use Node.js 20 or newer:
+Use Node.js 24 LTS (the version in `.nvmrc` used by CI). Astro requires Node.js 22.12.0 or newer:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 

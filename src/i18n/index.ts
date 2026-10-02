@@ -23,7 +23,7 @@ export function localizedObject(object: PublicObject, locale: Locale) {
   const data = object.data;
   if (locale === 'en') {
     return {
-      title: data.title, category: data.category, summary: data.summary, story: object.body,
+      title: data.title, category: data.category, summary: data.summary, story: object.body ?? '',
       maker: data.maker, creator: data.creator, materials: data.materials ?? [],
       tags: data.tags ?? [], edition: data.edition,
       imageAlts: data.images.map((image) => image.alt),

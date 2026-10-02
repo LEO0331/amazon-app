@@ -1,37 +1,19 @@
 # Session Handoff
 
-## Current Objective
+## Latest objective — 2026-10-02
 
-- Status: Six archive enhancements and the CI type fix are verified complete locally.
-- Branch: master; inspect `git status --short` before making further changes.
+`astro-upgrade-ci-001` is complete locally. Master was fast-forwarded to c161fbfe, retaining the user's merged Dependabot Astro 7.3.5/security updates. The user-requested commit includes the runtime/configuration compatibility fix.
 
-## Verification Evidence
+## Changes
 
-- Astro check: 0 diagnostics across 30 files.
-- Standard Node tests: 19 passed.
-- Production build: 52 pages.
-- Generated-site audit: passed for bilingual routes, public-only content, captions, memories, timelines, and local paths.
-- Browser: archive URL restoration, language switching, reset, chronology, captions, and memory presentation passed inspection.
+- CI reads .nvmrc selecting Node 24; package and lockfile require >=22.12.0.
+- Content config moved to src/content.config.ts with glob loader and astro/zod; optional English body handled in src/i18n/index.ts.
+- README and feature/progress state updated. Publication guard remains intact.
 
-## Files Changed
+## Verification
 
-- `src/lib/archive-url.mjs`, `src/pages/archive.astro`, and the three harness state files.
+On Node 24.14.0: npm ci succeeded with 0 vulnerabilities, Astro check had 0 diagnostics across 30 files, all 19 tests passed, 52 pages built, generated-site audit passed for both languages, public-only records, and base-aware links/assets.
 
-## Blockers / Risks
+## Next step and limits
 
-- None blocking completion. Printer-specific pagination was not inspected because native print preview was unavailable in the in-app browser.
-- No push or deployment was performed.
-
-## Next Session Startup
-
-1. Read `AGENTS.md`, `feature_list.json`, and `progress.md`.
-2. Preserve the current uncommitted changes.
-3. Wait for a new user-authorized task.
-
-## Recommended Next Step
-
-- Review/commit the verified CI fix and state update when requested.
-
-## Latest rename handoff — 2026-10-01
-
-The `family-cabinet` rename updates are verified locally. `origin` points to the new repository; the workflow remains valid for `master`. Current uncommitted files update the Astro base, audit/tests, README, AGENTS, and state. No push/deployment was performed. New Pages URLs are `/family-cabinet/` and `/family-cabinet/zh/`.
+Push the committed local fix when requested to trigger remote CI. No push/deployment performed; remote Ubuntu CI and Pages deployment remain unverified. Before further work inspect git status and preserve these edits. Native print pagination remains unverified from earlier work.

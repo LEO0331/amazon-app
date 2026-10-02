@@ -2,6 +2,14 @@
   "policy": "Track only user-authorized work. The README roadmap is informational and is not an implementation queue. Keep at most one active feature unless ownership is explicitly split.",
   "features": [
     {
+      "id": "astro-upgrade-ci-001",
+      "name": "Support merged Dependabot Astro upgrade",
+      "description": "Retain Dependabot's Astro 7.3.5 and transitive security updates; align CI/local Node requirements and migrate content configuration to the supported loader API.",
+      "dependencies": ["repo-rename-001"],
+      "status": "complete",
+      "evidence": "2026-10-02: retained merged Astro 7.3.5 and transitive bot updates; CI uses Node 24 via .nvmrc; package/lock require >=22.12.0. Migrated to content.config.ts/glob and handled optional entry body. npm ci: 0 advisories; Astro check: 30 files, 0 diagnostics; tests: 19 passed; build: 52 pages; verify:build passed bilingual routes, public-only records and base-aware links/assets on Node 24.14.0. Remote CI/deployment not run."
+    },
+    {
       "id": "repo-rename-001",
       "name": "Family Cabinet repository rename",
       "description": "Align the Pages base, documentation, URL audit, and local origin remote with the renamed family-cabinet repository.",
